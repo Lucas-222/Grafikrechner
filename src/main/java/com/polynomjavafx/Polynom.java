@@ -81,7 +81,33 @@ public class Polynom {
             list.add(x2);
         }
         return list;
+    }
 
+    public double functionValue(double x) {
+        // Get the sum of all coefficients multiplied by x to the power of the exponent
+        double functionValue = 0.0;
+
+        for (int i = 0; i < this.coefficients.length; i++) {
+            functionValue += this.coefficients[i] * Math.pow(x, i);
+        }
+
+        return functionValue;
+    }
+
+    public double[] derivationCoefficients() {
+        // Example: (6x^4 - 12x^3 + 3x^2 + 4x + 8) --> (0 + 24x^3 - 36x^2 + 6x + 4)
+        double[] derivation = { 0.0, 0.0, 0.0, 0.0, 0.0 };
+
+        for (int i = 0; i < this.coefficients.length-1; i++) {
+            // Multiply the coefficient with the exponent and subtract 1 from the exponent
+            derivation[i] = (i+1) * this.coefficients[i+1];
+        }
+
+        return derivation;
+    }
+
+    public Polynom derivationPolynom() throws WrongInputSizeException {
+        return new Polynom(this.derivationCoefficients());
     }
 
 }
