@@ -17,6 +17,12 @@ public class Application extends javafx.application.Application {
     }
 
     public static void main(String[] args) {
-        launch();
+        try {
+            Polynom myPoly = new Polynom(new double[]{1.0, 2.0, 5.0});
+            System.out.println(myPoly.getExtremaQuadratic());
+        } catch (WrongInputSizeException e) {
+            System.out.println("");
+        }
+
     }
 }

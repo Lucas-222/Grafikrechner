@@ -52,9 +52,13 @@ public class Polynom {
         return this.getDegree() != 0;
     }
 
-    public ArrayList<Double> getNull() {
+    public ArrayList<Double> getNull(double[] Polynomial) {
         // If function is linear or quadratic (degree 1 or 2), use the quadratic formula else return a new ArrayList
-        return this.getDegree() == 1 ? this.getNullLinear() : this.getDegree() == 2 ? this.getNullQuadratic() : new ArrayList<>();
+        if (Polynomial != null) {
+            return this.getNullQuadratic(Polynomial);
+        } else {
+            return this.getDegree() == 1 ? this.getNullLinear() : this.getDegree() == 2 ? this.getNullQuadratic(this.coefficients) : new ArrayList<>();
+        }
     }
 
     private ArrayList<Double> getNullLinear() {
@@ -62,7 +66,7 @@ public class Polynom {
         return new ArrayList<>(List.of((this.coefficients[0] * -1) / this.coefficients[1]));
     }
 
-    private ArrayList<Double> getNullQuadratic() {
+    private ArrayList<Double> getNullQuadratic(double[] Polynomial) {
         // divide p and q by the value with the exponent 2
         double p = this.coefficients[1] / this.coefficients[2];
         double q = this.coefficients[0] / this.coefficients[2];
@@ -109,5 +113,23 @@ public class Polynom {
     public Polynom derivationPolynom() throws WrongInputSizeException {
         return new Polynom(this.derivationCoefficients());
     }
+
+   public ArrayList<Double> getExtremaQuadratic() {
+        // first, get the derivative of the polynomial
+        double[] derivCoeff = this.derivationCoefficients();
+        // then, get the roots of the derivative
+        ArrayList<Double> nulls = this.getNull(derivCoeff);
+        // plug the roots into the initial function to get the values
+       ArrayList<Double> funcValues = new ArrayList<Double>();
+       funcValues.add(this.functionValue(nulls.get(0)));
+       funcValues.add(this.functionValue(nulls.get(1)));
+       // lastly, create an Array of points and return it
+       ArrayList<Double> returnList = new ArrayList<>();
+       for (int i = 0; i < funcValues.size(); i++) {
+           returnList.add(nulls.get(i));
+           returnList.add(funcValues.get(i));
+       }
+       return returnList;
+   }
 
 }
