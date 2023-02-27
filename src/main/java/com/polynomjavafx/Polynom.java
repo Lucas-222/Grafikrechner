@@ -8,7 +8,7 @@ public class Polynom {
 
     public Polynom(double[] coefficients) throws WrongInputSizeException {
         // Test if input is the wrong size
-        if (coefficients.length != 5) {
+        if (coefficients.length != 6) {
             throw new WrongInputSizeException(coefficients.length);
         }
         this.coefficients = coefficients;
