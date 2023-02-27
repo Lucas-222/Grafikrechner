@@ -5,6 +5,6 @@ module com.example.polynomjavafx {
     requires org.controlsfx.controls;
     requires org.kordamp.bootstrapfx.core;
 
-    opens com.example.polynomjavafx to javafx.fxml;
-    exports com.example.polynomjavafx;
+    opens com.polynomjavafx to javafx.fxml;
+    exports com.polynomjavafx;
 }

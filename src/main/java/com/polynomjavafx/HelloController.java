@@ -1,4 +1,4 @@
-package com.example.polynomjavafx;
+package com.polynomjavafx;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

@@ -1,4 +1,4 @@
-package com.example.polynomjavafx;
+package com.polynomjavafx;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
