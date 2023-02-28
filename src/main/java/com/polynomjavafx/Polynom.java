@@ -109,25 +109,36 @@ public class Polynom {
         return new Polynom(this.derivationCoefficients());
     }
 
-   public ArrayList<double[]> getExtremaQuadratic() throws WrongInputSizeException, ArithmeticException {
+   public ArrayList<double[]> getExtrema() throws WrongInputSizeException, ArithmeticException {
         // first, get the derivative of the polynomial
-        Polynom derivCoeff = this.derivationPolynom();
+        Polynom firstDerivative = this.derivationPolynom();
         // don't forget to handle cases where no extrema exist
-       if (derivCoeff.getDegree() < 1) {
+       if (firstDerivative.getDegree() < 1) {
            throw new ArithmeticException("Can't compute the extrema of a polynomial below the second degree");
        }
        // then, get the roots of the derivative and their function values
-       ArrayList<Double> nulls = derivCoeff.getNull();
-       ArrayList<Double> funcValues = new ArrayList<>();
-       for (int i = 0; i < derivCoeff.getDegree(); i++){
-           funcValues.add(this.functionValue(nulls.get(i)));
-       }
-       // lastly, create an Array of points and return it
+       ArrayList<Double> nulls = firstDerivative.getNull();
        ArrayList<double[]> returnList = new ArrayList<>();
-       for (int i = 0; i < funcValues.size(); i++) {
-           returnList.add(new double[]{nulls.get(i), funcValues.get(i)});
+       for (int i = 0; i < firstDerivative.getDegree(); i++){
+           returnList.add(new double[]{nulls.get(i), this.functionValue(nulls.get(i))});
        }
+       // return the array of null-value pairs
        return returnList;
+   }
+
+   public ArrayList<double[]> getInflectionPoints() throws WrongInputSizeException, ArithmeticException {
+        // get the first and second derivatives of current function
+        Polynom secondDerivative = this.derivationPolynom().derivationPolynom();
+       if (secondDerivative.getDegree() < 2) {
+           throw new ArithmeticException("Can't compute the inflections of a polynomial below the third degree");
+       }
+        ArrayList<Double> secDerivNulls = secondDerivative.getNull();
+        ArrayList<double[]> returnList = new ArrayList<>();
+        for (double secDerivNull : secDerivNulls) {
+            returnList.add(new double[]{secDerivNull, this.functionValue(secDerivNull)});
+        }
+        // return an array of the inflection points
+        return returnList;
    }
 
 }
