@@ -141,4 +141,23 @@ public class Polynom {
         return returnList;
    }
 
+   public ArrayList<double[]> getSaddlePoints() throws WrongInputSizeException, ArithmeticException {
+       // a function has a saddle point if its first and second derivatives equal zero
+       Polynom firstDerivative = this.derivationPolynom();
+       Polynom secondDerivative = firstDerivative.derivationPolynom();
+       if (this.getDegree() < 2) {
+           throw new ArithmeticException("Polynomials below the second degree can't have saddle points");
+       }
+       // get the zero of the second derivative and plug into the first derivative.
+       // if both are zero, it's a saddle point.
+       ArrayList<Double> secDerivNulls = secondDerivative.getNull();
+       ArrayList<double[]> returnList = new ArrayList<>();
+       for (double secDerivNull: secDerivNulls) {
+           if (firstDerivative.functionValue(secDerivNull) == 0.0) {
+               returnList.add(new double[]{secDerivNull, this.functionValue(secDerivNull)});
+           }
+       }
+       return returnList;
+   }
+
 }
