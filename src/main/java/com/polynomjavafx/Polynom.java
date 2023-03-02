@@ -88,23 +88,31 @@ public class Polynom {
     }
 
     public ArrayList<Double> getNullCubic(double x0, double tol, int maxIter) throws WrongInputSizeException {
-        ArrayList<Double> nullstellen = new ArrayList<>();
+        ArrayList<Double> list = new ArrayList<>();
+        // x0 = start value
         double x = x0;
+        // tol = tolerance (1e-12)
         int iter = 0;
+        // maxIter = maximum iterations (1000)
         while (iter < maxIter) {
+            // fx is the function value at x
             double fx = this.functionValue(x);
+            // fpx is the function value at x of the derivation
             double fpx = this.derivationPolynom().functionValue(x);
+
             double delta = fx / fpx;
             x -= delta;
+
             if (Math.abs(delta) < tol) {
-                if (!nullstellen.contains(x)) {
-                    nullstellen.add(x);
+                // check if the value is already in the list
+                if (!list.contains(x)) {
+                    list.add(x);
                 }
                 x = x0;
             }
             iter++;
         }
-        return nullstellen;
+        return list;
     }
 
     public double functionValue(double x) {
