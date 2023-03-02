@@ -52,12 +52,12 @@ public class Polynom {
         return this.getDegree() != 0;
     }
 
-    public ArrayList<Double> getNull(double[] Polynomial) {
+    public ArrayList<Double> getNull(double[] Polynomial) throws WrongInputSizeException {
         // If function is linear or quadratic (degree 1 or 2), use the quadratic formula else return a new ArrayList
         if (Polynomial != null) {
             return this.getNullQuadratic(Polynomial);
         } else {
-            return this.getDegree() == 1 ? this.getNullLinear() : this.getDegree() == 2 ? this.getNullQuadratic(this.coefficients) : this.getDegree() == 3 ? this.getNullCubic() : new ArrayList<>();
+            return this.getDegree() == 1 ? this.getNullLinear() : this.getDegree() == 2 ? this.getNullQuadratic(this.coefficients) : this.getDegree() == 3 ? this.getNullCubic(10, 1e-12, 1000) : new ArrayList<>();
         }
     }
 
@@ -87,50 +87,24 @@ public class Polynom {
         return list;
     }
 
-    private ArrayList<Double> getNullCubic() {
-        ArrayList<Double> list = new ArrayList<>();
-
-        // Initial guesses for the list
-        double x1 = 1.0;
-        double x2 = -0.5;
-        double x3 = -1.0;
-
-        // Number of iterations to perform
-        int iterations = 100;
-
-        // Tolerance for convergence
-        double tolerance = 1e-10;
-
-        // Perform Newton-Raphson iterations to refine the list
-        for (int i = 0; i < iterations; i++) {
-            // Evaluate the function and its first and second derivatives at each root
-            double f1 = coefficients[0] * x1 * x1 * x1 + coefficients[1] * x1 * x1 + coefficients[2] * x1 + coefficients[3];
-            double f2 = coefficients[0] * x2 * x2 * x2 + coefficients[1] * x2 * x2 + coefficients[3] * x2 + coefficients[3];
-            double f3 = coefficients[0] * x3 * x3 * x3 + coefficients[1] * x3 * x3 + coefficients[3] * x3 + coefficients[3];
-            double f1prime = 3 * coefficients[0] * x1 * x1 + 2 * coefficients[1] * x1 + coefficients[3];
-            double f2prime = 3 * coefficients[0] * x2 * x2 + 2 * coefficients[1] * x2 + coefficients[3];
-            double f3prime = 3 * coefficients[0] * x3 * x3 + 2 * coefficients[1] * x3 + coefficients[3];
-            double f1primeprime = 6 * coefficients[0] * x1 + 2 * coefficients[1];
-            double f2primeprime = 6 * coefficients[0] * x2 + 2 * coefficients[1];
-            double f3primeprime = 6 * coefficients[0] * x3 + 2 * coefficients[1];
-
-            // Update each root using the Newton-Raphson formula
-            x1 = x1 - f1 / f1prime + 0.5 * f1 * f1prime / (f1prime * f1prime - f1 * f1primeprime);
-            x2 = x2 - f2 / f2prime + 0.5 * f2 * f2prime / (f2prime * f2prime - f2 * f2primeprime);
-            x3 = x3 - f3 / f3prime + 0.5 * f3 * f3prime / (f3prime * f3prime - f3 * f3primeprime);
-
-            // Check for convergence
-            if (Math.abs(f1) < tolerance && Math.abs(f2) < tolerance && Math.abs(f3) < tolerance) {
-                break;
+    public ArrayList<Double> getNullCubic(double x0, double tol, int maxIter) throws WrongInputSizeException {
+        ArrayList<Double> nullstellen = new ArrayList<>();
+        double x = x0;
+        int iter = 0;
+        while (iter < maxIter) {
+            double fx = this.functionValue(x);
+            double fpx = this.derivationPolynom().functionValue(x);
+            double delta = fx / fpx;
+            x -= delta;
+            if (Math.abs(delta) < tol) {
+                if (!nullstellen.contains(x)) {
+                    nullstellen.add(x);
+                }
+                x = x0;
             }
+            iter++;
         }
-
-        // Assign the refined list to the output array
-        list.add(x1);
-        list.add(x2);
-        list.add(x3);
-
-        return list;
+        return nullstellen;
     }
 
     public double functionValue(double x) {
@@ -160,7 +134,7 @@ public class Polynom {
         return new Polynom(this.derivationCoefficients());
     }
 
-   public ArrayList<Double> getExtremaQuadratic() {
+   public ArrayList<Double> getExtremaQuadratic() throws WrongInputSizeException {
         // first, get the derivative of the polynomial
         double[] derivCoeff = this.derivationCoefficients();
         // then, get the roots of the derivative
