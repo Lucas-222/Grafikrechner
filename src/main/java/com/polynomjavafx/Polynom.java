@@ -137,7 +137,7 @@ public class Polynom {
         return new Polynom(this.derivationCoefficients());
     }
 
-    public ArrayList<double[]> getExtrema() throws WrongInputSizeException, ArithmeticException {
+    public ArrayList<double[]> getExtrema() throws WrongInputSizeException, ArithmeticException, ComputationFailedException {
         // first, get the derivative of the polynomial
         Polynom firstDerivative = this.derivationPolynom();
         // don't forget to handle cases where no extrema exist
@@ -146,6 +146,9 @@ public class Polynom {
        }
        // then, get the roots of the derivative and their function values
        ArrayList<Double> firstDerivNulls = firstDerivative.getNull();
+       if (firstDerivNulls.isEmpty()) {
+           throw new ComputationFailedException("extrema", "the first derivative has no roots/zeroes");
+       }
        ArrayList<double[]> returnList = new ArrayList<>();
        for (double firstDerivNull: firstDerivNulls){
            returnList.add(new double[]{firstDerivNull, this.functionValue(firstDerivNull)});
@@ -154,13 +157,17 @@ public class Polynom {
        return returnList;
    }
 
-   public ArrayList<double[]> getInflectionPoints() throws WrongInputSizeException, ArithmeticException {
+   public ArrayList<double[]> getInflectionPoints() throws WrongInputSizeException, ArithmeticException, ComputationFailedException {
         // get the first and second derivatives of current function
         Polynom secondDerivative = this.derivationPolynom().derivationPolynom();
        if (this.getDegree() < 3) {
            throw new ArithmeticException("Can't compute the inflections of a polynomial below the third degree");
        }
         ArrayList<Double> secDerivNulls = secondDerivative.getNull();
+       if (secDerivNulls.isEmpty()) {
+           throw new ComputationFailedException("inflection points", "the second derivative of the function " +
+                   "has no roots/zeroes");
+       }
         ArrayList<double[]> returnList = new ArrayList<>();
         for (double secDerivNull : secDerivNulls) {
             returnList.add(new double[]{secDerivNull, this.functionValue(secDerivNull)});
@@ -169,7 +176,7 @@ public class Polynom {
         return returnList;
    }
 
-   public ArrayList<double[]> getSaddlePoints() throws WrongInputSizeException, ArithmeticException {
+   public ArrayList<double[]> getSaddlePoints() throws WrongInputSizeException, ArithmeticException, ComputationFailedException {
        // a function has a saddle point if its first and second derivatives equal zero
        Polynom firstDerivative = this.derivationPolynom();
        Polynom secondDerivative = firstDerivative.derivationPolynom();
@@ -179,6 +186,10 @@ public class Polynom {
        // get the zero of the second derivative and plug into the first derivative.
        // if both are zero, it's a saddle point.
        ArrayList<Double> secDerivNulls = secondDerivative.getNull();
+       if (secDerivNulls.isEmpty()) {
+           throw new ComputationFailedException("saddle points", "the second derivative of the function " +
+                   "has no roots/zeroes");
+       }
        ArrayList<double[]> returnList = new ArrayList<>();
        for (double secDerivNull: secDerivNulls) {
            if (firstDerivative.functionValue(secDerivNull) == 0.0) {
