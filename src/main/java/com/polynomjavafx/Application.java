@@ -18,9 +18,8 @@ public class Application extends javafx.application.Application {
     }
 
     public static void main(String[] args) throws WrongInputSizeException {
-        Polynom myPoly = new Polynom(new double[]{1.0, 2.0, 5.0, 0.0, 0.0});
+        Polynom myPoly = new Polynom(new double[]{-8.0, -6.0, 3.0, 1.0, 0.0});
         System.out.println(Arrays.toString(myPoly.getExtrema().get(0)));
-        System.out.println(Arrays.toString(myPoly.getInflectionPoints().get(0)));
-
+        System.out.println(Arrays.toString(myPoly.getExtrema().get(1)));
     }
 }

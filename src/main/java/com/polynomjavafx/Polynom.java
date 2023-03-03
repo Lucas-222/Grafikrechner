@@ -53,8 +53,9 @@ public class Polynom {
         return this.getDegree() != 0;
     }
 
-    public ArrayList<Double> getNull() {
-        return this.getDegree() == 1 ? this.getNullLinear() : this.getDegree() == 2 ? this.getNullQuadratic() : new ArrayList<>();
+    public ArrayList<Double> getNull() throws WrongInputSizeException {
+        // If function is linear or quadratic (degree 1 or 2), use the quadratic formula else return a new ArrayList
+        return this.getDegree() == 1 ? this.getNullLinear() : this.getDegree() == 2 ? this.getNullQuadratic() : this.getDegree() == 3 ? this.getNullCubic(10, 1e-12, 1000) : new ArrayList<>();
     }
 
     private ArrayList<Double> getNullLinear() {
@@ -83,6 +84,34 @@ public class Polynom {
         return list;
     }
 
+    public ArrayList<Double> getNullCubic(double x0, double tol, int maxIter) throws WrongInputSizeException {
+        ArrayList<Double> list = new ArrayList<>();
+        // x0 = start value
+        double x = x0;
+        // tol = tolerance (1e-12)
+        int iter = 0;
+        // maxIter = maximum iterations (1000)
+        while (iter < maxIter) {
+            // fx is the function value at x
+            double fx = this.functionValue(x);
+            // fpx is the function value at x of the derivation
+            double fpx = this.derivationPolynom().functionValue(x);
+
+            double delta = fx / fpx;
+            x -= delta;
+
+            if (Math.abs(delta) < tol) {
+                // check if the value is already in the list
+                if (!list.contains(x)) {
+                    list.add(x);
+                }
+                x = x0;
+            }
+            iter++;
+        }
+        return list;
+    }
+
     public double functionValue(double x) {
         // Get the sum of all coefficients multiplied by x to the power of the exponent
         double functionValue = 0.0;
@@ -90,7 +119,6 @@ public class Polynom {
         for (int i = 0; i < this.coefficients.length; i++) {
             functionValue += this.coefficients[i] * Math.pow(x, i);
         }
-
         return functionValue;
     }
 
@@ -109,18 +137,18 @@ public class Polynom {
         return new Polynom(this.derivationCoefficients());
     }
 
-   public ArrayList<double[]> getExtrema() throws WrongInputSizeException, ArithmeticException {
+    public ArrayList<double[]> getExtrema() throws WrongInputSizeException, ArithmeticException {
         // first, get the derivative of the polynomial
         Polynom firstDerivative = this.derivationPolynom();
         // don't forget to handle cases where no extrema exist
-       if (firstDerivative.getDegree() < 1) {
+       if (this.getDegree() < 2) {
            throw new ArithmeticException("Can't compute the extrema of a polynomial below the second degree");
        }
        // then, get the roots of the derivative and their function values
-       ArrayList<Double> nulls = firstDerivative.getNull();
+       ArrayList<Double> firstDerivNulls = firstDerivative.getNull();
        ArrayList<double[]> returnList = new ArrayList<>();
-       for (int i = 0; i < firstDerivative.getDegree(); i++){
-           returnList.add(new double[]{nulls.get(i), this.functionValue(nulls.get(i))});
+       for (double firstDerivNull: firstDerivNulls){
+           returnList.add(new double[]{firstDerivNull, this.functionValue(firstDerivNull)});
        }
        // return the array of null-value pairs
        return returnList;
@@ -129,7 +157,7 @@ public class Polynom {
    public ArrayList<double[]> getInflectionPoints() throws WrongInputSizeException, ArithmeticException {
         // get the first and second derivatives of current function
         Polynom secondDerivative = this.derivationPolynom().derivationPolynom();
-       if (secondDerivative.getDegree() < 2) {
+       if (this.getDegree() < 3) {
            throw new ArithmeticException("Can't compute the inflections of a polynomial below the third degree");
        }
         ArrayList<Double> secDerivNulls = secondDerivative.getNull();
@@ -145,8 +173,8 @@ public class Polynom {
        // a function has a saddle point if its first and second derivatives equal zero
        Polynom firstDerivative = this.derivationPolynom();
        Polynom secondDerivative = firstDerivative.derivationPolynom();
-       if (this.getDegree() < 2) {
-           throw new ArithmeticException("Polynomials below the second degree can't have saddle points");
+       if (this.getDegree() < 3) {
+           throw new ArithmeticException("Polynomials below the third degree can't have saddle points");
        }
        // get the zero of the second derivative and plug into the first derivative.
        // if both are zero, it's a saddle point.
