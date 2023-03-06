@@ -55,7 +55,7 @@ public class Polynom {
 
     public ArrayList<Double> getNull() throws WrongInputSizeException {
         // If function is linear or quadratic (degree 1 or 2), use the quadratic formula else return a new ArrayList
-        return this.getDegree() == 1 ? this.getNullLinear() : this.getDegree() == 2 ? this.getNullQuadratic() : this.getDegree() == 3 ? this.getNullCubic(this.getStartValues(), 1e-10, 1000) : new ArrayList<>();
+        return this.getDegree() == 1 ? this.getNullLinear() : this.getDegree() == 2 ? this.getNullQuadratic() : this.getDegree() == 3 ? this.getNullCubic(this.getStartValues(), 1e-6, 100) : new ArrayList<>();
     }
 
     private ArrayList<Double> getNullLinear() {
@@ -106,6 +106,14 @@ public class Polynom {
                     break; // break out of the loop once a root has been found
                 }
                 iter++;
+            }
+        }
+
+        // round roots if they are close to the next integer
+        for (int i = 0; i < list.size(); i++) {
+            double root = list.get(i);
+            if (Math.abs(root - Math.round(root)) < tol) {
+                list.set(i, (double) Math.round(root));
             }
         }
 
