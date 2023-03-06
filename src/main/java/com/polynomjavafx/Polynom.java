@@ -1,6 +1,7 @@
 package com.polynomjavafx;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Polynom {
@@ -52,13 +53,9 @@ public class Polynom {
         return this.getDegree() != 0;
     }
 
-    public ArrayList<Double> getNull(double[] Polynomial) throws WrongInputSizeException {
+    public ArrayList<Double> getNull() throws WrongInputSizeException {
         // If function is linear or quadratic (degree 1 or 2), use the quadratic formula else return a new ArrayList
-        if (Polynomial != null) {
-            return this.getNullQuadratic(Polynomial);
-        } else {
-            return this.getDegree() == 1 ? this.getNullLinear() : this.getDegree() == 2 ? this.getNullQuadratic(this.coefficients) : this.getDegree() == 3 ? this.getNullCubic(this.getStartValues(), 1e-10, 1000) : new ArrayList<>();
-        }
+        return this.getDegree() == 1 ? this.getNullLinear() : this.getDegree() == 2 ? this.getNullQuadratic() : this.getDegree() == 3 ? this.getNullCubic(this.getStartValues(), 1e-10, 1000) : new ArrayList<>();
     }
 
     private ArrayList<Double> getNullLinear() {
@@ -66,7 +63,7 @@ public class Polynom {
         return new ArrayList<>(List.of((this.coefficients[0] * -1) / this.coefficients[1]));
     }
 
-    private ArrayList<Double> getNullQuadratic(double[] Polynomial) {
+    private ArrayList<Double> getNullQuadratic() {
         // divide p and q by the value with the exponent 2
         double p = this.coefficients[1] / this.coefficients[2];
         double q = this.coefficients[0] / this.coefficients[2];
@@ -149,7 +146,6 @@ public class Polynom {
         for (int i = 0; i < this.coefficients.length; i++) {
             functionValue += this.coefficients[i] * Math.pow(x, i);
         }
-
         return functionValue;
     }
 
@@ -161,7 +157,6 @@ public class Polynom {
             // Multiply the coefficient with the exponent and subtract 1 from the exponent
             derivation[i] = (i+1) * this.coefficients[i+1];
         }
-
         return derivation;
     }
 
@@ -169,22 +164,65 @@ public class Polynom {
         return new Polynom(this.derivationCoefficients());
     }
 
-   public ArrayList<Double> getExtremaQuadratic() throws WrongInputSizeException {
+    public ArrayList<double[]> getExtrema() throws WrongInputSizeException, ArithmeticException, ComputationFailedException {
         // first, get the derivative of the polynomial
-        double[] derivCoeff = this.derivationCoefficients();
-        // then, get the roots of the derivative
-        ArrayList<Double> nulls = this.getNull(derivCoeff);
-        // plug the roots into the initial function to get the values
-       ArrayList<Double> funcValues = new ArrayList<Double>();
-       funcValues.add(this.functionValue(nulls.get(0)));
-       funcValues.add(this.functionValue(nulls.get(1)));
-       // lastly, create an Array of points and return it
-       ArrayList<Double> returnList = new ArrayList<>();
-       for (int i = 0; i < funcValues.size(); i++) {
-           returnList.add(nulls.get(i));
-           returnList.add(funcValues.get(i));
+        Polynom firstDerivative = this.derivationPolynom();
+        // don't forget to handle cases where no extrema exist
+       if (this.getDegree() < 2) {
+           throw new ArithmeticException("Can't compute the extrema of a polynomial below the second degree");
        }
+       // then, get the roots of the derivative and their function values
+       ArrayList<Double> firstDerivNulls = firstDerivative.getNull();
+       if (firstDerivNulls.isEmpty()) {
+           throw new ComputationFailedException("extrema", "the first derivative has no roots/zeroes");
+       }
+       ArrayList<double[]> returnList = new ArrayList<>();
+       for (double firstDerivNull: firstDerivNulls){
+           returnList.add(new double[]{firstDerivNull, this.functionValue(firstDerivNull)});
+       }
+       // return the array of null-value pairs
        return returnList;
    }
 
+   public ArrayList<double[]> getInflectionPoints() throws WrongInputSizeException, ArithmeticException, ComputationFailedException {
+        // get the first and second derivatives of current function
+        Polynom secondDerivative = this.derivationPolynom().derivationPolynom();
+       if (this.getDegree() < 3) {
+           throw new ArithmeticException("Can't compute the inflections of a polynomial below the third degree");
+       }
+        ArrayList<Double> secDerivNulls = secondDerivative.getNull();
+       if (secDerivNulls.isEmpty()) {
+           throw new ComputationFailedException("inflection points", "the second derivative of the function " +
+                   "has no roots/zeroes");
+       }
+        ArrayList<double[]> returnList = new ArrayList<>();
+        for (double secDerivNull : secDerivNulls) {
+            returnList.add(new double[]{secDerivNull, this.functionValue(secDerivNull)});
+        }
+        // return an array of the inflection points
+        return returnList;
+   }
+
+   public ArrayList<double[]> getSaddlePoints() throws WrongInputSizeException, ArithmeticException, ComputationFailedException {
+       // a function has a saddle point if its first and second derivatives equal zero
+       Polynom firstDerivative = this.derivationPolynom();
+       Polynom secondDerivative = firstDerivative.derivationPolynom();
+       if (this.getDegree() < 3) {
+           throw new ArithmeticException("Polynomials below the third degree can't have saddle points");
+       }
+       // get the zero of the second derivative and plug into the first derivative.
+       // if both are zero, it's a saddle point.
+       ArrayList<Double> secDerivNulls = secondDerivative.getNull();
+       if (secDerivNulls.isEmpty()) {
+           throw new ComputationFailedException("saddle points", "the second derivative of the function " +
+                   "has no roots/zeroes");
+       }
+       ArrayList<double[]> returnList = new ArrayList<>();
+       for (double secDerivNull: secDerivNulls) {
+           if (firstDerivative.functionValue(secDerivNull) == 0.0) {
+               returnList.add(new double[]{secDerivNull, this.functionValue(secDerivNull)});
+           }
+       }
+       return returnList;
+   }
 }

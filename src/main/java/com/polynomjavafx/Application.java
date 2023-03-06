@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class Application extends javafx.application.Application {
     @Override
@@ -16,13 +17,9 @@ public class Application extends javafx.application.Application {
         stage.show();
     }
 
-    public static void main(String[] args) {
-        try {
-            Polynom myPoly = new Polynom(new double[]{1.0, 2.0, 5.0});
-            System.out.println(myPoly.getExtremaQuadratic());
-        } catch (WrongInputSizeException e) {
-            System.out.println("");
-        }
-
+    public static void main(String[] args) throws WrongInputSizeException, ComputationFailedException {
+        Polynom myPoly = new Polynom(new double[]{-8.0, -6.0, 3.0, 1.0, 0.0});
+        System.out.println(myPoly.getExtrema());
+        System.out.println(myPoly.getSaddlePoints());
     }
 }
