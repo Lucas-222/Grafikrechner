@@ -57,7 +57,7 @@ public class Polynom {
         if (Polynomial != null) {
             return this.getNullQuadratic(Polynomial);
         } else {
-            return this.getDegree() == 1 ? this.getNullLinear() : this.getDegree() == 2 ? this.getNullQuadratic(this.coefficients) : this.getDegree() == 3 ? this.getNullCubic(10, 1e-12, 1000) : new ArrayList<>();
+            return this.getDegree() == 1 ? this.getNullLinear() : this.getDegree() == 2 ? this.getNullQuadratic(this.coefficients) : this.getDegree() == 3 ? this.getNullCubic(this.getStartValues(), 1e-10, 1000) : new ArrayList<>();
         }
     }
 
@@ -87,32 +87,59 @@ public class Polynom {
         return list;
     }
 
-    public ArrayList<Double> getNullCubic(double x0, double tol, int maxIter) throws WrongInputSizeException {
+    public ArrayList<Double> getNullCubic(double[] startValues, double tol, int maxIter) throws WrongInputSizeException {
         ArrayList<Double> list = new ArrayList<>();
-        // x0 = start value
-        double x = x0;
-        // tol = tolerance (1e-12)
-        int iter = 0;
-        // maxIter = maximum iterations (1000)
-        while (iter < maxIter) {
-            // fx is the function value at x
-            double fx = this.functionValue(x);
-            // fpx is the function value at x of the derivation
-            double fpx = this.derivationPolynom().functionValue(x);
+        for (double x0 : startValues) {
+            double x = x0;
+            int iter = 0;
 
-            double delta = fx / fpx;
-            x -= delta;
+            while (iter < maxIter) {
+                double fx = this.functionValue(x);
+                double fpx = this.derivationPolynom().functionValue(x);
+                double delta = fx / fpx;
+                x -= delta;
 
-            if (Math.abs(delta) < tol) {
-                // check if the value is already in the list
-                if (!list.contains(x)) {
-                    list.add(x);
+                if (Math.abs(delta) < tol) {
+                    if (Math.abs(x) < tol) {
+                        x = 0.0;
+                    }
+                    if (!list.contains(x)) {
+                        list.add(x);
+                    }
+                    break; // break out of the loop once a root has been found
                 }
-                x = x0;
+                iter++;
             }
-            iter++;
         }
+
+        // remove duplicate roots
+        for (int i = 0; i < list.size() - 1; i++) {
+            for (int j = i + 1; j < list.size(); j++) {
+                if (Math.abs(list.get(i) - list.get(j)) < tol) {
+                    list.remove(j);
+                    j--; // adjust index after removing an element
+                }
+            }
+        }
+
         return list;
+    }
+
+    private double[] getStartValues() {
+        int size = 80;
+        double range = 0.5;
+        double length = size * range;
+        double start = 0 - length / 2;
+        double end = start + length;
+        double[] startValues = new double[size];
+
+        int counter = 0;
+        for (double i = start; i < end; i += range) {
+            startValues[counter] = i;
+            counter++;
+        }
+
+        return startValues;
     }
 
     public double functionValue(double x) {
