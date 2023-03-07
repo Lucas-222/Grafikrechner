@@ -54,29 +54,46 @@ public class Polynom {
         return this.getDegree() != 0;
     }
 
-    public ArrayList<Double> getRoots() {
-        return this.calculateRoots(getStartingValues(), 0.000001, 100);
+    public double functionValue(double x) {
+        // Get the sum of all coefficients multiplied by x to the power of the exponent
+        double functionValue = 0.0;
+
+        for (int i = 0; i < this.coefficients.length; i++) {
+            functionValue += this.coefficients[i] * Math.pow(x, i);
+        }
+        return functionValue;
     }
 
-    public ArrayList<Double> calculateRoots(double[] startValues, double tol, int maxIter) {
-        ArrayList<Double> list = new ArrayList<>();
-        for (double x0 : startValues) {
-            double x = x0;
+    public double[] derivationCoefficients() {
+        // Example: (6x^4 - 12x^3 + 3x^2 + 4x + 8) --> (0 + 24x^3 - 36x^2 + 6x + 4)
+        double[] derivation = { 0.0, 0.0, 0.0, 0.0, 0.0 };
+
+        for (int i = 0; i < this.coefficients.length-1; i++) {
+            // Multiply the coefficient with the exponent and subtract 1 from the exponent
+            derivation[i] = (i+1) * this.coefficients[i+1];
+        }
+        return derivation;
+    }
+
+    public Polynom derivationPolynom() {
+        return new Polynom(this.derivationCoefficients(), (this.derivationCounter+1));
+    }
+
+    private ArrayList<Double> getRoots() {
+        double[] startingValues = getStartingValues();
+        double tol = 1.0e-6;
+        int maxIter = 100;
+
+        ArrayList<Double> roots = new ArrayList<>();
+        for (double x : startingValues) {
             int iter = 0;
 
             while (iter < maxIter) {
-                double fx = this.functionValue(x);
-                double fpx = this.derivationPolynom().functionValue(x);
-                double delta = fx / fpx;
+                double delta = this.functionValue(x) / this.derivationPolynom().functionValue(x);
                 x -= delta;
 
                 if (Math.abs(delta) < tol) {
-                    if (Math.abs(x) < tol) {
-                        x = 0.0;
-                    }
-                    if (!list.contains(x)) {
-                        list.add(x);
-                    }
+                    roots.add(x);
                     break; // break out of the loop once a root has been found
                 }
                 iter++;
@@ -84,24 +101,24 @@ public class Polynom {
         }
 
         // round roots if they are close to the next integer
-        for (int i = 0; i < list.size(); i++) {
-            double root = list.get(i);
+        for (int i = 0; i < roots.size(); i++) {
+            double root = roots.get(i);
             if (Math.abs(root - Math.round(root)) < tol) {
-                list.set(i, (double) Math.round(root));
+                roots.set(i, (double) Math.round(root));
             }
         }
 
         // remove duplicate roots
-        for (int i = 0; i < list.size() - 1; i++) {
-            for (int j = i + 1; j < list.size(); j++) {
-                if (Math.abs(list.get(i) - list.get(j)) < tol) {
-                    list.remove(j);
+        for (int i = 0; i < roots.size() - 1; i++) {
+            for (int j = i + 1; j < roots.size(); j++) {
+                if (Math.abs(roots.get(i) - roots.get(j)) < tol) {
+                    roots.remove(j);
                     j--; // adjust index after removing an element
                 }
             }
         }
 
-        return list;
+        return roots;
     }
 
     private double[] getStartingValues() {
@@ -127,31 +144,6 @@ public class Polynom {
         }
 
         return startingValues.stream().mapToDouble(Double::doubleValue).toArray();
-    }
-
-    public double functionValue(double x) {
-        // Get the sum of all coefficients multiplied by x to the power of the exponent
-        double functionValue = 0.0;
-
-        for (int i = 0; i < this.coefficients.length; i++) {
-            functionValue += this.coefficients[i] * Math.pow(x, i);
-        }
-        return functionValue;
-    }
-
-    public double[] derivationCoefficients() {
-        // Example: (6x^4 - 12x^3 + 3x^2 + 4x + 8) --> (0 + 24x^3 - 36x^2 + 6x + 4)
-        double[] derivation = { 0.0, 0.0, 0.0, 0.0, 0.0 };
-
-        for (int i = 0; i < this.coefficients.length-1; i++) {
-            // Multiply the coefficient with the exponent and subtract 1 from the exponent
-            derivation[i] = (i+1) * this.coefficients[i+1];
-        }
-        return derivation;
-    }
-
-    public Polynom derivationPolynom() {
-        return new Polynom(this.derivationCoefficients(), (this.derivationCounter+1));
     }
 
     public ArrayList<double[]> getExtrema() throws ArithmeticException, ComputationFailedException {
