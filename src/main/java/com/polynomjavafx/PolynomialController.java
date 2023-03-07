@@ -23,9 +23,14 @@ public class PolynomialController {
 
     private GraphicsContext graphicsContext;
 
+    private double xScale;
+    private double yScale;
+
     @FXML
     private void initialize(){
         graphicsContext = polynomialCanvas.getGraphicsContext2D();
+        this.yScale = polynomialCanvas.getHeight()/10;
+        this.xScale = polynomialCanvas.getWidth()/10;
         initializeSpinners();
     }
     private void initializeSpinners(){
@@ -42,12 +47,37 @@ public class PolynomialController {
         double[] coefficients = {coefficient0Spinner.getValue(), coefficient1Spinner.getValue(),
                 coefficient2Spinner.getValue(), coefficient3Spinner.getValue(),
                 coefficient4Spinner.getValue(), coefficient5Spinner.getValue()};
-            new Polynom(coefficients);
+            polynom = new Polynom(coefficients);
             inputWarningLabel.setVisible(false);
+            drawPolynomialToCanvas(polynom, Color.RED);
         }
         catch (NumberFormatException invalidInput){
             inputWarningLabel.setVisible(true);
         }
 
+    }
+
+    private void drawPolynomialToCanvas(Polynom polynomialToDraw, Color color) {
+        graphicsContext.setStroke(color);
+        double polynomialWidth = 1;
+        graphicsContext.setLineWidth(polynomialWidth);
+
+        double lastX = (-polynomialCanvas.getWidth() / xScale) / 2;
+        double lastY = polynomialToDraw.functionValue(lastX);
+
+        for (double x = (-polynomialCanvas.getWidth() / 2) / xScale; x <= (polynomialCanvas.getWidth() / 2) / xScale; x += 0.1) {
+            double y = polynomialToDraw.functionValue(x);
+            graphicsContext.strokeLine(adaptXCoordinate(lastX), adaptYCoordinate(lastY), adaptXCoordinate(x), adaptYCoordinate(y));
+            lastX = x;
+            lastY = y;
+        }
+    }
+
+    private double adaptXCoordinate(double mathematicalXCoordinate){
+        return mathematicalXCoordinate * xScale + polynomialCanvas.getWidth() / 2;
+    }
+
+    private double adaptYCoordinate(double mathematicalYCoordinate){
+        return -mathematicalYCoordinate * yScale + polynomialCanvas.getHeight() / 2;
     }
 }
