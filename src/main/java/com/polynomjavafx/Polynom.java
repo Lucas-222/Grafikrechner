@@ -64,7 +64,7 @@ public class Polynom {
         return functionValue;
     }
 
-    public double[] derivationCoefficients() {
+    private double[] derivationCoefficients() {
         // Example: (6x^4 - 12x^3 + 3x^2 + 4x + 8) --> (0 + 24x^3 - 36x^2 + 6x + 4)
         double[] derivation = { 0.0, 0.0, 0.0, 0.0, 0.0 };
 
@@ -79,16 +79,14 @@ public class Polynom {
         return new Polynom(this.derivationCoefficients(), (this.derivationCounter+1));
     }
 
-    private ArrayList<Double> getRoots() {
+    public ArrayList<Double> getRoots() {
         double[] startingValues = getStartingValues();
         double tol = 1.0e-6;
         int maxIter = 100;
 
         ArrayList<Double> roots = new ArrayList<>();
         for (double x : startingValues) {
-            int iter = 0;
-
-            while (iter < maxIter) {
+            for (int i = 0; i <= maxIter; i++) {
                 double delta = this.functionValue(x) / this.derivationPolynom().functionValue(x);
                 x -= delta;
 
@@ -96,7 +94,6 @@ public class Polynom {
                     roots.add(x);
                     break; // break out of the loop once a root has been found
                 }
-                iter++;
             }
         }
 
@@ -124,8 +121,8 @@ public class Polynom {
     private double[] getStartingValues() {
         // Use values around the roots of the derivation
         ArrayList<Double> startingValues = new ArrayList<>();
-        // Size of the array
-        int size = 80;
+        // Range size
+        int size = 50;
         // Range of the values
         double range = 0.5;
 
