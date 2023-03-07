@@ -9,6 +9,7 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.paint.Color;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 
 public class PolynomialController {
     public Spinner<Double> coefficient5Spinner;
@@ -19,8 +20,11 @@ public class PolynomialController {
     public Spinner<Double> coefficient0Spinner;
     public Canvas polynomialCanvas;
     public Label inputWarningLabel;
+    public Label symmetryLabel;
+    public Label rootLabel;
 
     private GraphicsContext graphicsContext;
+    Polynom polynom;
 
     private double xScale;
     private double yScale;
@@ -46,7 +50,12 @@ public class PolynomialController {
         double[] coefficients = {coefficient0Spinner.getValue(), coefficient1Spinner.getValue(),
                 coefficient2Spinner.getValue(), coefficient3Spinner.getValue(),
                 coefficient4Spinner.getValue(), coefficient5Spinner.getValue()};
-            Polynom polynom = new Polynom(coefficients);
+            polynom = new Polynom(coefficients);
+
+            // show information about polynomial
+            showSymmetry();
+            showRoots();
+
             inputWarningLabel.setVisible(false);
             drawPolynomialToCanvas(polynom, Color.RED);
         }
@@ -79,4 +88,33 @@ public class PolynomialController {
     private double adaptYCoordinate(double mathematicalYCoordinate){
         return -mathematicalYCoordinate * yScale + polynomialCanvas.getHeight() / 2;
     }
+
+    private void showSymmetry() {
+        String symmetry;
+
+        if (polynom.isAxissymmetric()) {
+            symmetry = "Achsymmetrisch";
+        } else if (polynom.isPointsymmetric()) {
+            symmetry = "Punktsymmetrisch";
+        } else {
+            symmetry = "Keine Symmetrie";
+        }
+
+        symmetryLabel.setText(symmetry);
+    }
+
+    private void showRoots() {
+        ArrayList<Double> roots = polynom.getRoots();
+
+        for (Double root : roots) {
+            polynomialCanvas.getGraphicsContext2D().fillOval(adaptXCoordinate(root) - 5, adaptYCoordinate(0) - 5, 10, 10);
+        }
+
+        if (roots.size() == 0) {
+            rootLabel.setText("Keine Nullstellen");
+        } else {
+            rootLabel.setText("Nullstellen: " + roots);
+        }
+    }
+
 }

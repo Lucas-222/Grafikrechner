@@ -67,6 +67,7 @@
                         <Label fx:id="functionAsStringLabel" GridPane.columnIndex="1" />
                         <Label fx:id="symmetryLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label fx:id="functionTypeLabel" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label fx:id="rootLabel" GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="300" />
                     </GridPane>
                     <Button contentDisplay="CENTER" mnemonicParsing="false" prefHeight="25.0" prefWidth="180.0" text="Reset" />
                 </children></VBox>

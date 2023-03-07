@@ -8,9 +8,6 @@ public class Polynom {
 
     public Polynom(double[] coefficients) throws WrongInputSizeException {
         // Test if input is the wrong size
-        if (coefficients.length != 6) {
-            throw new WrongInputSizeException(coefficients.length);
-        }
         this.coefficients = coefficients;
     }
 
@@ -64,7 +61,7 @@ public class Polynom {
         return functionValue;
     }
 
-    public double[] derivationCoefficients() {
+    private double[] derivationCoefficients() {
         // Example: (6x^4 - 12x^3 + 3x^2 + 4x + 8) --> (0 + 24x^3 - 36x^2 + 6x + 4)
         double[] derivation = { 0.0, 0.0, 0.0, 0.0, 0.0 };
 
@@ -79,16 +76,14 @@ public class Polynom {
         return new Polynom(this.derivationCoefficients(), (this.derivationCounter+1));
     }
 
-    private ArrayList<Double> getRoots() {
+    public ArrayList<Double> getRoots() {
         double[] startingValues = getStartingValues();
         double tol = 1.0e-6;
-        int maxIter = 100;
+        int maxIter = 1000;
 
         ArrayList<Double> roots = new ArrayList<>();
         for (double x : startingValues) {
-            int iter = 0;
-
-            while (iter < maxIter) {
+            for (int i = 0; i <= maxIter; i++) {
                 double delta = this.functionValue(x) / this.derivationPolynom().functionValue(x);
                 x -= delta;
 
@@ -96,18 +91,16 @@ public class Polynom {
                     roots.add(x);
                     break; // break out of the loop once a root has been found
                 }
-                iter++;
             }
         }
 
         // round roots if they are close to the next integer
         for (int i = 0; i < roots.size(); i++) {
             double root = roots.get(i);
-            if (Math.abs(root - Math.round(root)) < tol) {
+            if (Math.abs(root) - Math.round(root) < tol) {
                 roots.set(i, (double) Math.round(root));
             }
         }
-
         // remove duplicate roots
         for (int i = 0; i < roots.size() - 1; i++) {
             for (int j = i + 1; j < roots.size(); j++) {
@@ -117,32 +110,29 @@ public class Polynom {
                 }
             }
         }
-
+        System.out.println(roots);
         return roots;
     }
 
     private double[] getStartingValues() {
         // Use values around the roots of the derivation
         ArrayList<Double> startingValues = new ArrayList<>();
-        // Size of the array
-        int size = 80;
+        // Range size
+        int size = 50;
         // Range of the values
         double range = 0.5;
 
         ArrayList<Double> roots = this.getDegree() >= 1 ? this.derivationPolynom().getRoots() : new ArrayList<>();
-
         if (roots.size() == 0) {
             for (double i = -size / 2.0; i <= size / 2.0; i += range) {
                 startingValues.add(i);
             }
         }
-
         for (double root : roots) {
             for (double i = root - size / 2.0; i <= root + size / 2.0; i += range) {
                 startingValues.add(i);
             }
         }
-
         return startingValues.stream().mapToDouble(Double::doubleValue).toArray();
     }
 
