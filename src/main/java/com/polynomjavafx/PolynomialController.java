@@ -19,7 +19,6 @@ public class PolynomialController {
     public Spinner<Double> coefficient0Spinner;
     public Canvas polynomialCanvas;
     public Label inputWarningLabel;
-    private Polynom polynom;
 
     private GraphicsContext graphicsContext;
 
@@ -47,7 +46,7 @@ public class PolynomialController {
         double[] coefficients = {coefficient0Spinner.getValue(), coefficient1Spinner.getValue(),
                 coefficient2Spinner.getValue(), coefficient3Spinner.getValue(),
                 coefficient4Spinner.getValue(), coefficient5Spinner.getValue()};
-            polynom = new Polynom(coefficients);
+            Polynom polynom = new Polynom(coefficients);
             inputWarningLabel.setVisible(false);
             drawPolynomialToCanvas(polynom, Color.RED);
         }
