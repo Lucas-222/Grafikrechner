@@ -1,11 +1,10 @@
 package com.polynomjavafx;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class Polynom {
     private final double[] coefficients;
+    private int derivationCounter = 0;
 
     public Polynom(double[] coefficients) throws WrongInputSizeException {
         // Test if input is the wrong size
@@ -15,8 +14,10 @@ public class Polynom {
         this.coefficients = coefficients;
     }
 
-    public double[] getCoefficients() {
-        return this.coefficients;
+    private Polynom(double[] coefficients, int derivationCounter) {
+        // Private constructor, that's why no exception check needs to be performed
+        this.coefficients = coefficients;
+        this.derivationCounter = derivationCounter;
     }
 
     public int getDegree() {
@@ -53,38 +54,11 @@ public class Polynom {
         return this.getDegree() != 0;
     }
 
-    public ArrayList<Double> getNull() throws WrongInputSizeException {
-        // If function is linear or quadratic (degree 1 or 2), use the quadratic formula else return a new ArrayList
-        return this.getDegree() == 1 ? this.getNullLinear() : this.getDegree() == 2 ? this.getNullQuadratic() : this.getDegree() == 3 ? this.getNullCubic(this.getStartValues(), 1e-6, 100) : new ArrayList<>();
+    public ArrayList<Double> getRoots() {
+        return this.calculateRoots(getStartingValues(), 0.000001, 100);
     }
 
-    private ArrayList<Double> getNullLinear() {
-        // Multiply the value with the lowest exponent by -1 and divide it by the value with the exponent 1
-        return new ArrayList<>(List.of((this.coefficients[0] * -1) / this.coefficients[1]));
-    }
-
-    private ArrayList<Double> getNullQuadratic() {
-        // divide p and q by the value with the exponent 2
-        double p = this.coefficients[1] / this.coefficients[2];
-        double q = this.coefficients[0] / this.coefficients[2];
-
-        double sqrt = Math.sqrt(Math.pow((p / 2), 2) - q);
-        double x1 = -(p / 2) + sqrt;
-        double x2 = -(p / 2) - sqrt;
-
-        // Check if nulls are real numbers
-        ArrayList<Double> list = new ArrayList<>();
-
-        if (!Double.isNaN(x1)) {
-            list.add(x1);
-        }
-        if (!Double.isNaN(x2) && x1 != x2) {
-            list.add(x2);
-        }
-        return list;
-    }
-
-    public ArrayList<Double> getNullCubic(double[] startValues, double tol, int maxIter) throws WrongInputSizeException {
+    public ArrayList<Double> calculateRoots(double[] startValues, double tol, int maxIter) {
         ArrayList<Double> list = new ArrayList<>();
         for (double x0 : startValues) {
             double x = x0;
@@ -130,21 +104,29 @@ public class Polynom {
         return list;
     }
 
-    private double[] getStartValues() {
+    private double[] getStartingValues() {
+        // Use values around the roots of the derivation
+        ArrayList<Double> startingValues = new ArrayList<>();
+        // Size of the array
         int size = 80;
+        // Range of the values
         double range = 0.5;
-        double length = size * range;
-        double start = 0 - length / 2;
-        double end = start + length;
-        double[] startValues = new double[size];
 
-        int counter = 0;
-        for (double i = start; i < end; i += range) {
-            startValues[counter] = i;
-            counter++;
+        ArrayList<Double> roots = this.getDegree() >= 1 ? this.derivationPolynom().getRoots() : new ArrayList<>();
+
+        if (roots.size() == 0) {
+            for (double i = -size / 2.0; i <= size / 2.0; i += range) {
+                startingValues.add(i);
+            }
         }
 
-        return startValues;
+        for (double root : roots) {
+            for (double i = root - size / 2.0; i <= root + size / 2.0; i += range) {
+                startingValues.add(i);
+            }
+        }
+
+        return startingValues.stream().mapToDouble(Double::doubleValue).toArray();
     }
 
     public double functionValue(double x) {
@@ -168,11 +150,11 @@ public class Polynom {
         return derivation;
     }
 
-    public Polynom derivationPolynom() throws WrongInputSizeException {
-        return new Polynom(this.derivationCoefficients());
+    public Polynom derivationPolynom() {
+        return new Polynom(this.derivationCoefficients(), (this.derivationCounter+1));
     }
 
-    public ArrayList<double[]> getExtrema() throws WrongInputSizeException, ArithmeticException, ComputationFailedException {
+    public ArrayList<double[]> getExtrema() throws ArithmeticException, ComputationFailedException {
         // first, get the derivative of the polynomial
         Polynom firstDerivative = this.derivationPolynom();
         // don't forget to handle cases where no extrema exist
@@ -180,7 +162,7 @@ public class Polynom {
            throw new ArithmeticException("Can't compute the extrema of a polynomial below the second degree");
        }
        // then, get the roots of the derivative and their function values
-       ArrayList<Double> firstDerivNulls = firstDerivative.getNull();
+       ArrayList<Double> firstDerivNulls = firstDerivative.getRoots();
        if (firstDerivNulls.isEmpty()) {
            throw new ComputationFailedException("extrema", "the first derivative has no roots/zeroes");
        }
@@ -192,13 +174,13 @@ public class Polynom {
        return returnList;
    }
 
-   public ArrayList<double[]> getInflectionPoints() throws WrongInputSizeException, ArithmeticException, ComputationFailedException {
+   public ArrayList<double[]> getInflectionPoints() throws ArithmeticException, ComputationFailedException {
         // get the first and second derivatives of current function
         Polynom secondDerivative = this.derivationPolynom().derivationPolynom();
        if (this.getDegree() < 3) {
            throw new ArithmeticException("Can't compute the inflections of a polynomial below the third degree");
        }
-        ArrayList<Double> secDerivNulls = secondDerivative.getNull();
+        ArrayList<Double> secDerivNulls = secondDerivative.getRoots();
        if (secDerivNulls.isEmpty()) {
            throw new ComputationFailedException("inflection points", "the second derivative of the function " +
                    "has no roots/zeroes");
@@ -211,7 +193,7 @@ public class Polynom {
         return returnList;
    }
 
-   public ArrayList<double[]> getSaddlePoints() throws WrongInputSizeException, ArithmeticException, ComputationFailedException {
+   public ArrayList<double[]> getSaddlePoints() throws ArithmeticException, ComputationFailedException {
        // a function has a saddle point if its first and second derivatives equal zero
        Polynom firstDerivative = this.derivationPolynom();
        Polynom secondDerivative = firstDerivative.derivationPolynom();
@@ -220,7 +202,7 @@ public class Polynom {
        }
        // get the zero of the second derivative and plug into the first derivative.
        // if both are zero, it's a saddle point.
-       ArrayList<Double> secDerivNulls = secondDerivative.getNull();
+       ArrayList<Double> secDerivNulls = secondDerivative.getRoots();
        if (secDerivNulls.isEmpty()) {
            throw new ComputationFailedException("saddle points", "the second derivative of the function " +
                    "has no roots/zeroes");
