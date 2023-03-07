@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="450.0" prefWidth="1057.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.polynomjavafx.PolynomialController">
+    <VBox alignment="CENTER" prefHeight="155.0" prefWidth="600.0" spacing="5.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+        <HBox alignment="CENTER" prefHeight="64.0" prefWidth="622.0" spacing="20.0">
+            <VBox.margin>
+                <Insets />
+            </VBox.margin>
+            <Label prefHeight="25.0" prefWidth="48.0" text="f(x) = " />
+            <Spinner fx:id="coefficient5Spinner" editable="true" prefWidth="80.0" />
+            <Label text=" * x^5 + " />
+            <Spinner fx:id="coefficient4Spinner" editable="true" prefWidth="80.0" />
+            <Label text=" * x^4 + " />
+            <Spinner fx:id="coefficient3Spinner" editable="true" prefWidth="80.0" />
+            <Label text=" * x^3 + " />
+            <Spinner fx:id="coefficient2Spinner" editable="true" prefWidth="80.0" />
+            <Label text=" * x^2 +  " />
+            <Spinner fx:id="coefficient1Spinner" editable="true" prefWidth="80.0" />
+            <Label text=" * x + " />
+            <Spinner fx:id="coefficient0Spinner" editable="true" prefWidth="80.0" />
+            <Button alignment="CENTER" mnemonicParsing="false" onAction="#onSubmitButtonClicked" text="Ok" />
+            <padding>
+                <Insets left="5.0" right="5.0" />
+            </padding>
+        </HBox>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+         <children>
+            <Label fx:id="inputWarningLabel" text="Ungültige Eingabe" textFill="RED" visible="false" />
+         </children>
+      </HBox>
+        <HBox prefHeight="187.0" prefWidth="881.0">
+            <VBox.margin>
+                <Insets />
+            </VBox.margin>
+            <VBox alignment="CENTER" prefHeight="400.0" prefWidth="539.0">
+                <children>
+                    <GridPane alignment="CENTER" prefHeight="350.0" prefWidth="481.0">
+                        <columnConstraints>
+                            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        </columnConstraints>
+                        <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        </rowConstraints>
+                        <Label alignment="TOP_LEFT" snapToPixel="false" text="Funktion:" />
+                        <Label contentDisplay="CENTER" text="Symmetirien:" GridPane.rowIndex="1" />
+                        <Label text="Funktionstyp" GridPane.rowIndex="2" />
+                        <Label text="y-Achsenabschnitt" GridPane.rowIndex="3" />
+                        <Label text="Nullstellen:" GridPane.rowIndex="4" />
+                        <Label fx:id="functionAsStringLabel" GridPane.columnIndex="1" />
+                        <Label fx:id="symmetryLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Label fx:id="functionTypeLabel" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                    </GridPane>
+                    <Button contentDisplay="CENTER" mnemonicParsing="false" prefHeight="25.0" prefWidth="180.0" text="Reset" />
+                </children></VBox>
+            <Canvas fx:id="polynomialCanvas" height="400.0" width="400.0">
+                <cursor>
+                    <Cursor fx:constant="CROSSHAIR" />
+                </cursor></Canvas>
+        </HBox>
+    </VBox>
+</AnchorPane>
