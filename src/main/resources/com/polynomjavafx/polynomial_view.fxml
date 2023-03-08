@@ -6,7 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="450.0" prefWidth="1057.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.polynomjavafx.PolynomialController">
+<AnchorPane onKeyPressed="#onKeyPressed" prefHeight="450.0" prefWidth="1057.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.polynomjavafx.PolynomialController">
     <VBox alignment="CENTER" prefHeight="155.0" prefWidth="600.0" spacing="5.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
         <HBox alignment="CENTER" prefHeight="64.0" prefWidth="622.0" spacing="20.0">
             <VBox.margin>
@@ -29,16 +29,11 @@
                 <Insets left="5.0" right="5.0" />
             </padding>
         </HBox>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
-         <children>
-            <Label fx:id="inputWarningLabel" text="Ungültige Eingabe" textFill="RED" visible="false" />
-         </children>
-      </HBox>
-        <HBox prefHeight="187.0" prefWidth="881.0">
+      <HBox prefHeight="187.0" prefWidth="881.0">
             <VBox.margin>
                 <Insets />
             </VBox.margin>
-            <VBox alignment="CENTER" prefHeight="400.0" prefWidth="539.0">
+            <VBox alignment="CENTER_RIGHT" prefHeight="400.0" prefWidth="539.0">
                 <children>
                     <GridPane alignment="CENTER" prefHeight="350.0" prefWidth="481.0">
                         <columnConstraints>
@@ -68,7 +63,7 @@
                         <Label fx:id="symmetryLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label fx:id="functionTypeLabel" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                     </GridPane>
-                    <Button contentDisplay="CENTER" mnemonicParsing="false" prefHeight="25.0" prefWidth="180.0" text="Reset" />
+                    <Button contentDisplay="CENTER" mnemonicParsing="false" prefHeight="25.0" prefWidth="180.0" text="Reset" visible="false" />
                 </children></VBox>
             <Canvas fx:id="polynomialCanvas" height="400.0" width="400.0">
                 <cursor>
