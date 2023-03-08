@@ -80,7 +80,6 @@ public class PolynomialController {
             showSymmetry();
             showRoots();
 
-            inputWarningLabel.setVisible(false);
             drawPolynomialToCanvas(polynom, Color.RED);
         }
 
