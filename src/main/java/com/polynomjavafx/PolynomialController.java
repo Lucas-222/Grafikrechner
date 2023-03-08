@@ -8,7 +8,6 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.paint.Color;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 
 public class PolynomialController {
@@ -24,10 +23,10 @@ public class PolynomialController {
     public Label rootLabel;
 
     private GraphicsContext graphicsContext;
-    Polynom polynom;
 
     private double xScale;
     private double yScale;
+    private Polynom polynom;
 
     @FXML
     private void initialize(){
@@ -92,9 +91,9 @@ public class PolynomialController {
     private void showSymmetry() {
         String symmetry;
 
-        if (polynom.isAxissymmetric()) {
+        if (polynom.isAxisSymmetric()) {
             symmetry = "Achsymmetrisch";
-        } else if (polynom.isPointsymmetric()) {
+        } else if (polynom.isPointSymmetric()) {
             symmetry = "Punktsymmetrisch";
         } else {
             symmetry = "Keine Symmetrie";
@@ -106,6 +105,7 @@ public class PolynomialController {
     private void showRoots() {
         ArrayList<Double> roots = polynom.getRoots();
 
+        // draw roots
         for (Double root : roots) {
             polynomialCanvas.getGraphicsContext2D().fillOval(adaptXCoordinate(root) - 5, adaptYCoordinate(0) - 5, 10, 10);
         }

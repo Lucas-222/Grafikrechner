@@ -17,7 +17,7 @@ public class Application extends javafx.application.Application {
         stage.show();
     }
 
-    public static void main(String[] args) throws WrongInputSizeException, ComputationFailedException {
+    public static void main(String[] args) {
         launch();
     }
 }
