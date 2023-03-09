@@ -170,7 +170,7 @@ public class Polynom {
 
        ArrayList<double[]> returnList = new ArrayList<>();
        for (double firstDerivNull: firstDerivNulls){
-           returnList.add(new double[]{Math.round(firstDerivNull*100.0)/100.0, Math.round(this.functionValue(firstDerivNull*100.0)/100.0)});
+           returnList.add(new double[]{Math.round(firstDerivNull*100.0)/100.0, Math.round(this.functionValue(firstDerivNull)*100.0)/100.0});
        }
 
        // return the array of null-value pairs
@@ -193,7 +193,7 @@ public class Polynom {
 
         ArrayList<double[]> returnList = new ArrayList<>();
         for (double secDerivNull : secDerivNulls) {
-            returnList.add(new double[]{secDerivNull, this.functionValue(secDerivNull)});
+            returnList.add(new double[]{Math.round(secDerivNull/100.0)*100.0, Math.floor(this.functionValue(secDerivNull)*100.0)/100.0});
         }
 
         // return an array of the inflection points
@@ -219,7 +219,7 @@ public class Polynom {
        ArrayList<double[]> returnList = new ArrayList<>();
        for (double secDerivNull: secDerivNulls) {
            if (firstDerivative.functionValue(secDerivNull) == 0.0) {
-               returnList.add(new double[]{secDerivNull, this.functionValue(secDerivNull)});
+               returnList.add(new double[]{Math.floor(secDerivNull/100.0)*100.0, Math.floor(this.functionValue(secDerivNull)*100.0)/100.0});
            }
        }
 

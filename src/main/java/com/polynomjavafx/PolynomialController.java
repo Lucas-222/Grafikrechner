@@ -228,8 +228,8 @@ public class PolynomialController {
             ArrayList<double[]> saddleArray = polynom.getSaddlePoints();
             StringBuilder labelText = new StringBuilder();
 
-            if (saddleArray.size() != 0) {
-                labelText.append("Es gibt ").append(saddleArray.size()).append(" Sattelpunkte");
+            if (saddleArray.size() == 0) {
+                saddleLabel.setText("Keine Sattelpunkte");
             }
 
             for (double[] saddlePoint : saddleArray) {
