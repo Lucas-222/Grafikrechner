@@ -9,6 +9,8 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class PolynomialController {
     public Spinner<Double> coefficient5Spinner;
@@ -33,14 +35,15 @@ public class PolynomialController {
     @FXML
     private void initialize(){
         graphicsContext = polynomialCanvas.getGraphicsContext2D();
-        this.yScale = polynomialCanvas.getHeight() / 10.0;
-        this.xScale = polynomialCanvas.getWidth() / 10.0;
+        this.yScale = polynomialCanvas.getHeight() / 10;
+        this.xScale = polynomialCanvas.getWidth() / 10;
         initializeSpinners();
     }
 
     private void initializeSpinners() {
-        Spinner<Double>[] spinners = new Spinner[] {coefficient0Spinner, coefficient1Spinner, coefficient2Spinner,
-                coefficient3Spinner, coefficient4Spinner, coefficient5Spinner};
+        //Upcast list to Arraylist
+        List<Spinner<Double>> spinners = Arrays.asList(coefficient0Spinner, coefficient1Spinner, coefficient2Spinner, coefficient3Spinner, coefficient4Spinner,
+                coefficient5Spinner);
         for (Spinner<Double> spinner : spinners) {
             //Set value factory
             spinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-200, 200, 0.0, 0.1));
@@ -99,13 +102,19 @@ public class PolynomialController {
         graphicsContext.setStroke(color);
         double polynomialWidth = 1.0;
         graphicsContext.setLineWidth(polynomialWidth);
+        //Set step size so the function value is calculated for every pixel on the canvas
+        double stepSize = (polynomialCanvas.getWidth() / xScale) / polynomialCanvas.getWidth();
 
+        //Set starting point of the first drawn line to far left side of the canvas
         double lastX = (-polynomialCanvas.getWidth() / xScale) / 2.0;
         double lastY = polynomialToDraw.functionValue(lastX);
 
-        for (double x = (-polynomialCanvas.getWidth() / 2.0) / xScale; x <= (polynomialCanvas.getWidth() / 2.0) / xScale; x += 0.1) {
+        //Calculate the value for every pixel in a loop and stroke a line from the previous point
+        for (double x = (-polynomialCanvas.getWidth() / 2.0) / xScale; x <= (polynomialCanvas.getWidth() / 2.0)/ xScale; x += stepSize) {
             double y = polynomialToDraw.functionValue(x);
             graphicsContext.strokeLine(adaptXCoordinate(lastX), adaptYCoordinate(lastY), adaptXCoordinate(x), adaptYCoordinate(y));
+
+            //Set starting point for next line as endpoint of the previous line
             lastX = x;
             lastY = y;
         }
