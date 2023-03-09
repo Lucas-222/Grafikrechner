@@ -160,11 +160,17 @@ public class PolynomialController {
             polynomialCanvas.getGraphicsContext2D().fillOval(adaptXCoordinate(root) -2.5, adaptYCoordinate(0.0) -2.5, 5.0, 5.0);
         }
 
+        if (polynom.getDegree() > 3) {
+            rootLabel.setText("Grad zu hoch");
+            return;
+        }
+
         if (roots.size() == 0) {
             rootLabel.setText("Keine Nullstellen");
-        } else {
-            rootLabel.setText("Nullstellen: " + roots);
+            return;
         }
+
+        rootLabel.setText("Nullstellen: " + roots);
     }
 
 }

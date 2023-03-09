@@ -1,6 +1,7 @@
 package com.polynomjavafx;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Polynom {
     private final double[] coefficients;
@@ -82,7 +83,7 @@ public class Polynom {
     public ArrayList<Double> getRoots() {
         double[] startingValues = getStartingValues();
         double tol = 1.0e-6;
-        int maxIter = 100000;
+        int maxIter = 1000;
 
         ArrayList<Double> roots = new ArrayList<>();
         for (double x : startingValues) {
@@ -137,12 +138,7 @@ public class Polynom {
         // Range of the values
         double range = 0.5;
 
-        ArrayList<Double> roots = this.getDegree() >= 1 ? this.derivationPolynom().getRoots() : new ArrayList<>();
-        if (roots.size() == 0) {
-            for (double i = -size / 2.0; i <= size / 2.0; i += range) {
-                startingValues.add(i);
-            }
-        }
+        ArrayList<Double> roots = this.getDegree() >= 1 ? this.derivationPolynom().getRoots() : new ArrayList<>(List.of(0.0));
 
         for (double root : roots) {
             for (double i = root - size / 2.0; i <= root + size / 2.0; i += range) {
