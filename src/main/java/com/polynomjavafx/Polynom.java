@@ -239,13 +239,13 @@ public class Polynom {
     }
 
     private String getExponent(int i) {
-        // If exponent is 0 --> (x^0) not (x), If exponent is 1 --> (x) not (x^1), Default --> (x^2)
+        // If exponent is 0 --> () not (x^0), If exponent is 1 --> (x) not (x^1), Default --> (x^2)
         return i == 0 ? "" : i == 1 ? "x" : "x^" + i;
     }
 
     @Override
     public String toString() {
-        // Create a StringBuilder initialized with f(x) = | for every derivation add one (')
+        // Create a StringBuilder initialized with f(x) = | for every derivation add one apostrophe (')
         StringBuilder builder = new StringBuilder("f" + "'".repeat(this.derivationCounter) + "(x) = ");
 
         for (int i = this.coefficients.length-1; i >= 0; i--) {
