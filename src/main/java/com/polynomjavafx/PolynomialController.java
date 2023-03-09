@@ -20,6 +20,8 @@ public class PolynomialController {
     public Canvas polynomialCanvas;
     public Label inputWarningLabel;
     public Label symmetryLabel;
+    public Label functionAsStringLabel;
+    public Label degreeLabel;
     public Label rootLabel;
 
     private GraphicsContext graphicsContext;
@@ -35,6 +37,7 @@ public class PolynomialController {
         this.xScale = polynomialCanvas.getWidth()/10;
         initializeSpinners();
     }
+
     private void initializeSpinners(){
         coefficient0Spinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-200, 200,0.0,0.01));
         coefficient1Spinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-200, 200,0.0,0.01));
@@ -43,6 +46,7 @@ public class PolynomialController {
         coefficient4Spinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-200, 200,0.0,0.01));
         coefficient5Spinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-200, 200,0.0,0.01));
     }
+
     @FXML
     private void onSubmitButtonClicked() throws WrongInputSizeException {
         try {
@@ -52,8 +56,14 @@ public class PolynomialController {
             polynom = new Polynom(coefficients);
 
             // show information about polynomial
-            showSymmetry();
-            showRoots();
+            showFunctionAsString();
+            showDegree();
+
+            // show symmetry and roots if degree is <= 3
+            if (polynom.getDegree() <= 3) {
+                showSymmetry();
+                showRoots();
+            }
 
             inputWarningLabel.setVisible(false);
             drawPolynomialToCanvas(polynom, Color.RED);
@@ -62,6 +72,15 @@ public class PolynomialController {
             inputWarningLabel.setVisible(true);
         }
 
+    }
+
+    @FXML
+    private void onResetButtonClicked(){
+        initializeSpinners();
+        inputWarningLabel.setVisible(false);
+        symmetryLabel.setVisible(false);
+        rootLabel.setVisible(false);
+        graphicsContext.clearRect(0,0,polynomialCanvas.getWidth(), polynomialCanvas.getHeight());
     }
 
     private void drawPolynomialToCanvas(Polynom polynomialToDraw, Color color) {
@@ -88,6 +107,16 @@ public class PolynomialController {
         return -mathematicalYCoordinate * yScale + polynomialCanvas.getHeight() / 2;
     }
 
+    private void showFunctionAsString() {
+        String function = polynom.toString();
+        functionAsStringLabel.setText(function);
+    }
+
+    private void showDegree() {
+        int degree = polynom.getDegree();
+        degreeLabel.setText(String.valueOf(degree));
+    }
+
     private void showSymmetry() {
         String symmetry;
 
@@ -107,7 +136,7 @@ public class PolynomialController {
 
         // draw roots
         for (Double root : roots) {
-            polynomialCanvas.getGraphicsContext2D().fillOval(adaptXCoordinate(root) - 5, adaptYCoordinate(0) - 5, 10, 10);
+            polynomialCanvas.getGraphicsContext2D().fillOval(adaptXCoordinate(root) -2.5, adaptYCoordinate(0) -2.5, 5, 5);
         }
 
         if (roots.size() == 0) {

@@ -82,7 +82,7 @@ public class Polynom {
     public ArrayList<Double> getRoots() {
         double[] startingValues = getStartingValues();
         double tol = 1.0e-6;
-        int maxIter = 5000;
+        int maxIter = 100000;
 
         ArrayList<Double> roots = new ArrayList<>();
         for (double x : startingValues) {
@@ -98,22 +98,34 @@ public class Polynom {
         }
 
         // round roots if they are close to the next integer
-        for (int i = 0; i < roots.size(); i++) {
-            double root = roots.get(i);
-            if (Math.abs(root) - Math.round(root) < tol) {
-                roots.set(i, (double) Math.round(root));
+        for(int i = 0; i < roots.size(); i++){
+            // get difference between rounded root and root
+            double rounded = Math.round(Math.abs(roots.get(i)));
+            double notRounded = Math.abs(roots.get(i));
+            double difference;
+
+            if (rounded > notRounded) {
+                difference = rounded - notRounded;
+            } else {
+                difference = notRounded - rounded;
             }
+
+            if (difference <= 0.0001) {
+                roots.set(i, (double) Math.round(roots.get(i)));
+            }
+
         }
+
         // remove duplicate roots
         for (int i = 0; i < roots.size() - 1; i++) {
             for (int j = i + 1; j < roots.size(); j++) {
-                if (Math.abs(roots.get(i) - roots.get(j)) < tol) {
+                if (Math.abs(roots.get(i)) - Math.abs(roots.get(j)) < tol) {
                     roots.remove(j);
                     j--; // adjust index after removing an element
                 }
             }
         }
-        System.out.println("Roots: " + roots);
+
         return roots;
     }
 
@@ -131,11 +143,13 @@ public class Polynom {
                 startingValues.add(i);
             }
         }
+
         for (double root : roots) {
             for (double i = root - size / 2.0; i <= root + size / 2.0; i += range) {
                 startingValues.add(i);
             }
         }
+
         return startingValues.stream().mapToDouble(Double::doubleValue).toArray();
     }
 
@@ -211,4 +225,37 @@ public class Polynom {
 
        return returnList;
    }
+
+    private String getOperator(int i) {
+        // Check if the value is negative
+        String operator = this.coefficients[i] < 0 ? "-" : i >= this.getDegree() ? "" : "+";
+        // If operator is not the first operator, add whitespaces around it
+        return i < this.getDegree() ? " " + operator + " " : operator;
+    }
+
+    private String getNumber(int i) {
+        // If number is 1 --> (x) not (1x),  If number is an integer --> (3x) not (3.0x), Default --> (4.56x)
+        return this.coefficients[i] == 1 && i >= 1 ? "" : this.coefficients[i] == Math.round(this.coefficients[i]) ? String.valueOf((int) Math.abs(this.coefficients[i])) : String.valueOf(Math.abs(this.coefficients[i]));
+    }
+
+    private String getExponent(int i) {
+        // If exponent is 0 --> (x^0) not (x), If exponent is 1 --> (x) not (x^1), Default --> (x^2)
+        return i == 0 ? "" : i == 1 ? "x" : "x^" + i;
+    }
+
+    @Override
+    public String toString() {
+        // Create a StringBuilder initialized with f(x) = | for every derivation add one (')
+        StringBuilder builder = new StringBuilder("f" + "'".repeat(this.derivationCounter) + "(x) = ");
+
+        for (int i = this.coefficients.length-1; i >= 0; i--) {
+            // If the coefficient is not 0, fill the builder with the operator, number and exponent
+            if (this.coefficients[i] != 0) {
+                builder.append(this.getOperator(i)).append(this.getNumber(i)).append(this.getExponent(i));
+            }
+        }
+
+        return builder.toString();
+    }
+
 }
