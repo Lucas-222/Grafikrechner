@@ -25,7 +25,9 @@ public class PolynomialController {
     public Label functionAsStringLabel;
     public Label degreeLabel;
     public Label rootLabel;
-
+    public Label extremaLabel;
+    public Label inflectionLabel;
+    public Label saddleLabel;
     private GraphicsContext graphicsContext;
 
     private double xScale;
@@ -33,7 +35,7 @@ public class PolynomialController {
     private Polynom polynom;
 
     @FXML
-    private void initialize(){
+    private void initialize() {
         graphicsContext = polynomialCanvas.getGraphicsContext2D();
         this.yScale = polynomialCanvas.getHeight() / 10;
         this.xScale = polynomialCanvas.getWidth() / 10;
@@ -50,10 +52,9 @@ public class PolynomialController {
             //Add listener to textProperty so only valid input is accepted
             spinner.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
                         if (!newValue.matches("-?[0-9]+\\.?[0-9]*")) {
-                            if(newValue.equals("")){
+                            if (newValue.equals("")) {
                                 spinner.getEditor().setText("0");
-                            }
-                            else {
+                            } else {
                                 spinner.getEditor().setText(oldValue);
                             }
                         }
@@ -67,7 +68,7 @@ public class PolynomialController {
         try {
             double[] coefficients = {coefficient0Spinner.getValue(), coefficient1Spinner.getValue(),
                     coefficient2Spinner.getValue(), coefficient3Spinner.getValue(),
-            coefficient4Spinner.getValue(), coefficient5Spinner.getValue()};
+                    coefficient4Spinner.getValue(), coefficient5Spinner.getValue()};
 
             polynom = new Polynom(coefficients);
 
@@ -79,22 +80,27 @@ public class PolynomialController {
             if (polynom.getDegree() <= 3) {
                 showSymmetry();
                 showRoots();
+                showExtrema();
+                showInflectionPoints();
+                showSaddlePoints();
             }
 
             inputWarningLabel.setVisible(false);
             drawPolynomialToCanvas(polynom, Color.RED);
-        } catch (NumberFormatException invalidInput){
+        } catch (NumberFormatException invalidInput) {
             inputWarningLabel.setVisible(true);
         }
 
     }
 
     @FXML
-    private void onResetButtonClicked() {
+    private void onResetButtonClicked() throws WrongInputSizeException {
+        this.polynom = new Polynom(new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
         initializeSpinners();
         inputWarningLabel.setVisible(false);
         symmetryLabel.setVisible(false);
         rootLabel.setVisible(false);
+        this.showExtrema();
         graphicsContext.clearRect(0.0, 0.0, polynomialCanvas.getWidth(), polynomialCanvas.getHeight());
     }
 
@@ -110,7 +116,7 @@ public class PolynomialController {
         double lastY = polynomialToDraw.functionValue(lastX);
 
         //Calculate the value for every pixel in a loop and stroke a line from the previous point
-        for (double x = (-polynomialCanvas.getWidth() / 2.0) / xScale; x <= (polynomialCanvas.getWidth() / 2.0)/ xScale; x += stepSize) {
+        for (double x = (-polynomialCanvas.getWidth() / 2.0) / xScale; x <= (polynomialCanvas.getWidth() / 2.0) / xScale; x += stepSize) {
             double y = polynomialToDraw.functionValue(x);
             graphicsContext.strokeLine(adaptXCoordinate(lastX), adaptYCoordinate(lastY), adaptXCoordinate(x), adaptYCoordinate(y));
 
@@ -157,7 +163,7 @@ public class PolynomialController {
 
         // draw roots
         for (Double root : roots) {
-            polynomialCanvas.getGraphicsContext2D().fillOval(adaptXCoordinate(root) -2.5, adaptYCoordinate(0.0) -2.5, 5.0, 5.0);
+            polynomialCanvas.getGraphicsContext2D().fillOval(adaptXCoordinate(root) - 2.5, adaptYCoordinate(0.0) - 2.5, 5.0, 5.0);
         }
 
         if (roots.size() == 0) {
@@ -165,6 +171,78 @@ public class PolynomialController {
         } else {
             rootLabel.setText("Nullstellen: " + roots);
         }
+
     }
 
+    private void showExtrema() {
+        try {
+
+            ArrayList<double[]> extremaArray = polynom.getExtrema();
+            StringBuilder labelText = new StringBuilder();
+
+            if (extremaArray.size() == 0) {
+                labelText.append("Keine Extremstellen");
+            }
+
+            for (double[] extrema : extremaArray) {
+                polynomialCanvas.getGraphicsContext2D().fillOval(adaptXCoordinate(extrema[0]) - 2.5,
+                        adaptYCoordinate(extrema[1]) - 2.5, 5.0, 5.0);
+                labelText.append(Arrays.toString(extrema));
+            }
+
+            extremaLabel.setText(labelText.toString());
+
+        } catch (ArithmeticException | ComputationFailedException e) {
+            System.out.println(e);
+            extremaLabel.setText("Keine Extrempunkte");
+        }
+    }
+
+    private void showInflectionPoints() {
+        try {
+
+            ArrayList<double[]> inflectionArray = polynom.getInflectionPoints();
+            StringBuilder labelText = new StringBuilder();
+
+            if (inflectionArray.size() == 0) {
+                labelText.append("Keine Wendepunkte");
+            }
+
+            for (double[] inflection : inflectionArray) {
+                polynomialCanvas.getGraphicsContext2D().fillOval(adaptXCoordinate(inflection[0]) - 2.5,
+                        adaptYCoordinate(inflection[1]) - 2.5, 5.0, 5.0);
+                labelText.append(Arrays.toString(inflection));
+            }
+
+            inflectionLabel.setText(labelText.toString());
+
+        } catch (ComputationFailedException | ArithmeticException e) {
+            System.out.println(e);
+            inflectionLabel.setText("Keine Wendepunkte");
+        }
+    }
+
+    private void showSaddlePoints() {
+        try {
+
+            ArrayList<double[]> saddleArray = polynom.getSaddlePoints();
+            StringBuilder labelText = new StringBuilder();
+
+            if (saddleArray.size() != 0) {
+                labelText.append("Es gibt ").append(saddleArray.size()).append(" Sattelpunkte");
+            }
+
+            for (double[] saddlePoint : saddleArray) {
+                polynomialCanvas.getGraphicsContext2D().fillOval(adaptXCoordinate(saddlePoint[0]) - 2.5,
+                        adaptYCoordinate(saddlePoint[1]) - 2.5, 5.0, 5.0);
+                labelText.append(Arrays.toString(saddlePoint));
+            }
+
+            saddleLabel.setText(labelText.toString());
+
+        } catch (ComputationFailedException | ArithmeticException e) {
+            System.out.println(e);
+            saddleLabel.setText("Keine Sattelpunkte");
+        }
+    }
 }
