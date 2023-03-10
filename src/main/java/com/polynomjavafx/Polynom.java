@@ -161,12 +161,12 @@ public class Polynom {
        // then, get the roots of the derivative and their function values
        ArrayList<Double> firstDerivNulls = firstDerivative.getRoots();
        if (firstDerivNulls.isEmpty()) {
-           throw new ComputationFailedException("extrema", "the first derivative has no roots/zeroes");
+           throw new ComputationFailedException("extrema", this.toString(), "the first derivative has no roots/zeroes");
        }
 
        ArrayList<double[]> returnList = new ArrayList<>();
        for (double firstDerivNull: firstDerivNulls){
-           returnList.add(new double[]{firstDerivNull, this.functionValue(firstDerivNull)});
+           returnList.add(new double[]{Math.round(firstDerivNull*100.0)/100.0, Math.round(this.functionValue(firstDerivNull)*100.0)/100.0});
        }
 
        // return the array of null-value pairs
@@ -183,13 +183,14 @@ public class Polynom {
 
         ArrayList<Double> secDerivNulls = secondDerivative.getRoots();
        if (secDerivNulls.isEmpty()) {
-           throw new ComputationFailedException("inflection points", "the second derivative of the function " +
+           throw new ComputationFailedException("inflection points", this.toString(), "the second derivative of the function " +
                    "has no roots/zeroes");
        }
 
         ArrayList<double[]> returnList = new ArrayList<>();
         for (double secDerivNull : secDerivNulls) {
-            returnList.add(new double[]{secDerivNull, this.functionValue(secDerivNull)});
+            // 0.49249068954058 -> 490.0 -> 0.49
+            returnList.add(new double[]{Math.round(secDerivNull*100.0)/100.0, Math.round(this.functionValue(secDerivNull)*100.0)/100.0});
         }
 
         // return an array of the inflection points
@@ -208,14 +209,14 @@ public class Polynom {
        // if both are zero, it's a saddle point.
        ArrayList<Double> secDerivNulls = secondDerivative.getRoots();
        if (secDerivNulls.isEmpty()) {
-           throw new ComputationFailedException("saddle points", "the second derivative of the function " +
+           throw new ComputationFailedException("saddle points", this.toString(), "the second derivative of the function " +
                    "has no roots/zeroes");
        }
 
        ArrayList<double[]> returnList = new ArrayList<>();
        for (double secDerivNull: secDerivNulls) {
            if (firstDerivative.functionValue(secDerivNull) == 0.0) {
-               returnList.add(new double[]{secDerivNull, this.functionValue(secDerivNull)});
+               returnList.add(new double[]{Math.floor(secDerivNull/100.0)*100.0, Math.floor(this.functionValue(secDerivNull)*100.0)/100.0});
            }
        }
 

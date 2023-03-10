@@ -58,15 +58,23 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
                     </rowConstraints>
+
                     <Label alignment="TOP_LEFT" snapToPixel="false" text="Funktion:"/>
                     <Label contentDisplay="CENTER" text="Symmetirien:" GridPane.rowIndex="1"/>
                     <Label text="Grad der Funktion" GridPane.rowIndex="2"/>
                     <Label text="y-Achsenabschnitt" GridPane.rowIndex="3"/>
                     <Label text="Nullstellen:" GridPane.rowIndex="4"/>
+                    <Label text="Extremstellen: " GridPane.rowIndex="5"/>
+                    <Label text="Wendepunkte: " GridPane.rowIndex="6"/>
+                    <Label text="Sattelpunkte:" GridPane.rowIndex="7"/>
                     <Label fx:id="functionAsStringLabel" GridPane.columnIndex="1"/>
                     <Label fx:id="symmetryLabel" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                     <Label fx:id="degreeLabel" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                     <Label fx:id="rootLabel" GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="300"/>
+                    <Label fx:id="extremaLabel" GridPane.columnIndex="1" GridPane.rowIndex="5" prefWidth="300"/>
+                    <Label fx:id="inflectionLabel" GridPane.columnIndex="1" GridPane.rowIndex="6" prefWidth="300"/>
+                    <Label fx:id="saddleLabel" GridPane.ColumnIndex="1" GridPane.rowIndex="7" prefWidth="300"/>
+
                 </GridPane>
                 <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="180.0" onAction="#onResetButtonClicked" text="Reset"/>
             </VBox>
