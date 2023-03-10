@@ -17,7 +17,14 @@ public class Application extends javafx.application.Application {
         stage.show();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws WrongInputSizeException {
         launch();
+        try {
+
+            Polynom polynom = new Polynom(new double[]{0.0, 0.0, 3.0, -8.0, -9.0, -1.0});
+            System.out.println(Arrays.toString(polynom.getInflectionPoints().get(0)));
+        } catch (ComputationFailedException | ArithmeticException e) {
+            System.out.println(e);
+        }
     }
 }

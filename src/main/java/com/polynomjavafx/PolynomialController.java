@@ -40,6 +40,7 @@ public class PolynomialController {
         this.yScale = polynomialCanvas.getHeight() / 10;
         this.xScale = polynomialCanvas.getWidth() / 10;
         initializeSpinners();
+        drawAxis();
     }
 
     private void initializeSpinners() {
@@ -124,6 +125,17 @@ public class PolynomialController {
             lastX = x;
             lastY = y;
         }
+    }
+
+    private void drawAxis(){
+        graphicsContext.setStroke(Color.BLACK);
+        graphicsContext.setLineWidth(1.0);
+
+        //Draw x-axis
+        graphicsContext.strokeLine(0, polynomialCanvas.getHeight()/2, polynomialCanvas.getWidth(), polynomialCanvas.getHeight()/2);
+
+        //Draw y-axis
+        graphicsContext.strokeLine(polynomialCanvas.getWidth()/2, polynomialCanvas.getHeight(), polynomialCanvas.getWidth()/2, 0);
     }
 
     private double adaptXCoordinate(double mathematicalXCoordinate) {
