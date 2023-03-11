@@ -189,7 +189,7 @@ public class Polynom {
 
         ArrayList<double[]> returnList = new ArrayList<>();
         for (double secDerivNull : secDerivNulls) {
-            // 0.49249068954058 -> 490.0 -> 0.49
+            // example: 0.49249068954058 -> 490.0 -> 0.49
             returnList.add(new double[]{Math.round(secDerivNull*100.0)/100.0, Math.round(this.functionValue(secDerivNull)*100.0)/100.0});
         }
 
@@ -216,7 +216,7 @@ public class Polynom {
        ArrayList<double[]> returnList = new ArrayList<>();
        for (double secDerivNull: secDerivNulls) {
            if (firstDerivative.functionValue(secDerivNull) == 0.0) {
-               returnList.add(new double[]{Math.floor(secDerivNull/100.0)*100.0, Math.floor(this.functionValue(secDerivNull)*100.0)/100.0});
+               returnList.add(new double[]{Math.floor(secDerivNull*100.0)/100.0, Math.floor(this.functionValue(secDerivNull)*100.0)/100.0});
            }
        }
 
