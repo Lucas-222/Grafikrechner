@@ -99,19 +99,12 @@ public class Polynom {
         }
 
         // round roots if they are close to the next integer
-        for(int i = 0; i < roots.size(); i++){
+        for (int i = 0; i < roots.size(); i++){
             // get difference between rounded root and root
             double rounded = Math.round(Math.abs(roots.get(i)));
             double notRounded = Math.abs(roots.get(i));
-            double difference;
 
-            if (rounded > notRounded) {
-                difference = rounded - notRounded;
-            } else {
-                difference = notRounded - rounded;
-            }
-
-            if (difference <= 0.0001) {
+            if (getDifference(rounded, notRounded) <= 0.0001) {
                 roots.set(i, (double) Math.round(roots.get(i)));
             }
 
@@ -120,7 +113,7 @@ public class Polynom {
         // remove duplicate roots
         for (int i = 0; i < roots.size() - 1; i++) {
             for (int j = i + 1; j < roots.size(); j++) {
-                if (Math.abs(roots.get(i)) - Math.abs(roots.get(j)) < tol) {
+                if (getDifference(roots.get(i), roots.get(j)) <= 0.0001) {
                     roots.remove(j);
                     j--; // adjust index after removing an element
                 }
@@ -130,15 +123,32 @@ public class Polynom {
         return roots;
     }
 
+    public double getDifference(double x, double y) {
+        double difference;
+
+        if (Math.abs(x) > Math.abs(y)) {
+            difference = x - y;
+        } else {
+            difference = y - x;
+        }
+
+        return difference;
+    }
+
     private double[] getStartingValues() {
-        // Use values around the roots of the derivation
         ArrayList<Double> startingValues = new ArrayList<>();
-        // Range size
+        // Size of the array
         int size = 50;
         // Range of the values
         double range = 0.5;
 
         ArrayList<Double> roots = this.getDegree() >= 1 ? this.derivationPolynom().getRoots() : new ArrayList<>(List.of(0.0));
+
+        if (roots.size() == 0) {
+            for (double i = -size / 2.0; i <= size / 2.0; i += range) {
+                startingValues.add(i);
+            }
+        }
 
         for (double root : roots) {
             for (double i = root - size / 2.0; i <= root + size / 2.0; i += range) {
