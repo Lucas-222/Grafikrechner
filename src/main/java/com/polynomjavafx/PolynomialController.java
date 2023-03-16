@@ -4,9 +4,6 @@ import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -44,7 +41,6 @@ public class PolynomialController {
     private double xScale;
     private double yScale;
     private Polynom polynom;
-    private  double majorScaleSize;
     private double xOffset;
     private double yOffset;
     private double spaceBetweenCols;
@@ -55,14 +51,6 @@ public class PolynomialController {
         initializeVisuals();
         initializeSpinners();
         initializeMenuItems();
-    }
-
-    public  void initializeShortcuts() {
-        KeyCombination keyCombination = new KeyCodeCombination(KeyCode.U, KeyCombination.CONTROL_DOWN);
-        Runnable returnToOrigin = () -> this.xOffset = 0;
-        this.yOffset = 0;
-        this.resetCoordinateCanvas();
-        this.coordinateSystemCanvas.getScene().getAccelerators().put(keyCombination, returnToOrigin);
     }
 
     private void initializeMenuItems() {
@@ -97,7 +85,7 @@ public class PolynomialController {
                 coefficient5Spinner);
         for (Spinner<Double> spinner : spinners) {
             //Set value factory
-            spinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-200, 200, 0.0, 0.1));
+            spinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-999999999, 999999999, 0.0, 0.1));
             //Add listener to textProperty so only valid input is accepted
             spinner.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
                         if (!newValue.matches("-?[0-9]+\\.?[0-9]*")) {
@@ -128,12 +116,13 @@ public class PolynomialController {
         this.xScale = polynomialCanvas.getWidth() / 10;
 
 
-        //Values that represent the space scrolled on the canvas. Axis are at the center if both are 0
+        //Values that represent the space scrolled on the canvas in pixels
         this.xOffset = 0;
         this.yOffset = 0;
 
         polynomialGraphicsContext = polynomialCanvas.getGraphicsContext2D();
         coordinateSystemGraphicsContext = coordinateSystemCanvas.getGraphicsContext2D();
+
 
         spaceBetweenCols = xScale;
         spaceBetweenRows = yScale;
@@ -181,6 +170,12 @@ public class PolynomialController {
         polynomialGraphicsContext.clearRect(0.0, 0.0, polynomialCanvas.getWidth(), polynomialCanvas.getHeight());
     }
 
+
+    /**
+     * Draws Polynomial onto canvas in given color
+     * @param polynomialToDraw The polynomial to be drawn
+     * @param color The color of the polynomial
+     */
     private void drawPolynomialToCanvas(Polynom polynomialToDraw, Color color) {
         polynomialGraphicsContext.setStroke(color);
         double polynomialWidth = 1.0;
@@ -203,6 +198,11 @@ public class PolynomialController {
         }
     }
 
+    /**
+     * Translates an x-coordinate of a mathematical coordinate system to the equivalent x-coordinate on the canvas
+     * @param mathematicalXCoordinate x-coordinate to be translated
+     * @return translated x-coordinate
+     */
     private double mathXCoordinateToCanvasXCoordinate(double mathematicalXCoordinate) {
         return (mathematicalXCoordinate * xScale + polynomialCanvas.getWidth() / 2.0) + xOffset;
     }
@@ -336,26 +336,25 @@ public class PolynomialController {
      * Draws labels onto axis according to current scaling
      */
     private void drawCoordinateSystem() {
-        double originX = (coordinateSystemCanvas.getWidth() / 2) + xOffset;
-        double originY = (coordinateSystemCanvas.getHeight() / 2) + yOffset;
         if(showAxis) {
-            drawAxis(originX, originY);
+            drawAxis();
         }
-        if(showGrid) {
-            drawVerticalLines();
-            drawHorizontalLines();
-        }
+        drawVerticalLines();
+        drawHorizontalLines();
+
     }
 
-    private void drawAxis(double originXCoordinate, double originYCoordinate) {
+    private void drawAxis() {
+        double originX = (coordinateSystemCanvas.getWidth() / 2) + xOffset;
+        double originY = (coordinateSystemCanvas.getHeight() / 2) + yOffset;
         coordinateSystemGraphicsContext.setStroke(Color.BLACK);
         coordinateSystemGraphicsContext.setLineWidth(1.0);
 
         //Draw x-axis
-        coordinateSystemGraphicsContext.strokeLine(0, originYCoordinate, polynomialCanvas.getWidth(), originYCoordinate);
+        coordinateSystemGraphicsContext.strokeLine(0, originY, polynomialCanvas.getWidth(), originY);
 
         //Draw y-axis
-        coordinateSystemGraphicsContext.strokeLine(originXCoordinate, polynomialCanvas.getHeight(), originXCoordinate, 0);
+        coordinateSystemGraphicsContext.strokeLine(originX, polynomialCanvas.getHeight(), originX, 0);
     }
 
     private void drawHorizontalLines() {
@@ -364,13 +363,20 @@ public class PolynomialController {
         double scrollingOffset = yOffset % majorScaleDistance; //The offset of the first line coordinates created by the y-offset
         double scalingOffset = coordinateSystemCanvas.getHeight() / 2 % majorScaleDistance; //The offset created by the scale distance. Without this, the axis and grid could go out of alignment
         for(double yCoordinate = scrollingOffset + scalingOffset; yCoordinate <= coordinateSystemCanvas.getHeight(); yCoordinate += majorScaleDistance) {
-            double scaleLabel = (yCoordinate + yOffset) / spaceBetweenRows;
-            coordinateSystemGraphicsContext.setStroke(Color.GRAY);
-            coordinateSystemGraphicsContext.setLineWidth(0.5);
-            coordinateSystemGraphicsContext.strokeLine(0, yCoordinate, coordinateSystemCanvas.getWidth(), yCoordinate);
-            double label = canvasYCoordinateToMathYCoordinate(yCoordinate);
-            label = Math.round(label);
-            drawMajorYAxisScale(Double.toString(label), coordinateSystemCanvas.getWidth() / 2 + xOffset, yCoordinate);
+            if(showGrid) {
+                //Draw the vertical line of the grid at the curren y-coordinate
+                coordinateSystemGraphicsContext.setStroke(Color.GRAY);
+                coordinateSystemGraphicsContext.setLineWidth(0.5);
+                coordinateSystemGraphicsContext.strokeLine(0, yCoordinate, coordinateSystemCanvas.getWidth(), yCoordinate);
+            }
+            if(showScales) {
+                //Draw the label for the current y-Coordinate
+                double label = canvasYCoordinateToMathYCoordinate(yCoordinate);
+                label = Math.round(label);
+                if (showScales) {
+                    drawYAxisLabel(Double.toString(label), yCoordinate);
+                }
+            }
         }
     }
 
@@ -379,61 +385,57 @@ public class PolynomialController {
         double scrollingOffSet = xOffset % majorScaleDistance; //The offset of the first line coordinates created by the x-offset
         double scalingOffset = coordinateSystemCanvas.getWidth() / 2 % majorScaleDistance; //The offset created by the scale distance. Without this, the axis and grid could go out of alignment
         for(double xCoordinate = scrollingOffSet + scalingOffset; xCoordinate <= coordinateSystemCanvas.getWidth(); xCoordinate += majorScaleDistance) {
-            coordinateSystemGraphicsContext.setStroke(Color.GRAY);
-            coordinateSystemGraphicsContext.setLineWidth(0.5);
-            coordinateSystemGraphicsContext.strokeLine(xCoordinate, 0, xCoordinate, coordinateSystemCanvas.getHeight());
-            double label = canvasXCoordinateToMathXCoordinate(xCoordinate);
-            label = Math.round(label);
-            drawMajorXAxisScale(Double.toString(label), xCoordinate, coordinateSystemCanvas.getHeight()/2 + yOffset);
+            if(showGrid) {
+                coordinateSystemGraphicsContext.setStroke(Color.GRAY);
+                coordinateSystemGraphicsContext.setLineWidth(0.5);
+                coordinateSystemGraphicsContext.strokeLine(xCoordinate, 0, xCoordinate, coordinateSystemCanvas.getHeight());
+            }
+            if(showScales) {
+                double label = canvasXCoordinateToMathXCoordinate(xCoordinate);
+                label = Math.round(label);
+                if (showScales) {
+                    drawXAxisLabel(Double.toString(label), xCoordinate);
+                }
+            }
         }
     }
 
-    private void drawMajorXAxisScale(String scaleLabel, double x, double y) {
-        double xAxisToLabelSpacing = 15;
+    private void drawXAxisLabel(String labelText, double x) {
+        Text label = new Text(labelText);
+        double labelHeight = label.getBoundsInLocal().getHeight();
+        double y;
         coordinateSystemGraphicsContext.setLineWidth(1);
         coordinateSystemGraphicsContext.setStroke(Color.BLACK);
-        coordinateSystemGraphicsContext.strokeLine(x, y, x, y + majorScaleSize);
-        coordinateSystemGraphicsContext.fillText(scaleLabel, x, y + xAxisToLabelSpacing);
+        if(coordinateSystemCanvas.getHeight()/2  -labelHeight > yOffset && yOffset > -coordinateSystemCanvas.getHeight()/2) {
+            y = coordinateSystemCanvas.getHeight() / 2 + yOffset + labelHeight;
+        }
+        else if(yOffset > -coordinateSystemCanvas.getHeight()/2) {
+            y = coordinateSystemCanvas.getHeight();
+        }
+        else y= labelHeight;
+        coordinateSystemGraphicsContext.fillText(labelText, x, y);
     }
 
-    private void drawMajorYAxisScale(String scaleLabel, double x, double y) {
-        double yAxisToLabelSpacing = 0;
-        coordinateSystemGraphicsContext.setLineWidth(1);
-        coordinateSystemGraphicsContext.setStroke(Color.BLACK);
-        coordinateSystemGraphicsContext.strokeLine(x, y, x - majorScaleSize, y);
-
-        Text label = new Text(scaleLabel);
-        label.setFont(coordinateSystemGraphicsContext.getFont());
+    private void drawYAxisLabel(String labelText, double y) {
+        Text label = new Text(labelText);
         double labelWidth = label.getBoundsInLocal().getWidth();
-
-        coordinateSystemGraphicsContext.fillText(scaleLabel, x - yAxisToLabelSpacing - labelWidth, y);
+        double x;
+        if( coordinateSystemCanvas.getWidth()/2 > xOffset && xOffset > -coordinateSystemCanvas.getWidth()/2 + labelWidth) {
+            System.out.println("Drawing");
+            x = coordinateSystemCanvas.getWidth() / 2 + xOffset - labelWidth; // X-coordinate of the label
+        }
+        else if((coordinateSystemCanvas.getWidth()/2 - labelWidth) > xOffset) {
+            x = 0;
+        }
+        else {
+            x = coordinateSystemCanvas.getWidth() - labelWidth;
+        }
+        coordinateSystemGraphicsContext.fillText(labelText, x, y);
     }
 
 
-    private void drawMinorXAxisScale(double x, double y) {
-        coordinateSystemGraphicsContext.setLineWidth(0.5);
-        coordinateSystemGraphicsContext.setStroke(Color.GRAY);
-        if(showScales && showAxis) {
-            coordinateSystemGraphicsContext.strokeLine(x, y, x, y + majorScaleSize / 2);
-        }
-        if(showGrid) {
-            coordinateSystemGraphicsContext.setLineWidth(0.1);
-            coordinateSystemGraphicsContext.strokeLine(x, coordinateSystemCanvas.getHeight(), x, 0);
-        }
-    }
 
 
-    private void drawMinorYAxisScale(double x, double y) {
-        coordinateSystemGraphicsContext.setLineWidth(0.5);
-        coordinateSystemGraphicsContext.setStroke(Color.GRAY);
-        if(showScales && showAxis) {
-            coordinateSystemGraphicsContext.strokeLine(x, y, x - majorScaleSize / 2, y);
-        }
-        if(showGrid) {
-            coordinateSystemGraphicsContext.setLineWidth(0.1);
-            coordinateSystemGraphicsContext.strokeLine(0, y, coordinateSystemCanvas.getWidth(), y);
-        }
-    }
 
     public void onMouseScrolledOnCanvas(ScrollEvent scrollEvent) {
         if(scrollEvent.isControlDown()) {
@@ -457,21 +459,9 @@ public class PolynomialController {
     }
 
     private void modifySpaceBetweenRows(double delta) {
-        if(coordinateSystemCanvas.getHeight() / spaceBetweenRows + delta < 5) {
-            //spaceBetweenRows *= 0.5;
-        }
-        else if (coordinateSystemCanvas.getHeight() / spaceBetweenRows + delta > 30) {
-            //spaceBetweenRows *= 2;
-        }
          spaceBetweenRows += delta;
     }
     private void modifySpaceBetweenCols(double delta) {
-        if(coordinateSystemCanvas.getWidth() / spaceBetweenCols + delta < 5) {
-            //spaceBetweenCols *= 0.5;
-        }
-        else if(coordinateSystemCanvas.getWidth() / spaceBetweenCols + delta > 30){
-            //paceBetweenCols *= 2;
-        }
          spaceBetweenCols += delta;
     }
 
