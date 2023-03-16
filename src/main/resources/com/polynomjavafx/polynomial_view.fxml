@@ -4,10 +4,36 @@
 <?import javafx.scene.*?>
 <?import javafx.scene.canvas.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
 
 <AnchorPane prefHeight="450.0" prefWidth="1057.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.polynomjavafx.PolynomialController">
-    <VBox alignment="CENTER" prefHeight="155.0" prefWidth="600.0" spacing="5.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+    <VBox alignment="CENTER" layoutY="-2.0" prefHeight="482.0" prefWidth="1057.0" spacing="5.0" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="-2.0">
+      <MenuBar>
+         <menus>
+            <Menu mnemonicParsing="false" text="Anzeige">
+               <items>
+                  <RadioMenuItem fx:id="gridToggleMenuItem" mnemonicParsing="false" text="Gitter">
+                     <accelerator>
+                        <KeyCodeCombination alt="UP" code="G" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                     </accelerator></RadioMenuItem>
+                  <RadioMenuItem fx:id="axisToggleMenuItem" mnemonicParsing="false" text="Achsen">
+                     <accelerator>
+                        <KeyCodeCombination alt="UP" code="K" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                     </accelerator></RadioMenuItem>
+                  <RadioMenuItem fx:id="axisScalesMenuItemToggle" mnemonicParsing="false" text="Achsenbeschriftung" />
+                  <MenuItem fx:id="returnToOriginMenuItem" mnemonicParsing="false" onAction="#returnToOrigin" text="Zurück zum Ursprung">
+                     <accelerator>
+                        <KeyCodeCombination alt="UP" code="U" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                     </accelerator></MenuItem>
+                  <MenuItem mnemonicParsing="false" onAction="#resetScaling" text="Skalierung zurücksetzen">
+                     <accelerator>
+                        <KeyCodeCombination alt="UP" code="R" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                     </accelerator>
+                  </MenuItem>
+               </items>
+            </Menu>
+         </menus></MenuBar>
         <HBox alignment="CENTER" prefHeight="64.0" prefWidth="622.0" spacing="20.0">
             <VBox.margin>
                 <Insets />
@@ -31,7 +57,7 @@
         </HBox>
 
         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
-            <Label fx:id="inputWarningLabel" text="Ungültige Eingabe" textFill="RED" visible="false"/>
+            <Label fx:id="inputWarningLabel" text="Ungültige Eingabe" textFill="RED" visible="false" />
         </HBox>
 
         <HBox prefHeight="187.0" prefWidth="881.0">
@@ -41,49 +67,54 @@
             <VBox alignment="CENTER" prefHeight="400.0" prefWidth="539.0">
                 <GridPane alignment="CENTER" prefHeight="350.0" prefWidth="481.0">
                     <columnConstraints>
-                        <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                        <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                     </columnConstraints>
                     <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
 
-                    <Label alignment="TOP_LEFT" snapToPixel="false" text="Funktion:"/>
-                    <Label contentDisplay="CENTER" text="Symmetirien:" GridPane.rowIndex="1"/>
-                    <Label text="Grad der Funktion" GridPane.rowIndex="2"/>
-                    <Label text="y-Achsenabschnitt" GridPane.rowIndex="3"/>
-                    <Label text="Nullstellen:" GridPane.rowIndex="4"/>
-                    <Label text="Extremstellen: " GridPane.rowIndex="5"/>
-                    <Label text="Wendepunkte: " GridPane.rowIndex="6"/>
-                    <Label text="Sattelpunkte:" GridPane.rowIndex="7"/>
-                    <Label fx:id="functionAsStringLabel" GridPane.columnIndex="1"/>
-                    <Label fx:id="symmetryLabel" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                    <Label fx:id="degreeLabel" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                    <Label fx:id="rootLabel" GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="300"/>
-                    <Label fx:id="extremaLabel" GridPane.columnIndex="1" GridPane.rowIndex="5" prefWidth="300"/>
-                    <Label fx:id="inflectionLabel" GridPane.columnIndex="1" GridPane.rowIndex="6" prefWidth="300"/>
-                    <Label fx:id="saddleLabel" GridPane.ColumnIndex="1" GridPane.rowIndex="7" prefWidth="300"/>
+                    <Label alignment="TOP_LEFT" snapToPixel="false" text="Funktion:" />
+                    <Label contentDisplay="CENTER" text="Symmetirien:" GridPane.rowIndex="1" />
+                    <Label text="Grad der Funktion" GridPane.rowIndex="2" />
+                    <Label text="y-Achsenabschnitt" GridPane.rowIndex="3" />
+                    <Label text="Nullstellen:" GridPane.rowIndex="4" />
+                    <Label text="Extremstellen: " GridPane.rowIndex="5" />
+                    <Label text="Wendepunkte: " GridPane.rowIndex="6" />
+                    <Label text="Sattelpunkte:" GridPane.rowIndex="7" />
+                    <Label fx:id="functionAsStringLabel" GridPane.columnIndex="1" />
+                    <Label fx:id="symmetryLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    <Label fx:id="degreeLabel" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                    <Label fx:id="rootLabel" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                    <Label fx:id="extremaLabel" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                    <Label fx:id="inflectionLabel" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                    <Label fx:id="saddleLabel" prefWidth="300" GridPane.ColumnIndex="1" GridPane.rowIndex="7" />
 
                 </GridPane>
-                <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="180.0" onAction="#onResetButtonClicked" text="Reset"/>
+                <Button mnemonicParsing="false" onAction="#onResetButtonClicked" prefHeight="25.0" prefWidth="180.0" text="Reset" />
             </VBox>
 
-            <Canvas fx:id="polynomialCanvas" height="400.0" width="400.0">
+            <Canvas fx:id="polynomialCanvas" height="518.0" width="518.0">
                 <cursor>
                     <Cursor fx:constant="CROSSHAIR" />
                 </cursor>
             </Canvas>
+         <Canvas fx:id="coordinateSystemCanvas" height="518.0" onScroll="#onMouseScrolledOnCanvas" width="518.0">
+            <HBox.margin>
+               <Insets left="-518.0" />
+            </HBox.margin>
+         </Canvas>
         </HBox>
     </VBox>
 </AnchorPane>

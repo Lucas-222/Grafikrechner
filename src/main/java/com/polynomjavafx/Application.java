@@ -14,6 +14,7 @@ public class Application extends javafx.application.Application {
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("Grafikrechner");
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 
@@ -21,8 +22,8 @@ public class Application extends javafx.application.Application {
         launch();
         try {
 
-            Polynom polynom = new Polynom(new double[]{0.0, 0.0, 3.0, -8.0, -9.0, -1.0});
-            System.out.println(Arrays.toString(polynom.getInflectionPoints().get(0)));
+            Polynom polynom = new Polynom(new double[]{0.0, 0.0, 2.0, 0.0, 0.0, 0.0});
+            System.out.println(polynom.getInflectionPoints());
         } catch (ComputationFailedException | ArithmeticException e) {
             System.out.println(e);
         }
