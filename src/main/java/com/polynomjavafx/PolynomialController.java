@@ -14,6 +14,7 @@ import javafx.util.StringConverter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 public class PolynomialController {
@@ -47,8 +48,8 @@ public class PolynomialController {
     private Polynom polynom;
     private double xOffset;
     private double yOffset;
-    private double spaceBetweenCols;
-    private double spaceBetweenRows;
+    private double rowSize;
+    private double colSize;
 
     @FXML
     private void initialize() {
@@ -82,24 +83,53 @@ public class PolynomialController {
     }
 
     private void initializeSpinners() {
+        //Array of every spinner
         List<Spinner<Double>> spinners = Arrays.asList(coefficient5Spinner, coefficient4Spinner, coefficient3Spinner, coefficient2Spinner, coefficient1Spinner,
                 coefficient0Spinner);
+        StringConverter<Double> stringConverter= new StringConverter<>() {
+            @Override
+            public String toString(Double doubleInput) {
+                if(doubleInput == 0.0) {
+                    return "0.0";
+                }
+                return Double.toString(doubleInput);
+            }
+
+            @Override
+            public Double fromString(String string) {
+                if(Objects.equals(string, "")) {
+                    return 0.0;
+                }
+                //Replace comma with point
+                string  = string.replace(",", ".");
+                try {
+                    return Double.parseDouble(string);
+                }
+                catch (NumberFormatException numberFormatException) {
+                    return 0.0;
+                }
+            }
+        };
+        UnaryOperator<TextFormatter.Change> filter  = change -> {
+            String newString = change.getControlNewText();
+            if(newString.matches("-?([0-9]+[.,]?[0-9]*)*")) {
+                return change;
+            }
+            else return null;
+        };
+
+
+
+
+        //Loop that iterates trough spinners for less code repetition
         for (int i = 0; i < spinners.size(); i++) {
+            TextFormatter<Double> textFormatter = new TextFormatter<>(stringConverter, 0.0 , filter);
             Spinner<Double> spinner = spinners.get(i);
             //Set value factory
             spinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-            //Add listener to textProperty so only valid input is accepted
-            /*spinner.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
-                        if (!newValue.matches("-?[0-9]+\\.?[0-9]*")) {
-                            if (newValue.equals("")) {
-                                spinner.getEditor().setText("0");
-                            } else {
-                                spinner.getEditor().setText(oldValue);
-                            }
-                        }
-                    }
-            ); */
-            setTextFormatter(spinner);
+
+            spinner.getEditor().setTextFormatter(textFormatter);
+
             //Spinner is the last spinner in the list, so set eventHandler to submit input if enter is pressed
             if(i == spinners.size()-1) {
                 spinner.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
@@ -142,8 +172,8 @@ public class PolynomialController {
         coordinateSystemGraphicsContext = coordinateSystemCanvas.getGraphicsContext2D();
 
 
-        spaceBetweenCols = xScale;
-        spaceBetweenRows = yScale;
+        rowSize = yScale;
+        colSize = xScale;
 
         drawCoordinateSystem();
     }
@@ -155,6 +185,7 @@ public class PolynomialController {
 
     private void submitInput() {
         try {
+            System.out.println(coefficient5Spinner.getValue());
             double[] coefficients = {coefficient0Spinner.getValue(), coefficient1Spinner.getValue(),
                     coefficient2Spinner.getValue(), coefficient3Spinner.getValue(),
                     coefficient4Spinner.getValue(), coefficient5Spinner.getValue()};
@@ -392,7 +423,7 @@ public class PolynomialController {
      * Draws the horizontal lines of the coordinate system
      */
     private void drawHorizontalLines() {
-        double majorScaleDistance = spaceBetweenRows; //The pixel amount between major scales
+        double majorScaleDistance = colSize; //The pixel amount between major scales
         //Set color and width of the lines to stroke
         double scrollingOffset = yOffset % majorScaleDistance; //The offset of the first line coordinates created by the y-offset
         double scalingOffset = coordinateSystemCanvas.getHeight() / 2 % majorScaleDistance; //The offset created by the scale distance. Without this, the axis and grid could go out of alignment
@@ -404,11 +435,13 @@ public class PolynomialController {
                     coordinateSystemGraphicsContext.setStroke(Color.GRAY);
                     coordinateSystemGraphicsContext.setLineWidth(0.5);
                     coordinateSystemGraphicsContext.strokeLine(0, yCoordinate, coordinateSystemCanvas.getWidth(), yCoordinate);
+
+                    coordinateSystemGraphicsContext.setLineWidth(0.1);
+                    coordinateSystemGraphicsContext.strokeLine(0, yCoordinate - majorScaleDistance/2, coordinateSystemCanvas.getWidth(), yCoordinate - majorScaleDistance/2);
                 }
                 if (showScales) {
                     //Draw the label for the current y-Coordinate
                     double label = canvasYCoordinateToMathYCoordinate(yCoordinate);
-                    label = Math.round(label);
                     drawYAxisLabel(Double.toString(label), yCoordinate);
                 }
             }
@@ -419,7 +452,7 @@ public class PolynomialController {
      * Draws the vertical lines of the coordinate system
      */
     private void drawVerticalLines() {
-        double majorScaleDistance = spaceBetweenCols;
+        double majorScaleDistance = rowSize;
         double scrollingOffSet = xOffset % majorScaleDistance; //The offset of the first line coordinates created by the x-offset
         double scalingOffset = coordinateSystemCanvas.getWidth() / 2 % majorScaleDistance; //The offset created by the scale distance. Without this, the axis and grid could go out of alignment
         if(showGrid || showScales) {
@@ -428,10 +461,12 @@ public class PolynomialController {
                     coordinateSystemGraphicsContext.setStroke(Color.GRAY);
                     coordinateSystemGraphicsContext.setLineWidth(0.5);
                     coordinateSystemGraphicsContext.strokeLine(xCoordinate, 0, xCoordinate, coordinateSystemCanvas.getHeight());
+
+                    coordinateSystemGraphicsContext.setLineWidth(0.1);
+                    coordinateSystemGraphicsContext.strokeLine(xCoordinate - majorScaleDistance/2 , 0, xCoordinate - majorScaleDistance/2, coordinateSystemCanvas.getHeight());
                 }
                 if (showScales) {
                     double label = canvasXCoordinateToMathXCoordinate(xCoordinate);
-                    label = Math.round(label);
                     if (showScales) {
                         drawXAxisLabel(Double.toString(label), xCoordinate);
                     }
@@ -511,8 +546,8 @@ public class PolynomialController {
     private void changeScale(double changeX, double changeY) {
         xScale += changeX;
         yScale += changeY;
-        modifySpaceBetweenRows(changeX);
-        modifySpaceBetweenCols(changeY);
+        updateRowSize();
+        updateColSize();
         drawCoordinateSystem();
         if(polynom != null) {
             polynomialGraphicsContext.clearRect(0, 0, polynomialCanvas.getWidth(), polynomialCanvas.getHeight());
@@ -520,20 +555,36 @@ public class PolynomialController {
         }
     }
 
-    private void modifySpaceBetweenRows(double delta) {
-         spaceBetweenRows += delta;
+    private void updateRowSize() {
+        rowSize = xScale;
+        while(coordinateSystemCanvas.getWidth() / rowSize > 10) {
+            rowSize *= 2;
+        }
+        while(coordinateSystemCanvas.getWidth() / rowSize < 4) {
+            rowSize *= 0.5;
+        }
     }
-    private void modifySpaceBetweenCols(double delta) {
-         spaceBetweenCols += delta;
+
+    private void updateColSize() {
+        colSize = yScale;
+        while(coordinateSystemCanvas.getHeight() / colSize > 10) {
+            colSize *= 2;
+        }
+        while(coordinateSystemCanvas.getHeight() / colSize < 4) {
+            colSize *= 0.5;
+        }
     }
 
     double canvasXCoordinateToMathXCoordinate(double xCoordinate) {
-        return ((xCoordinate)  / xScale  - coordinateSystemCanvas.getWidth() / xScale / 2 - xOffset / xScale);
+        double mathXCoordinate = (xCoordinate - polynomialCanvas.getWidth() / 2.0 - xOffset) / xScale;
+        return Math.round(mathXCoordinate * 100) / 100.0;
     }
 
     double canvasYCoordinateToMathYCoordinate(double yCoordinate) {
-        return -((yCoordinate /yScale) - coordinateSystemCanvas.getHeight() / xScale / 2 - yOffset / xScale);
+        double mathYCoordinate = -(yCoordinate - polynomialCanvas.getHeight() / 2.0 - yOffset) / yScale;
+        return Math.round(mathYCoordinate * 100) / 100.0;
     }
+
 
     /**
      * Returns view to origin
@@ -554,8 +605,6 @@ public class PolynomialController {
     public void resetScaling() {
         this.xScale = coordinateSystemCanvas.getWidth() / 10;
         this.yScale = coordinateSystemCanvas.getHeight() / 10;
-        spaceBetweenCols = xScale;
-        spaceBetweenRows = yScale;
         drawCoordinateSystem();
         polynomialGraphicsContext.clearRect(0,0,coordinateSystemCanvas.getWidth(), coordinateSystemCanvas.getHeight());
         if(polynom != null) {
@@ -563,36 +612,13 @@ public class PolynomialController {
         }
     }
 
-    private void setTextFormatter(Spinner<Double> spinner){
-        StringConverter<Double> stringConverter= new StringConverter<>() {
-            @Override
-            public String toString(Double doubleInput) {
-                if(doubleInput == 0.0) {
-                    return "0";
-                }
-                return Double.toString(doubleInput);
-            }
-
-            @Override
-            public Double fromString(String s) {
-                if(s == null) {
-                    return 0.0;
-                }
-                s  = s.replace(",", ".");
-                if(!s.matches("^(-?)(0|([1-9][0-9]*))(\\.[0-9]+)?$")) {
-                    return 0.0;
-                }
-                return Double.parseDouble(s);
-            }
-        };
-        UnaryOperator<TextFormatter.Change> filter  = change -> {
-            String newString = change.getControlNewText();
-            if(newString.matches("-?([0-9]+[\\.,]?[0-9]*)*")) {
-                return change;
-            }
-            else return null;
-        };
-        TextFormatter<Double> textFormatter = new TextFormatter<>(stringConverter, 0.0 , filter);
-        spinner.getEditor().setTextFormatter(textFormatter);
+    public void onKeyPressedOnCanvas(KeyEvent keyEvent) {
+        System.out.println(keyEvent.getCode());
+        switch(keyEvent.getCode()) {
+            case UP -> yOffset -= yScale;
+            case DOWN -> yOffset += yScale;
+            case LEFT -> xOffset -= xScale;
+            case RIGHT -> xOffset += xScale;
+        }
     }
 }
