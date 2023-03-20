@@ -50,6 +50,7 @@ public class PolynomialController {
     private double yOffset;
     private double rowSize;
     private double colSize;
+    private final double DEFAULT_CELL_AMOUNT = 10;
 
     @FXML
     private void initialize() {
@@ -160,8 +161,8 @@ public class PolynomialController {
 
 
         //Scaling values that represent how many pixels represent one on each axis
-        this.yScale = polynomialCanvas.getHeight() / 10;
-        this.xScale = polynomialCanvas.getWidth() / 10;
+        this.yScale = polynomialCanvas.getHeight() / DEFAULT_CELL_AMOUNT;
+        this.xScale = polynomialCanvas.getWidth() / DEFAULT_CELL_AMOUNT;
 
 
         //Values that represent the space scrolled on the canvas in pixels
@@ -404,7 +405,7 @@ public class PolynomialController {
     }
 
     /**
-     * Draws the axis onto the coordinate system canvas.
+     * Draws the axis onto the coordinate system canvas
      */
     private void drawAxis() {
         double originX = (coordinateSystemCanvas.getWidth() / 2) + xOffset;
@@ -533,6 +534,11 @@ public class PolynomialController {
 
     }
 
+    /**
+     * Shifts view of  the Canvas up / down and left / right by amount of pixels give as params
+     * @param deltaX pixels to scroll horizontally
+     * @param deltaY pixels to scroll vertically
+     */
     private void scroll(double deltaX, double deltaY) {
         xOffset += deltaX;
         yOffset += deltaY;
@@ -543,9 +549,14 @@ public class PolynomialController {
         }
     }
 
+    /**
+     * Increases or reduces y and x scaling with given parameters
+     * @param changeX
+     * @param changeY
+     */
     private void changeScale(double changeX, double changeY) {
-        xScale += changeX;
-        yScale += changeY;
+        xScale += changeX * xScale / 100;
+        yScale += changeY * yScale / 100;
         updateRowSize();
         updateColSize();
         drawCoordinateSystem();
@@ -555,31 +566,50 @@ public class PolynomialController {
         }
     }
 
+    /**
+     * Updates row size dependent on current scaling to avoid to small / big rows
+     */
     private void updateRowSize() {
         rowSize = xScale;
-        while(coordinateSystemCanvas.getWidth() / rowSize > 10) {
+        double canvasWidth = coordinateSystemCanvas.getWidth();
+        while (canvasWidth / rowSize > 10) {
             rowSize *= 2;
         }
-        while(coordinateSystemCanvas.getWidth() / rowSize < 4) {
+        while (canvasWidth / rowSize < 4) {
             rowSize *= 0.5;
         }
     }
 
+    /**
+     * Updates column size dependent on current scaling to avoid to small / big columns
+     */
     private void updateColSize() {
         colSize = yScale;
-        while(coordinateSystemCanvas.getHeight() / colSize > 10) {
+        double canvasHeight = coordinateSystemCanvas.getHeight();
+        while (canvasHeight / colSize > 10) {
             colSize *= 2;
         }
-        while(coordinateSystemCanvas.getHeight() / colSize < 4) {
+        while (canvasHeight / colSize < 4) {
             colSize *= 0.5;
         }
     }
 
+
+    /**
+     * Translates canvas x-coordinate to mathematical equivalent
+     * @param xCoordinate x-coordinate to translate
+     * @return translated coordinate
+     */
     double canvasXCoordinateToMathXCoordinate(double xCoordinate) {
         double mathXCoordinate = (xCoordinate - polynomialCanvas.getWidth() / 2.0 - xOffset) / xScale;
         return Math.round(mathXCoordinate * 100) / 100.0;
     }
 
+    /**
+     * Translates canvas y-coordinate to mathematical equivalent
+     * @param yCoordinate y-coordinate to translate
+     * @return translated coordinate
+     */
     double canvasYCoordinateToMathYCoordinate(double yCoordinate) {
         double mathYCoordinate = -(yCoordinate - polynomialCanvas.getHeight() / 2.0 - yOffset) / yScale;
         return Math.round(mathYCoordinate * 100) / 100.0;
@@ -603,22 +633,14 @@ public class PolynomialController {
      * Resets scaling to default values
      */
     public void resetScaling() {
-        this.xScale = coordinateSystemCanvas.getWidth() / 10;
-        this.yScale = coordinateSystemCanvas.getHeight() / 10;
+        this.xScale = coordinateSystemCanvas.getWidth() / DEFAULT_CELL_AMOUNT;
+        this.yScale = coordinateSystemCanvas.getHeight() / DEFAULT_CELL_AMOUNT;
+        updateColSize();
+        updateRowSize();
         drawCoordinateSystem();
         polynomialGraphicsContext.clearRect(0,0,coordinateSystemCanvas.getWidth(), coordinateSystemCanvas.getHeight());
         if(polynom != null) {
             drawPolynomialToCanvas(polynom, Color.RED);
-        }
-    }
-
-    public void onKeyPressedOnCanvas(KeyEvent keyEvent) {
-        System.out.println(keyEvent.getCode());
-        switch(keyEvent.getCode()) {
-            case UP -> yOffset -= yScale;
-            case DOWN -> yOffset += yScale;
-            case LEFT -> xOffset -= xScale;
-            case RIGHT -> xOffset += xScale;
         }
     }
 }
