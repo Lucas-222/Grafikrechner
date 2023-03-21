@@ -1,6 +1,5 @@
 package com.polynomjavafx;
 
-import javafx.beans.DefaultProperty;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
@@ -24,6 +23,7 @@ public class MathCanvas extends StackPane {
     private Polynom polynom;
     private boolean showScales;
     private boolean initialised;
+    private double tickLineLength;
 
     /**
      * Set whether the axis should be shown
@@ -79,13 +79,13 @@ public class MathCanvas extends StackPane {
                 colSize = xScale;
                 drawCoordinateSystem();
             }
-        });;
+        });
         this.heightProperty().addListener(((observable, oldValue, newValue )-> {
             coordinateSystemLayer.setHeight((double) newValue);
             contentLayer.setHeight((double) newValue);
             this.yScale = contentLayer.getHeight() / DEFAULT_CELL_AMOUNT;
             this.xScale = contentLayer.getWidth() / DEFAULT_CELL_AMOUNT;
-
+            tickLineLength = this.getHeight()/100;
             rowSize = yScale;
             colSize = xScale;
             drawCoordinateSystem();
@@ -114,7 +114,10 @@ public class MathCanvas extends StackPane {
         //Calculate the value for every pixel in a loop and stroke a line from the previous point
         for (double x = ((-contentLayer.getWidth() / 2.0) - xOffset)  / xScale; x <= ((contentLayer.getWidth() / 2.0 - xOffset)) / xScale; x += stepSize) {
             double y = polynomialToDraw.functionValue(x);
-            contentGC.strokeLine(mathXCoordinateToCanvasXCoordinate(lastX), mathYCoordinateToCanvasYCoordinate(lastY), mathXCoordinateToCanvasXCoordinate(x), mathYCoordinateToCanvasYCoordinate(y));
+            contentGC.strokeLine(mathXCoordinateToCanvasXCoordinate(lastX),
+                    mathYCoordinateToCanvasYCoordinate(lastY),
+                    mathXCoordinateToCanvasXCoordinate(x),
+                    mathYCoordinateToCanvasYCoordinate(y));
 
             //Set starting point for next line as endpoint of the previous line
             lastX = x;
@@ -280,12 +283,21 @@ public class MathCanvas extends StackPane {
         double y;
         coordinateSysGC.setLineWidth(1);
         coordinateSysGC.setStroke(Color.BLACK);
+
+        //If the axis is visible, draw at the location of the axis
         if(coordinateSystemLayer.getHeight()/2  -labelHeight > yOffset && yOffset > -coordinateSystemLayer.getHeight()/2) {
-            y = coordinateSystemLayer.getHeight() / 2 + yOffset + labelHeight;
+            y = coordinateSystemLayer.getHeight() / 2 + yOffset + labelHeight + tickLineLength;
+
+            //Stroke a small line from the axis
+            coordinateSysGC.setStroke(Color.BLACK);
+            coordinateSysGC.setLineWidth(1);
+            coordinateSysGC.strokeLine(x, coordinateSystemLayer.getHeight() / 2 + yOffset, x, coordinateSystemLayer.getHeight() / 2 + yOffset + tickLineLength);
         }
+        //If the axis ist too far below, draw to the bottom of the canvas
         else if(yOffset > -coordinateSystemLayer.getHeight()/2) {
             y = coordinateSystemLayer.getHeight();
         }
+        //If the two previous conditions are false, axis is too far up, draw to the top of the canvas
         else y= labelHeight;
         coordinateSysGC.fillText(labelText, x, y);
     }
@@ -301,7 +313,12 @@ public class MathCanvas extends StackPane {
         double x;
         //If the axis is visible, draw at the location of the axis
         if( coordinateSystemLayer.getWidth()/2 > xOffset && xOffset > -coordinateSystemLayer.getWidth()/2 + labelWidth) {
-            x = coordinateSystemLayer.getWidth() / 2 + xOffset - labelWidth; // X-coordinate of the label
+            x = coordinateSystemLayer.getWidth() / 2 + xOffset - labelWidth - tickLineLength; // X-coordinate of the label
+
+            //Stroke a small line from the axis
+            coordinateSysGC.setStroke(Color.BLACK);
+            coordinateSysGC.setLineWidth(1);
+            coordinateSysGC.strokeLine(coordinateSystemLayer.getWidth() / 2 + xOffset, y, coordinateSystemLayer.getWidth() / 2 + xOffset - tickLineLength, y);
         }
         //If the axis ist too far to the left, draw to the left side of the canvas
         else if((coordinateSystemLayer.getWidth()/2 - labelWidth) > xOffset) {
@@ -330,7 +347,7 @@ public class MathCanvas extends StackPane {
                     coordinateSysGC.setStroke(Color.GRAY);
                     coordinateSysGC.setLineWidth(0.5);
                     coordinateSysGC.strokeLine(0, yCoordinate, coordinateSystemLayer.getWidth(), yCoordinate);
-                    for(double i = yCoordinate + majorScaleDistance/5; i < yCoordinate + majorScaleDistance; i+=majorScaleDistance/5) {
+                    for(double i = yCoordinate + majorScaleDistance/5; i < yCoordinate + majorScaleDistance; i+=majorScaleDistance/10) {
                         coordinateSysGC.setLineWidth(0.1);
                         coordinateSysGC.strokeLine(0, i, coordinateSystemLayer.getWidth(), i);
                     }
@@ -357,16 +374,17 @@ public class MathCanvas extends StackPane {
                     coordinateSysGC.setStroke(Color.GRAY);
                     coordinateSysGC.setLineWidth(0.5);
                     coordinateSysGC.strokeLine(xCoordinate, 0, xCoordinate, coordinateSystemLayer.getHeight());
-                    for(double i = xCoordinate + majorScaleDistance/5; i < xCoordinate + majorScaleDistance; i+=majorScaleDistance/5) {
+
+
+                    //Draw 10 small lines between this line and the next
+                    for(double i = xCoordinate + majorScaleDistance/5; i < xCoordinate + majorScaleDistance; i+=majorScaleDistance/10) {
                         coordinateSysGC.setLineWidth(0.1);
                         coordinateSysGC.strokeLine(i , 0, i, coordinateSystemLayer.getHeight());
                     }
                 }
                 if (showScales) {
                     double label = canvasXCoordinateToMathXCoordinate(xCoordinate);
-                    if (showScales) {
-                        drawXAxisLabel(Double.toString(label), xCoordinate);
-                    }
+                    drawXAxisLabel(Double.toString(label), xCoordinate);
                 }
             }
         }
