@@ -80,6 +80,24 @@ public class Polynom {
         return new Polynom(this.derivationCoefficients(), (this.derivationCounter+1));
     }
 
+    private double[] antiderivativeCoefficients() {
+        // Define the constant of integration
+        double C = this.coefficients[this.coefficients.length - 1];
+
+        // Calculate the antiderivative coefficients using the power rule
+        double[] antiderivativeCoefficients = new double[coefficients.length + 1];
+        for (int i = 0; i < coefficients.length; i++) {
+            antiderivativeCoefficients[i] = coefficients[i] / (i + 1);
+        }
+        antiderivativeCoefficients[coefficients.length] = C;
+
+        return antiderivativeCoefficients;
+    }
+
+    public Polynom antiderivationPolynom() {
+        return new Polynom(this.antiderivativeCoefficients(), 0);
+    }
+
     public ArrayList<Double> getRoots() {
         double[] startingValues = getStartingValues();
         double tol = 1.0e-6;
@@ -231,6 +249,17 @@ public class Polynom {
         }
 
         return returnList;
+    }
+
+    public double getIntegral(double x1, double x2) {
+        // get anti-derivative
+        Polynom antiDerivative = this.antiderivationPolynom();
+        // Get bigger x value
+        double biggerX = Math.max(x1, x2);
+        // Get smaller x value
+        double smallerX = Math.min(x1, x2);
+        // Get the integral
+        return Math.abs(antiDerivative.functionValue(biggerX) - antiDerivative.functionValue(smallerX));
     }
 
     private String getOperator(int i) {

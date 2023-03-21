@@ -95,6 +95,7 @@
                     <Label text="Extremstellen: " GridPane.rowIndex="5" />
                     <Label text="Wendepunkte: " GridPane.rowIndex="6" />
                     <Label text="Sattelpunkte:" GridPane.rowIndex="7" />
+                    <Label text="Integral:" GridPane.rowIndex="8" />
                     <Label fx:id="functionAsStringLabel" GridPane.columnIndex="1" />
                     <Label fx:id="symmetryLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                     <Label fx:id="degreeLabel" GridPane.columnIndex="1" GridPane.rowIndex="2" />
@@ -102,6 +103,7 @@
                     <Label fx:id="extremaLabel" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                     <Label fx:id="inflectionLabel" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                     <Label fx:id="saddleLabel" prefWidth="300" GridPane.ColumnIndex="1" GridPane.rowIndex="7" />
+                    <Label fx:id="integralLabel" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="8" />
 
                 </GridPane>
                 <Button mnemonicParsing="false" onAction="#onResetButtonClicked" prefHeight="25.0" prefWidth="180.0" text="Reset" />
