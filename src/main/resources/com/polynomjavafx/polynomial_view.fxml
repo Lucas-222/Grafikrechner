@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.polynomjavafx.*?>
 <?import javafx.geometry.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.canvas.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
 
 <AnchorPane prefHeight="606.0" prefWidth="926.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.polynomjavafx.PolynomialController">
-    <VBox alignment="CENTER" layoutY="-2.0" prefHeight="482.0" prefWidth="1057.0" spacing="5.0" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="-2.0">
+    <VBox alignment="CENTER" layoutY="-2.0" prefHeight="482.0" prefWidth="1057.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <MenuBar>
          <menus>
             <Menu mnemonicParsing="false" text="Anzeige">
@@ -63,7 +62,7 @@
             <Label fx:id="inputWarningLabel" text="Ungültige Eingabe" textFill="RED" visible="false" />
         </HBox>
 
-        <HBox prefHeight="187.0" prefWidth="881.0">
+        <HBox fx:id="infoHbox" prefHeight="407.0" prefWidth="926.0">
             <VBox.margin>
                 <Insets />
             </VBox.margin>
@@ -107,18 +106,7 @@
                 </GridPane>
                 <Button mnemonicParsing="false" onAction="#onResetButtonClicked" prefHeight="25.0" prefWidth="180.0" text="Reset" />
             </VBox>
-            <StackPane prefHeight="150.0" prefWidth="200.0">
-                <Canvas fx:id="polynomialCanvas" height="518.0" width="518.0 ">
-                    <cursor>
-                        <Cursor fx:constant="DEFAULT"/>
-                    </cursor>
-                </Canvas>
-                <Canvas fx:id="coordinateSystemCanvas" focusTraversable="true" height="518.0" onScroll="#onMouseScrolledOnCanvas" width="518.0">
-                    <cursor>
-                        <Cursor fx:constant="CROSSHAIR"/>
-                    </cursor>
-                </Canvas>
-            </StackPane>
+            <MathCanvas fx:id="mathCanvas" maxHeight="590.0" maxWidth="590.0" minHeight="590.0" minWidth="590.0" onScroll="#onMouseScrolledOnCanvas" prefHeight="590.0" prefWidth="590.0" />
         </HBox>
     </VBox>
 </AnchorPane>
