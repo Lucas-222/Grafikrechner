@@ -94,8 +94,8 @@ public class Polynom {
         return antiderivativeCoefficients;
     }
 
-    public Polynom antiderivationPolynom() {
-        return new Polynom(this.antiderivativeCoefficients(), 0);
+    public Polynom antiderivationPolynom() throws WrongInputSizeException {
+        return new Polynom(this.antiderivativeCoefficients());
     }
 
     public ArrayList<Double> getRoots() {
@@ -251,7 +251,11 @@ public class Polynom {
         return returnList;
     }
 
-    public double getIntegral(double x1, double x2) {
+    public double getIntegral(double x1, double x2) throws WrongInputSizeException {
+        if (this.getDegree() == 0) {
+            return (Math.abs(x1) + Math.abs(x2)) * this.coefficients[0];
+        }
+
         // get anti-derivative
         Polynom antiDerivative = this.antiderivationPolynom();
         // Get bigger x value
@@ -270,7 +274,7 @@ public class Polynom {
     }
 
     private String getNumber(int i) {
-        // If number is 1 --> (x) not (1x),  If number is an integer --> (3x) not (3.0x), Default --> (4.56x)
+        // If number is 1 --> (1.0) not (1.0x^0),  If number is an integer --> (3.0x) not (3.0x^1), Default --> (4.56x^2)
         return this.coefficients[i] == 1 && i >= 1 ? "" : this.coefficients[i] == Math.round(this.coefficients[i]) ? String.valueOf((int) Math.abs(this.coefficients[i])) : String.valueOf(Math.abs(this.coefficients[i]));
     }
 
