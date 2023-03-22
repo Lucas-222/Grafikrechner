@@ -6,6 +6,8 @@
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.Cursor?>
 <AnchorPane prefHeight="606.0" prefWidth="926.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.polynomjavafx.PolynomialController">
     <VBox alignment="CENTER" layoutY="-2.0" prefHeight="482.0" prefWidth="1057.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <MenuBar>
@@ -94,7 +96,13 @@
                     <Label text="Extremstellen: " GridPane.rowIndex="5" />
                     <Label text="Wendepunkte: " GridPane.rowIndex="6" />
                     <Label text="Sattelpunkte:" GridPane.rowIndex="7" />
+
+                    <!-- Integral -->
                     <Label text="Integral:" GridPane.rowIndex="8" />
+                    <!-- Text fields for input for integral -->
+                    <TextField fx:id="integralTextField1" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
+                    <TextField fx:id="integralTextField2" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
+
                     <Label fx:id="functionAsStringLabel" GridPane.columnIndex="1" />
                     <Label fx:id="symmetryLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                     <Label fx:id="degreeLabel" GridPane.columnIndex="1" GridPane.rowIndex="2" />
@@ -108,7 +116,18 @@
             <ChoiceBox fx:id="scaleChoicebox" prefHeight="34.0" prefWidth="150.0" />
                 <Button mnemonicParsing="false" onAction="#onResetButtonClicked" prefHeight="25.0" prefWidth="180.0" text="Reset" />
             </VBox>
-            <MathCanvas fx:id="mathCanvas" maxHeight="590.0" maxWidth="590.0" minHeight="590.0" minWidth="590.0" onScroll="#onMouseScrolledOnCanvas" prefHeight="590.0" prefWidth="590.0" />
+            <StackPane prefHeight="150.0" prefWidth="200.0">
+                <Canvas fx:id="polynomialCanvas" height="518.0" width="518.0 ">
+                    <cursor>
+                        <Cursor fx:constant="DEFAULT"/>
+                    </cursor>
+                </Canvas>
+                <Canvas fx:id="coordinateSystemCanvas" focusTraversable="true" height="518.0" onScroll="#onMouseScrolledOnCanvas" width="518.0">
+                    <cursor>
+                        <Cursor fx:constant="CROSSHAIR"/>
+                    </cursor>
+                </Canvas>
+            </StackPane>
         </HBox>
     </VBox>
 </AnchorPane>
