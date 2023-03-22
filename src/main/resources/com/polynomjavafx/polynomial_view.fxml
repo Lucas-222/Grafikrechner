@@ -6,36 +6,33 @@
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
 
-<?import javafx.scene.canvas.Canvas?>
-<?import javafx.scene.Cursor?>
-<AnchorPane prefHeight="606.0" prefWidth="926.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.polynomjavafx.PolynomialController">
-    <VBox alignment="CENTER" layoutY="-2.0" prefHeight="482.0" prefWidth="1057.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <MenuBar>
+<AnchorPane prefHeight="606.0" prefWidth="1064.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.polynomjavafx.PolynomialController">
+    <VBox alignment="TOP_CENTER" layoutY="-2.0" prefHeight="606.0" prefWidth="1064.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <MenuBar prefHeight="12.0" prefWidth="974.0">
             <Menu mnemonicParsing="false" text="Anzeige">
                 <RadioMenuItem fx:id="gridToggleMenuItem" mnemonicParsing="false" text="Gitter">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="G" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                        <KeyCodeCombination alt="UP" code="G" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </RadioMenuItem>
                 <RadioMenuItem fx:id="axisToggleMenuItem" mnemonicParsing="false" text="Achsen">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="K" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                        <KeyCodeCombination alt="UP" code="K" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </RadioMenuItem>
                 <RadioMenuItem fx:id="axisScalesMenuItemToggle" mnemonicParsing="false" text="Achsenbeschriftung">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="L" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                        <KeyCodeCombination alt="UP" code="L" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </RadioMenuItem>
-                <MenuItem fx:id="returnToOriginMenuItem" mnemonicParsing="false" onAction="#returnToOrigin"
-                          text="Zurück zum Ursprung">
+                <MenuItem fx:id="returnToOriginMenuItem" mnemonicParsing="false" onAction="#returnToOrigin" text="Zurück zum Ursprung">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="U" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                        <KeyCodeCombination alt="UP" code="U" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </MenuItem>
                 <MenuItem mnemonicParsing="false" onAction="#resetScaling" text="Skalierung zurücksetzen">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="R" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                        <KeyCodeCombination alt="UP" code="R" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </MenuItem>
             </Menu>
@@ -62,11 +59,11 @@
             </padding>
         </HBox>
 
-        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+        <HBox alignment="CENTER" prefHeight="58.0" prefWidth="926.0">
             <Label fx:id="inputWarningLabel" text="Ungültige Eingabe" textFill="RED" visible="false" />
         </HBox>
 
-        <HBox fx:id="infoHbox" prefHeight="407.0" prefWidth="926.0">
+        <HBox fx:id="infoHbox" prefHeight="494.0" prefWidth="1136.0">
             <VBox.margin>
                 <Insets />
             </VBox.margin>
@@ -86,6 +83,7 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints />
                     </rowConstraints>
 
                     <Label alignment="TOP_LEFT" snapToPixel="false" text="Funktion:" />
@@ -100,8 +98,8 @@
                     <!-- Integral -->
                     <Label text="Integral:" GridPane.rowIndex="8" />
                     <!-- Text fields for input for integral -->
-                    <TextField fx:id="integralTextField1" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
-                    <TextField fx:id="integralTextField2" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
+                    <TextField fx:id="integralTextField1" GridPane.columnIndex="0" GridPane.rowIndex="9" />
+                    <TextField fx:id="integralTextField2" GridPane.columnIndex="1" GridPane.rowIndex="9" />
 
                     <Label fx:id="functionAsStringLabel" GridPane.columnIndex="1" />
                     <Label fx:id="symmetryLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" />
@@ -116,18 +114,7 @@
             <ChoiceBox fx:id="scaleChoicebox" prefHeight="34.0" prefWidth="150.0" />
                 <Button mnemonicParsing="false" onAction="#onResetButtonClicked" prefHeight="25.0" prefWidth="180.0" text="Reset" />
             </VBox>
-            <StackPane prefHeight="150.0" prefWidth="200.0">
-                <Canvas fx:id="polynomialCanvas" height="518.0" width="518.0 ">
-                    <cursor>
-                        <Cursor fx:constant="DEFAULT"/>
-                    </cursor>
-                </Canvas>
-                <Canvas fx:id="coordinateSystemCanvas" focusTraversable="true" height="518.0" onScroll="#onMouseScrolledOnCanvas" width="518.0">
-                    <cursor>
-                        <Cursor fx:constant="CROSSHAIR"/>
-                    </cursor>
-                </Canvas>
-            </StackPane>
+            <MathCanvas fx:id="mathCanvas" maxHeight="500.0" maxWidth="500.0" minHeight="500.0" minWidth="500.0" onScroll="#onMouseScrolledOnCanvas" prefHeight="500.0" prefWidth="500.0" />
         </HBox>
     </VBox>
 </AnchorPane>

@@ -7,7 +7,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
 import java.util.ArrayList;
@@ -41,7 +40,6 @@ public class PolynomialController {
     public RadioMenuItem axisScalesMenuItemToggle;
     public MenuItem returnToOriginMenuItem;
     public HBox infoHbox;
-    public Label integralLabel;
     public ChoiceBox<String> scaleChoicebox;
     private Polynom polynom;
     @FXML
@@ -342,15 +340,9 @@ public class PolynomialController {
         double area = polynom.getIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
         System.out.println(area);
         integralLabel.setText(String.valueOf(area));
-        drawIntegral();
+        mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
     }
 
-    private void drawIntegral() {
-        polynomialGraphicsContext.setStroke(Color.BLUE);
-        for (double start = Double.parseDouble(integralTextField1.getText()); start < Double.parseDouble(integralTextField2.getText()); start += 0.01) {
-            polynomialGraphicsContext.strokeLine(mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(0.0), mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(polynom.functionValue(start)));
-        }
-    }
 
     private void showInflectionPoints() {
         try {

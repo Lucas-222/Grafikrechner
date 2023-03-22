@@ -430,4 +430,12 @@ public class MathCanvas extends StackPane {
         updateRowSize();
         drawCoordinateSystem();
     }
+
+
+    public void drawIntegral(double start, double end) {
+        contentGC.setStroke(Color.BLUE);
+        for (; start < end; start += 0.01) {
+            contentGC.strokeLine(mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(0.0), mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(polynom.functionValue(start)));
+        }
+    }
 }

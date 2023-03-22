@@ -1,6 +1,7 @@
 package com.polynomjavafx;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Polynom {
@@ -90,7 +91,7 @@ public class Polynom {
             antiderivativeCoefficients[i] = coefficients[i] / (i + 1);
         }
         antiderivativeCoefficients[coefficients.length] = c;
-
+        System.out.println(Arrays.toString(antiderivativeCoefficients));
         return antiderivativeCoefficients;
     }
 
