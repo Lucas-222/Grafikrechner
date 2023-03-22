@@ -22,38 +22,12 @@ public class MathCanvas extends StackPane {
     private boolean showGrid;
     private Polynom polynom;
     private boolean showScales;
-    private boolean initialised;
     private double tickLineLength;
-
-    /**
-     * Set whether the axis should be shown
-     * @param showAxis value to set to
-     */
-    public void setShowAxis(boolean showAxis) {
-        this.showAxis = showAxis;
-    }
-
-    /**
-     * Set whether the grid of the coordinateSystem should be shown
-     * @param showGrid value to set to
-     */
-    public void setShowGrid(boolean showGrid) {
-        this.showGrid = showGrid;
-    }
-
-    /**
-     * Set whether the Labels that mark scales on the coordinate system should be shown
-     * @param showScales value to set to
-     */
-    public void setShowScales(boolean showScales) {
-        this.showScales = showScales;
-    }
-
-
+    private double xAxisPosition;
+    private double yAxisPosition;
 
     public MathCanvas() {
         super();
-        initialised = false;
 
         this.contentLayer = new Canvas();
         this.coordinateSystemLayer = new Canvas();
@@ -68,17 +42,10 @@ public class MathCanvas extends StackPane {
         showScales = true;
         showAxis = true;
 
+        //Add change listeners to keep size of child elements consisten with parten
         this.widthProperty().addListener((observable, oldValue, newValue) -> {
             coordinateSystemLayer.setWidth((double)newValue);
             contentLayer.setWidth((double)newValue);
-            if(initialised) {
-                this.yScale = contentLayer.getHeight() / DEFAULT_CELL_AMOUNT;
-                this.xScale = contentLayer.getWidth() / DEFAULT_CELL_AMOUNT;
-
-                rowSize = yScale;
-                colSize = xScale;
-                drawCoordinateSystem();
-            }
         });
         this.heightProperty().addListener(((observable, oldValue, newValue )-> {
             coordinateSystemLayer.setHeight((double) newValue);
@@ -88,6 +55,10 @@ public class MathCanvas extends StackPane {
             tickLineLength = this.getHeight()/100;
             rowSize = yScale;
             colSize = xScale;
+
+            xAxisPosition = mathYCoordinateToCanvasYCoordinate(0);
+            yAxisPosition = mathXCoordinateToCanvasXCoordinate(0);
+
             drawCoordinateSystem();
         } ));
 
@@ -96,8 +67,36 @@ public class MathCanvas extends StackPane {
         this.xOffset = 0;
         this.yOffset = 0;
 
-        initialised = true;
     }
+
+    /**
+     * Set whether the axis should be shown
+     * @param showAxis value to set to
+     */
+    public void setShowAxis(boolean showAxis) {
+        this.showAxis = showAxis;
+        drawCoordinateSystem();
+    }
+
+    /**
+     * Set whether the grid of the coordinateSystem should be shown
+     * @param showGrid value to set to
+     */
+    public void setShowGrid(boolean showGrid) {
+        this.showGrid = showGrid;
+        drawCoordinateSystem();
+    }
+
+    /**
+     * Set whether the Labels that mark scales on the coordinate system should be shown
+     * @param showScales value to set to
+     */
+    public void setShowScales(boolean showScales) {
+        this.showScales = showScales;
+        drawCoordinateSystem();
+    }
+
+
 
     public void drawPolynomial(Polynom polynomialToDraw, Color color) {
         this.polynom = polynomialToDraw;
@@ -331,6 +330,7 @@ public class MathCanvas extends StackPane {
         coordinateSysGC.fillText(labelText, x, y);
     }
 
+
     /**
      * Draws the horizontal lines of the coordinate system
      */
@@ -338,7 +338,7 @@ public class MathCanvas extends StackPane {
         double majorScaleDistance = colSize; //The pixel amount between major scales
         //Set color and width of the lines to stroke
         double scrollingOffset = yOffset % majorScaleDistance; //The offset of the first line coordinates created by the y-offset
-        double scalingOffset = coordinateSystemLayer.getHeight() / 2 % majorScaleDistance; //The offset created by the scale distance. Without this, the axis and grid could go out of alignment
+        double scalingOffset = xAxisPosition % majorScaleDistance; //The offset created by the scale distance. Without this, the axis and grid could go out of alignment
         //Only start loop if labels or gird are supposed to be shown
         if(showGrid || showScales){
             for(double yCoordinate = scrollingOffset + scalingOffset; yCoordinate <= coordinateSystemLayer.getHeight(); yCoordinate += majorScaleDistance) {
@@ -393,20 +393,41 @@ public class MathCanvas extends StackPane {
      * Draws the axis onto the coordinate system canvas
      */
     private void drawAxis() {
-        double originX = (coordinateSystemLayer.getWidth() / 2) + xOffset;
-        double originY = (coordinateSystemLayer.getHeight() / 2) + yOffset;
+        double yAxisPos = yAxisPosition + xOffset;
+        double xAxisPos = xAxisPosition + yOffset;
         coordinateSysGC.setStroke(Color.BLACK);
         coordinateSysGC.setLineWidth(1.0);
 
         //Draw x-axis
-        coordinateSysGC.strokeLine(0, originY, contentLayer.getWidth(), originY);
+        coordinateSysGC.strokeLine(0, xAxisPos, contentLayer.getWidth(), xAxisPos);
 
         //Draw y-axis
-        coordinateSysGC.strokeLine(originX, contentLayer.getHeight(), originX, 0);
+        coordinateSysGC.strokeLine(yAxisPos, contentLayer.getHeight(), yAxisPos, 0);
     }
 
     //Clears the content displayed on the canvas
     public void reset() {
         this.contentGC.clearRect(0,0, contentLayer.getWidth(), contentLayer.getHeight());
+    }
+
+    public void setRange(double start, double end) throws InvalidRangeException {
+        if(start >= end) {
+            throw new InvalidRangeException(start, end);
+        }
+
+        double range = Math.abs(end - start);
+        //Set scale to be able to display range
+        this.xScale = this.getWidth()/range;
+        this.yScale = this.getHeight()/range;
+
+
+        double offset = Math.abs(start) - Math.abs(end);
+        xOffset = offset * xScale;
+
+
+        this.yOffset = 0;
+        updateColSize();
+        updateRowSize();
+        drawCoordinateSystem();
     }
 }
