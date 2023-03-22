@@ -7,7 +7,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Path;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
@@ -37,7 +36,6 @@ public class PolynomialController {
     public Label integralLabel;
     public TextField integralTextField1;
     public TextField integralTextField2;
-    public Canvas coordinateSystemCanvas;
     public RadioMenuItem gridToggleMenuItem;
     public RadioMenuItem axisToggleMenuItem;
     public RadioMenuItem axisScalesMenuItemToggle;
@@ -198,16 +196,24 @@ public class PolynomialController {
         }
     }
 
-
     @FXML
-    private void onResetButtonClicked() throws WrongInputSizeException {
-        this.polynom = new Polynom(new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+    private void onResetButtonClicked() {
+        this.polynom = null;
         initializeSpinners();
         mathCanvas.reset();
         inputWarningLabel.setVisible(false);
         symmetryLabel.setVisible(false);
         rootLabel.setVisible(false);
         this.showExtrema();
+        inputWarningLabel.setText("");
+        symmetryLabel.setText("");
+        rootLabel.setText("");
+        degreeLabel.setText("");
+        integralLabel.setText("");
+        extremaLabel.setText("");
+        inflectionLabel.setText("");
+        saddleLabel.setText("");
+        functionAsStringLabel.setText("");
     }
 
     private void addChangeListenerToIntegralInput(TextField integralInput) {
@@ -255,7 +261,11 @@ public class PolynomialController {
                 return;
             }
 
-            showIntegral();
+            try {
+                showIntegral();
+            } catch (WrongInputSizeException e) {
+                e.printStackTrace();
+            }
         });
 
     }
@@ -323,12 +333,12 @@ public class PolynomialController {
             extremaLabel.setText(labelText.toString());
 
         } catch (ArithmeticException | ComputationFailedException e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
             extremaLabel.setText("Keine Extrempunkte");
         }
     }
 
-    private void showIntegral() {
+    private void showIntegral() throws WrongInputSizeException {
         double area = polynom.getIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
         System.out.println(area);
         integralLabel.setText(String.valueOf(area));
@@ -336,9 +346,8 @@ public class PolynomialController {
     }
 
     private void drawIntegral() {
-        polynomialGraphicsContext.setFill(Color.BLUE);
+        polynomialGraphicsContext.setStroke(Color.BLUE);
         for (double start = Double.parseDouble(integralTextField1.getText()); start < Double.parseDouble(integralTextField2.getText()); start += 0.01) {
-            System.out.println(start);
             polynomialGraphicsContext.strokeLine(mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(0.0), mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(polynom.functionValue(start)));
         }
     }
@@ -361,7 +370,7 @@ public class PolynomialController {
             inflectionLabel.setText(labelText.toString());
 
         } catch (ArithmeticException e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
             inflectionLabel.setText("Keine Wendepunkte");
         } catch (ComputationFailedException e) {
             throw new RuntimeException(e);
@@ -386,7 +395,7 @@ public class PolynomialController {
             saddleLabel.setText(labelText.toString());
 
         } catch (ArithmeticException e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
             saddleLabel.setText("Keine Sattelpunkte");
         } catch (ComputationFailedException e) {
             throw new RuntimeException(e);
