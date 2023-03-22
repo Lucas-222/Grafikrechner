@@ -1,17 +1,14 @@
 package com.polynomjavafx;
 
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Path;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
@@ -37,6 +34,9 @@ public class PolynomialController {
     public Label extremaLabel;
     public Label inflectionLabel;
     public Label saddleLabel;
+    public Label integralLabel;
+    public TextField integralTextField1;
+    public TextField integralTextField2;
     public Canvas coordinateSystemCanvas;
     public RadioMenuItem gridToggleMenuItem;
     public RadioMenuItem axisToggleMenuItem;
@@ -123,9 +123,6 @@ public class PolynomialController {
             else return null;
         };
 
-
-
-
         //Loop that iterates trough spinners for less code repetition
         for (int i = 0; i < spinners.size(); i++) {
             TextFormatter<Double> textFormatter = new TextFormatter<>(stringConverter, 0.0 , filter);
@@ -154,8 +151,11 @@ public class PolynomialController {
             }
 
         }
-    }
 
+        addChangeListenerToIntegralInput(integralTextField1);
+        addChangeListenerToIntegralInput(integralTextField2);
+
+    }
 
     private void initializeVisuals() {
         //Booleans for showing / hiding parts of the coordinate system
@@ -182,6 +182,8 @@ public class PolynomialController {
 
         drawCoordinateSystem();
     }
+
+
 
     @FXML
     private void onSubmitButtonClicked() {
@@ -216,7 +218,6 @@ public class PolynomialController {
         }
     }
 
-
     @FXML
     private void onResetButtonClicked() throws WrongInputSizeException {
         this.polynom = new Polynom(new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
@@ -228,6 +229,55 @@ public class PolynomialController {
         polynomialGraphicsContext.clearRect(0.0, 0.0, polynomialCanvas.getWidth(), polynomialCanvas.getHeight());
     }
 
+    private void addChangeListenerToIntegralInput(TextField integralInput) {
+        ArrayList<Character> validCharacters = new ArrayList<>(List.of('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '-'));
+        integralInput.textProperty().addListener((observable, oldValue, newValue) -> {
+            // If change contains illegal character reset the field to old value
+            for (int i = 0; i < newValue.length(); i++) {
+                if (!validCharacters.contains(newValue.charAt(i))) {
+                    integralLabel.setText(oldValue);
+                    break;
+                }
+            }
+
+            // check for multiple decimal points
+            int count = 0;
+            for (int i = 0; i < newValue.length(); i++) {
+                // Count the numbers of decimal points
+                if (newValue.charAt(i) == '.') count++;
+
+                // If there is more than one decimal point delete it
+                if (count > 1) {
+                    integralLabel.setText(oldValue);
+                    break;
+                }
+            }
+
+            // Check for minus sign
+            for (int i = 0; i < newValue.length(); i++) {
+                // If there is more than one minus sign delete it
+                if (newValue.charAt(i) == '-' && i != 0) {
+                    integralLabel.setText(oldValue);
+                    break;
+                }
+            }
+
+            if (polynom == null) {
+                return;
+            }
+
+            if (integralTextField1.getText().equals("") || integralTextField2.getText().equals("")) {
+                return;
+            }
+
+            if (integralTextField1.getText().equals(integralTextField2.getText())) {
+                return;
+            }
+
+            showIntegral();
+        });
+
+    }
 
     /**
      * Draws Polynomial onto canvas in given color
@@ -314,7 +364,7 @@ public class PolynomialController {
         if (roots.size() == 0) {
             rootLabel.setText("Keine Nullstellen");
         } else {
-            rootLabel.setText("Nullstellen: " + roots);
+            rootLabel.setText(roots.toString());
         }
 
     }
@@ -340,6 +390,21 @@ public class PolynomialController {
         } catch (ArithmeticException | ComputationFailedException e) {
             System.out.println(e);
             extremaLabel.setText("Keine Extrempunkte");
+        }
+    }
+
+    private void showIntegral() {
+        double area = polynom.getIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
+        System.out.println(area);
+        integralLabel.setText(String.valueOf(area));
+        drawIntegral();
+    }
+
+    private void drawIntegral() {
+        polynomialGraphicsContext.setFill(Color.BLUE);
+        for (double start = Double.parseDouble(integralTextField1.getText()); start < Double.parseDouble(integralTextField2.getText()); start += 0.01) {
+            System.out.println(start);
+            polynomialGraphicsContext.strokeLine(mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(0.0), mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(polynom.functionValue(start)));
         }
     }
 

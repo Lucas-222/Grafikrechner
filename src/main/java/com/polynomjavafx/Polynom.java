@@ -82,14 +82,14 @@ public class Polynom {
 
     private double[] antiderivativeCoefficients() {
         // Define the constant of integration
-        double C = this.coefficients[this.coefficients.length - 1];
+        double c = this.coefficients[this.coefficients.length - 1];
 
         // Calculate the antiderivative coefficients using the power rule
         double[] antiderivativeCoefficients = new double[coefficients.length + 1];
         for (int i = 0; i < coefficients.length; i++) {
             antiderivativeCoefficients[i] = coefficients[i] / (i + 1);
         }
-        antiderivativeCoefficients[coefficients.length] = C;
+        antiderivativeCoefficients[coefficients.length] = c;
 
         return antiderivativeCoefficients;
     }
