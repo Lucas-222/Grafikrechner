@@ -219,7 +219,7 @@ public class PolynomialController {
             // If change contains illegal character reset the field to old value
             for (int i = 0; i < newValue.length(); i++) {
                 if (!validCharacters.contains(newValue.charAt(i))) {
-                    integralLabel.setText(oldValue);
+                    integralInput.setText(oldValue);
                     break;
                 }
             }
@@ -401,8 +401,7 @@ public class PolynomialController {
         if(scrollEvent.isControlDown()) {
             double delta = scrollEvent.getDeltaY()/10;
             mathCanvas.changeScale(delta, delta);
-        }
-        else {
+        } else {
             mathCanvas.scroll(scrollEvent.getDeltaX(),scrollEvent.getDeltaY());
         }
         scaleChoicebox.setValue("");
