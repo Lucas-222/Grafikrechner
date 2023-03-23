@@ -95,8 +95,8 @@ public class Polynom {
         return antiderivativeCoefficients;
     }
 
-    public Polynom antiderivationPolynom() throws WrongInputSizeException {
-        return new Polynom(this.antiderivativeCoefficients());
+    public Polynom antiderivationPolynom() {
+        return new Polynom(this.antiderivativeCoefficients(), 0);
     }
 
     public ArrayList<Double> getRoots() {
@@ -252,7 +252,7 @@ public class Polynom {
         return returnList;
     }
 
-    public double getIntegral(double x1, double x2) throws WrongInputSizeException {
+    public double getIntegral(double x1, double x2) {
         if (this.getDegree() == 0) {
             return (Math.abs(x1) + Math.abs(x2)) * this.coefficients[0];
         }

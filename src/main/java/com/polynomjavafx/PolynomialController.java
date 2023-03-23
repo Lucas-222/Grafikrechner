@@ -308,7 +308,7 @@ public class PolynomialController {
         if (roots.size() == 0) {
             rootLabel.setText("Keine Nullstellen");
         } else {
-            rootLabel.setText("Nullstellen: " + roots);
+            rootLabel.setText(roots.toString());
         }
 
     }
