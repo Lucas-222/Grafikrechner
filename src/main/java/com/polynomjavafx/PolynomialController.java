@@ -199,10 +199,9 @@ public class PolynomialController {
         this.polynom = null;
         initializeSpinners();
         mathCanvas.reset();
-        inputWarningLabel.setVisible(false);
-        symmetryLabel.setVisible(false);
-        rootLabel.setVisible(false);
-        this.showExtrema();
+        inputWarningLabel.setText("");
+        symmetryLabel.setText("");
+        rootLabel.setText("");
         inputWarningLabel.setText("");
         symmetryLabel.setText("");
         rootLabel.setText("");
@@ -233,7 +232,7 @@ public class PolynomialController {
 
                 // If there is more than one decimal point delete it
                 if (count > 1) {
-                    integralLabel.setText(oldValue);
+                    integralInput.setText(oldValue);
                     break;
                 }
             }
@@ -242,12 +241,16 @@ public class PolynomialController {
             for (int i = 0; i < newValue.length(); i++) {
                 // If there is more than one minus sign delete it
                 if (newValue.charAt(i) == '-' && i != 0) {
-                    integralLabel.setText(oldValue);
+                    integralInput.setText(oldValue);
                     break;
                 }
             }
 
             if (polynom == null) {
+                return;
+            }
+
+            if (integralInput.getText().equals("-") || integralInput.getText().equals(".") || integralInput.getText().equals("-.")) {
                 return;
             }
 
@@ -337,16 +340,15 @@ public class PolynomialController {
     }
 
     private void showIntegral() throws WrongInputSizeException {
+        resetScaling();
         double area = polynom.getIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
         System.out.println(area);
         integralLabel.setText(String.valueOf(area));
         mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
     }
 
-
     private void showInflectionPoints() {
         try {
-
             ArrayList<double[]> inflectionArray = polynom.getInflectionPoints();
             StringBuilder labelText = new StringBuilder();
 
