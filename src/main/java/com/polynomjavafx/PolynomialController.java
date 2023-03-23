@@ -6,7 +6,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 import javafx.util.StringConverter;
 
 import java.util.ArrayList;
@@ -41,7 +40,8 @@ public class PolynomialController {
     public MenuItem returnToOriginMenuItem;
     public HBox infoHbox;
     public ChoiceBox<String> scaleChoicebox;
-    private Polynom polynom;
+    private ArrayList<Polynomial> polynomialArray;
+    private Polynomial selectedPolynomial;
     @FXML
     private MathCanvas mathCanvas;
 
@@ -50,6 +50,7 @@ public class PolynomialController {
         initializeVisuals();
         initializeSpinners();
         initializeMenuItems();
+        initializePolynomials();
         scaleChoicebox.getItems().add("-5 bis 5");
         scaleChoicebox.getItems().add("-10 bis 10");
         scaleChoicebox.getItems().add("-50 bis 50");
@@ -74,6 +75,20 @@ public class PolynomialController {
             }
 
         });
+    }
+
+    /**
+     * drawPolynomials each time a polynomial is submitted
+     */
+    private void drawPolynomials() {
+        for (Polynomial p : polynomialArray) {
+            this.mathCanvas.drawPolynomial(p);
+            this.showAttributes(p);
+        }
+    }
+
+    private void initializePolynomials() {
+        polynomialArray = mathCanvas.polynomialArray;
     }
 
     private void initializeMenuItems() {
@@ -153,8 +168,8 @@ public class PolynomialController {
 
         }
 
-        addChangeListenerToIntegralInput(integralTextField1);
-        addChangeListenerToIntegralInput(integralTextField2);
+        // addChangeListenerToIntegralInput(integralTextField1);
+        // addChangeListenerToIntegralInput(integralTextField2);
 
     }
 
@@ -173,31 +188,32 @@ public class PolynomialController {
                     coefficient2Spinner.getValue(), coefficient3Spinner.getValue(),
                     coefficient4Spinner.getValue(), coefficient5Spinner.getValue()};
 
-            polynom = new Polynom(coefficients);
-            // show information about polynomial
-            showFunctionAsString();
-            showDegree();
-
-            // show symmetry and roots if degree is <= 3
-            if (polynom.getDegree() <= 3) {
-                showSymmetry();
-                showRoots();
-                showExtrema();
-                showInflectionPoints();
-                showSaddlePoints();
-            }
-
-            inputWarningLabel.setVisible(false);
-            mathCanvas.drawPolynomial(polynom, Color.RED);
+            this.mathCanvas.polynomialArray.add(new Polynomial(coefficients));
+            this.inputWarningLabel.setVisible(false);
+            this.drawPolynomials();
         } catch (WrongInputSizeException inputSizeException) {
-            inputWarningLabel.setVisible(true);
+            this.inputWarningLabel.setVisible(true);
         }
     }
 
+    /**
+     * (selectively) show attributes for each polynomial in array
+     */
+    private void showAttributes(Polynomial p) {
+        // show information about polynomial
+        showFunctionAsString(p);
+        showDegree(p);
+        // show symmetry and roots if degree is <= 3
+        if (p.getDegree() <= 3) {
+            showSymmetry(p);
+            showRoots(p);
+            showExtrema(p);
+            showInflectionPoints(p);
+            showSaddlePoints(p);
+        }
+    }
     @FXML
     private void onResetButtonClicked() {
-        this.polynom = null;
-        initializeSpinners();
         mathCanvas.reset();
         inputWarningLabel.setText("");
         symmetryLabel.setText("");
@@ -211,6 +227,9 @@ public class PolynomialController {
         inflectionLabel.setText("");
         saddleLabel.setText("");
         functionAsStringLabel.setText("");
+
+        initializeSpinners();
+        initializePolynomials();
     }
 
     private void addChangeListenerToIntegralInput(TextField integralInput) {
@@ -246,7 +265,7 @@ public class PolynomialController {
                 }
             }
 
-            if (polynom == null) {
+            if (polynomialArray.isEmpty()) {
                 return;
             }
 
@@ -263,7 +282,7 @@ public class PolynomialController {
             }
 
             try {
-                showIntegral();
+                showIntegral(selectedPolynomial);
             } catch (WrongInputSizeException e) {
                 e.printStackTrace();
             }
@@ -271,22 +290,22 @@ public class PolynomialController {
 
     }
 
-    private void showFunctionAsString() {
-        String function = polynom.toString();
+    private void showFunctionAsString(Polynomial polynomial) {
+        String function = polynomial.toString();
         functionAsStringLabel.setText(function);
     }
 
-    private void showDegree() {
-        int degree = polynom.getDegree();
+    private void showDegree(Polynomial polynomial) {
+        int degree = polynomial.getDegree();
         degreeLabel.setText(String.valueOf(degree));
     }
 
-    private void showSymmetry() {
+    private void showSymmetry(Polynomial polynomial) {
         String symmetry;
 
-        if (polynom.isAxisSymmetric()) {
+        if (polynomial.isAxisSymmetric()) {
             symmetry = "Achsymmetrisch";
-        } else if (polynom.isPointSymmetric()) {
+        } else if (polynomial.isPointSymmetric()) {
             symmetry = "Punktsymmetrisch";
         } else {
             symmetry = "Keine Symmetrie";
@@ -295,15 +314,15 @@ public class PolynomialController {
         symmetryLabel.setText(symmetry);
     }
 
-    private void showRoots() {
-        ArrayList<Double> roots = polynom.getRoots();
+    private void showRoots(Polynomial polynomial) {
+        ArrayList<Double> roots = polynomial.getRoots();
 
         // draw roots
         for (Double root : roots) {
             mathCanvas.highlightPoint(root, 0);
         }
 
-        if (polynom.getDegree() > 3) {
+        if (polynomial.getDegree() > 3) {
             rootLabel.setText("Grad zu hoch");
             return;
         }
@@ -316,10 +335,10 @@ public class PolynomialController {
 
     }
 
-    private void showExtrema() {
+    private void showExtrema(Polynomial polynomial) {
         try {
 
-            ArrayList<double[]> extremaArray = polynom.getExtrema();
+            ArrayList<double[]> extremaArray = polynomial.extrema;
             StringBuilder labelText = new StringBuilder();
 
             if (extremaArray.size() == 0) {
@@ -333,23 +352,23 @@ public class PolynomialController {
 
             extremaLabel.setText(labelText.toString());
 
-        } catch (ArithmeticException | ComputationFailedException e) {
+        } catch (ArithmeticException e) {
             System.out.println(e.getMessage());
             extremaLabel.setText("Keine Extrempunkte");
         }
     }
 
-    private void showIntegral() throws WrongInputSizeException {
+    private void showIntegral(Polynomial polynomial) throws WrongInputSizeException {
         resetScaling();
-        double area = polynom.getIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
+        double area = polynomial.getIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
         System.out.println(area);
         integralLabel.setText(String.valueOf(area));
-        mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
+        // mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
     }
 
-    private void showInflectionPoints() {
+    private void showInflectionPoints(Polynomial polynomial) {
         try {
-            ArrayList<double[]> inflectionArray = polynom.getInflectionPoints();
+            ArrayList<double[]> inflectionArray = polynomial.inflections;
             StringBuilder labelText = new StringBuilder();
 
             if (inflectionArray.size() == 0) {
@@ -366,19 +385,17 @@ public class PolynomialController {
         } catch (ArithmeticException e) {
             System.out.println(e.getMessage());
             inflectionLabel.setText("Keine Wendepunkte");
-        } catch (ComputationFailedException e) {
-            throw new RuntimeException(e);
         }
+
     }
 
-    private void showSaddlePoints() {
+    private void showSaddlePoints(Polynomial polynomial) {
         try {
-
-            ArrayList<double[]> saddleArray = polynom.getSaddlePoints();
+            ArrayList<double[]> saddleArray = polynomial.saddles;
             StringBuilder labelText = new StringBuilder();
 
             if (saddleArray.size() == 0) {
-                saddleLabel.setText("Keine Sattelpunkte");
+                labelText.append("Keine Sattelpunkte");
             }
 
             for (double[] saddlePoint : saddleArray) {
@@ -391,27 +408,29 @@ public class PolynomialController {
         } catch (ArithmeticException e) {
             System.out.println(e.getMessage());
             saddleLabel.setText("Keine Sattelpunkte");
-        } catch (ComputationFailedException e) {
-            throw new RuntimeException(e);
         }
     }
 
 
     public void onMouseScrolledOnCanvas(ScrollEvent scrollEvent) {
-        if(scrollEvent.isControlDown()) {
+        if (scrollEvent.isControlDown()) {
             double delta = scrollEvent.getDeltaY()/10;
             mathCanvas.changeScale(delta, delta);
         } else {
-            mathCanvas.scroll(scrollEvent.getDeltaX(),scrollEvent.getDeltaY());
+            mathCanvas.scroll(scrollEvent.getDeltaX(), scrollEvent.getDeltaY());
         }
+        this.drawPolynomials();
         scaleChoicebox.setValue("");
     }
 
-    public void resetScaling() {
+    public void resetScaling()
+    {
         mathCanvas.resetScaling();
+        this.drawPolynomials();
     }
 
     public void returnToOrigin() {
         mathCanvas.returnToOrigin();
+        this.drawPolynomials();
     }
 }

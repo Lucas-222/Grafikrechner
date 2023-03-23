@@ -1,5 +1,7 @@
 package com.polynomjavafx;
 
+import java.util.ArrayList;
+
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
@@ -20,7 +22,7 @@ public class MathCanvas extends StackPane {
     private final double DEFAULT_CELL_AMOUNT;
     private boolean showAxis;
     private boolean showGrid;
-    private Polynom polynom;
+    ArrayList<Polynomial> polynomialArray;
     private boolean showScales;
     private double tickLineLength;
     private double xAxisPosition;
@@ -37,12 +39,14 @@ public class MathCanvas extends StackPane {
         this.getChildren().add(coordinateSystemLayer);
         DEFAULT_CELL_AMOUNT = 10;
 
+        this.polynomialArray = new ArrayList<>(10);
+
         //Booleans for showing / hiding parts of the coordinate system
         showGrid = true;
         showScales = true;
         showAxis = true;
 
-        //Add change listeners to keep size of child elements consisten with parten
+        //Add change listeners to keep size of child elements consistent with parten
         this.widthProperty().addListener((observable, oldValue, newValue) -> {
             coordinateSystemLayer.setWidth((double)newValue);
             contentLayer.setWidth((double)newValue);
@@ -67,6 +71,15 @@ public class MathCanvas extends StackPane {
         this.xOffset = 0;
         this.yOffset = 0;
 
+    }
+
+    /**
+     * redraw polynomials after parameter adjustment
+     */
+    public void drawPolynomials() {
+        for (Polynomial p : polynomialArray) {
+            drawPolynomial(p);
+        }
     }
 
     /**
@@ -96,11 +109,9 @@ public class MathCanvas extends StackPane {
         drawCoordinateSystem();
     }
 
+    public void drawPolynomial(Polynomial polynomialToDraw) {
+        contentGC.setStroke(polynomialToDraw.polyColor);
 
-
-    public void drawPolynomial(Polynom polynomialToDraw, Color color) {
-        this.polynom = polynomialToDraw;
-        contentGC.setStroke(color);
         double polynomialWidth = 1.0;
         contentGC.setLineWidth(polynomialWidth);
         //Set step size so the function value is calculated for every pixel on the canvas
@@ -134,9 +145,8 @@ public class MathCanvas extends StackPane {
         xOffset += deltaX;
         yOffset += deltaY;
         drawCoordinateSystem();
-        if(polynom != null) {
+        if (polynomialArray.get(0) != null) {
             contentGC.clearRect(0, 0, contentLayer.getWidth(), contentLayer.getHeight());
-            drawPolynomial(polynom, Color.RED);
         }
     }
 
@@ -151,9 +161,8 @@ public class MathCanvas extends StackPane {
         updateRowSize();
         updateColSize();
         drawCoordinateSystem();
-        if(polynom != null) {
+        if (polynomialArray.get(0) != null) {
             contentGC.clearRect(0, 0, contentLayer.getWidth(), contentLayer.getHeight());
-            drawPolynomial(polynom, Color.RED);
         }
     }
 
@@ -237,9 +246,8 @@ public class MathCanvas extends StackPane {
         this.xOffset = 0;
         this.yOffset = 0;
         drawCoordinateSystem();
-        if(polynom != null) {
+        if (polynomialArray.get(0) != null) {
             contentGC.clearRect(0, 0, contentLayer.getWidth(), contentLayer.getHeight());
-            drawPolynomial(polynom, Color.RED);
         }
     }
 
@@ -252,9 +260,8 @@ public class MathCanvas extends StackPane {
         updateColSize();
         updateRowSize();
         drawCoordinateSystem();
-        contentGC.clearRect(0,0,coordinateSystemLayer.getWidth(), coordinateSystemLayer.getHeight());
-        if(polynom != null) {
-            drawPolynomial(polynom, Color.RED);
+        if (polynomialArray.get(0) != null) {
+            contentGC.clearRect(0,0,coordinateSystemLayer.getWidth(), coordinateSystemLayer.getHeight());
         }
     }
 
@@ -408,6 +415,7 @@ public class MathCanvas extends StackPane {
     //Clears the content displayed on the canvas
     public void reset() {
         this.contentGC.clearRect(0,0, contentLayer.getWidth(), contentLayer.getHeight());
+        this.polynomialArray = new ArrayList<>();
     }
 
     public void setRange(double start, double end) throws InvalidRangeException {
@@ -432,10 +440,10 @@ public class MathCanvas extends StackPane {
     }
 
 
-    public void drawIntegral(double start, double end) {
+    /*public void drawIntegral(double start, double end) {
         contentGC.setStroke(Color.BLUE);
         for (; start < end; start += 0.01) {
             contentGC.strokeLine(mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(0.0), mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(polynom.functionValue(start)));
         }
-    }
+    }*/
 }

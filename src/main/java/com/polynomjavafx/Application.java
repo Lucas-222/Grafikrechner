@@ -5,7 +5,6 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class Application extends javafx.application.Application {
     @Override
@@ -18,13 +17,12 @@ public class Application extends javafx.application.Application {
         stage.show();
     }
 
-    public static void main(String[] args) throws WrongInputSizeException {
+    public static void main(String[] args) {
         launch();
         try {
-
-            Polynom polynom = new Polynom(new double[]{0.0, 0.0, 2.0, 0.0, 0.0, 0.0});
-            System.out.println(polynom.getInflectionPoints());
-        } catch (ComputationFailedException | ArithmeticException e) {
+            Polynomial polynomial = new Polynomial(new double[]{0.0, 0.0, 2.0, 0.0, 0.0, 0.0});
+            System.out.println(polynomial.getInflectionPoints());
+        } catch (ComputationFailedException | ArithmeticException | WrongInputSizeException e) {
             System.out.println(e);
         }
     }

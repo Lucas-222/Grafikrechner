@@ -3,23 +3,49 @@ package com.polynomjavafx;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
-public class Polynom {
+import javafx.scene.paint.Color;
+
+public class Polynomial {
     private final double[] coefficients;
     private int derivationCounter = 0;
+    ArrayList<double[]> extrema = new ArrayList<>();
+    ArrayList<double[]> inflections = new ArrayList<>();
+    ArrayList<double[]> saddles = new ArrayList<>();
+    Color polyColor;
 
-    public Polynom(double[] coefficients) throws WrongInputSizeException {
+    public Polynomial(double[] coefficients, Color... color) throws WrongInputSizeException {
         // Test if input is the wrong size
         if (coefficients.length != 6) {
             throw new WrongInputSizeException(coefficients.length);
         }
         this.coefficients = coefficients;
+        this.polyColor = color.length != 0 ? color[0] : generateColor();
+        try {
+            this.extrema = getExtrema();
+            this.inflections = getInflectionPoints();
+            this.saddles = getSaddlePoints();
+        } catch (ComputationFailedException | ArithmeticException e) {
+            System.out.println(e);
+        }
+
     }
 
-    private Polynom(double[] coefficients, int derivationCounter) {
+    private static Color generateColor() {
+        Random genRandom = new Random();
+        int r = genRandom.nextInt(0, 256);
+        int b = genRandom.nextInt(0, 256);
+        int g = genRandom.nextInt(0, 256);
+
+        return Color.rgb(r, g, b, 1.0);
+    }
+
+    private Polynomial(double[] coefficients, int derivationCounter, Color... color) {
         // Private constructor, that's why no exception check needs to be performed
         this.coefficients = coefficients;
         this.derivationCounter = derivationCounter;
+        this.polyColor = color.length != 0 ? color[0] : generateColor();
     }
 
     public int getDegree() {
@@ -77,8 +103,8 @@ public class Polynom {
         return derivation;
     }
 
-    public Polynom derivationPolynom() {
-        return new Polynom(this.derivationCoefficients(), (this.derivationCounter+1));
+    public Polynomial derivationPolynom() {
+        return new Polynomial(this.derivationCoefficients(), (this.derivationCounter+1));
     }
 
     private double[] antiderivativeCoefficients() {
@@ -95,8 +121,8 @@ public class Polynom {
         return antiderivativeCoefficients;
     }
 
-    public Polynom antiderivationPolynom() {
-        return new Polynom(this.antiderivativeCoefficients(), 0);
+    public Polynomial antiderivationPolynom() {
+        return new Polynomial(this.antiderivativeCoefficients(), 0);
     }
 
     public ArrayList<Double> getRoots() {
@@ -154,7 +180,7 @@ public class Polynom {
         return difference;
     }
 
-    private double[] getStartingValues() {
+    private double[] getStartingValues(){
         ArrayList<Double> startingValues = new ArrayList<>();
         // Size of the array
         int size = 50;
@@ -180,7 +206,7 @@ public class Polynom {
 
     public ArrayList<double[]> getExtrema() throws ArithmeticException, ComputationFailedException {
         // first, get the derivative of the polynomial
-        Polynom firstDerivative = this.derivationPolynom();
+        Polynomial firstDerivative = this.derivationPolynom();
 
         // don't forget to handle cases where no extrema exist
         if (this.getDegree() < 2) {
@@ -204,7 +230,7 @@ public class Polynom {
 
     public ArrayList<double[]> getInflectionPoints() throws ArithmeticException, ComputationFailedException {
         // get the first and second derivatives of current function
-        Polynom secondDerivative = this.derivationPolynom().derivationPolynom();
+        Polynomial secondDerivative = this.derivationPolynom().derivationPolynom();
 
         if (this.getDegree() < 3) {
             throw new ArithmeticException("Can't compute the inflections of a polynomial below the third degree");
@@ -228,8 +254,8 @@ public class Polynom {
 
     public ArrayList<double[]> getSaddlePoints() throws ArithmeticException, ComputationFailedException {
         // a function has a saddle point if its first and second derivatives equal zero
-        Polynom firstDerivative = this.derivationPolynom();
-        Polynom secondDerivative = firstDerivative.derivationPolynom();
+        Polynomial firstDerivative = this.derivationPolynom();
+        Polynomial secondDerivative = firstDerivative.derivationPolynom();
         if (this.getDegree() < 3) {
             throw new ArithmeticException("Polynomials below the third degree can't have saddle points");
         }
@@ -258,7 +284,7 @@ public class Polynom {
         }
 
         // get anti-derivative
-        Polynom antiDerivative = this.antiderivationPolynom();
+        Polynomial antiDerivative = this.antiderivationPolynom();
         // Get bigger x value
         double biggerX = Math.max(x1, x2);
         // Get smaller x value
