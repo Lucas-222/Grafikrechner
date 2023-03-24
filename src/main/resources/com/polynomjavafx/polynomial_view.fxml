@@ -10,14 +10,14 @@
     <VBox alignment="TOP_CENTER" layoutY="-2.0" prefHeight="606.0" prefWidth="1064.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <MenuBar prefHeight="12.0" prefWidth="974.0">
             <Menu mnemonicParsing="false" text="Anzeige">
-                <RadioMenuItem fx:id="gridToggleMenuItem" mnemonicParsing="false" text="Gitter">
-                    <accelerator>
-                        <KeyCodeCombination alt="UP" code="G" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                    </accelerator>
-                </RadioMenuItem>
                 <RadioMenuItem fx:id="axisToggleMenuItem" mnemonicParsing="false" text="Achsen">
                     <accelerator>
                         <KeyCodeCombination alt="UP" code="K" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </RadioMenuItem>
+                <RadioMenuItem fx:id="gridToggleMenuItem" mnemonicParsing="false" text="Gitter">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="G" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </RadioMenuItem>
                 <RadioMenuItem fx:id="axisScalesMenuItemToggle" mnemonicParsing="false" text="Achsenbeschriftung">
@@ -101,7 +101,8 @@
                     <TextField fx:id="integralTextField1" GridPane.columnIndex="0" GridPane.rowIndex="9" />
                     <TextField fx:id="integralTextField2" GridPane.columnIndex="1" GridPane.rowIndex="9" />
 
-                    <Label fx:id="functionAsStringLabel" GridPane.columnIndex="1" />
+                    <!--ChoiceBox for Polynomials-->
+                    <ChoiceBox fx:id="polynomialsCB" prefWidth="100" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                     <Label fx:id="symmetryLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                     <Label fx:id="degreeLabel" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                     <Label fx:id="rootLabel" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="4" />
@@ -111,6 +112,9 @@
                     <Label fx:id="integralLabel" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="8" />
 
                 </GridPane>
+
+
+
             <ChoiceBox fx:id="scaleChoicebox" prefHeight="34.0" prefWidth="150.0" />
                 <Button mnemonicParsing="false" onAction="#onResetButtonClicked" prefHeight="25.0" prefWidth="180.0" text="Reset" />
             </VBox>

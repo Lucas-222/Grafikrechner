@@ -25,7 +25,6 @@ public class PolynomialController {
     public Spinner<Double> coefficient0Spinner;
     public Label inputWarningLabel;
     public Label symmetryLabel;
-    public Label functionAsStringLabel;
     public Label degreeLabel;
     public Label rootLabel;
     public Label extremaLabel;
@@ -43,6 +42,8 @@ public class PolynomialController {
     private ArrayList<Polynomial> polynomialArray;
     private Polynomial selectedPolynomial;
     @FXML
+    private ChoiceBox<String> polynomialsCB;
+    @FXML
     private MathCanvas mathCanvas;
 
     @FXML
@@ -51,13 +52,49 @@ public class PolynomialController {
         initializeSpinners();
         initializeMenuItems();
         initializePolynomials();
+        initScaleChoiceBox();
+        scaleChoiceBoxListener();
+        polynomialsCBListener();
+    }
+
+    /**
+     * drawPolynomials each time a polynomial is submitted/a new is picked out from the drop-down list
+     */
+    private void drawPolynomials() {
+
+        if (selectedPolynomial != null) {
+            this.showAttributes(selectedPolynomial);
+        }
+
+        for (Polynomial p : polynomialArray) {
+            this.mathCanvas.drawPolynomial(p);
+        }
+
+    }
+
+    private void initializePolynomials() {
+        polynomialArray = mathCanvas.polynomialArray;
+    }
+
+    private void updateChoiceBox(Polynomial polynomial) {
+        this.polynomialsCB.getItems().add(polynomial.toString());
+        this.polynomialsCB.setValue(polynomial.toString());
+    }
+
+    private void resetChoiceBox() {
+        this.polynomialsCB.getItems().clear();
+    }
+
+    private void initScaleChoiceBox() {
         scaleChoicebox.getItems().add("-5 bis 5");
         scaleChoicebox.getItems().add("-10 bis 10");
         scaleChoicebox.getItems().add("-50 bis 50");
         scaleChoicebox.getItems().add("-100 bis 100");
         scaleChoicebox.getItems().add("-500 bis 500");
         scaleChoicebox.getItems().add("-1000 bis 1000");
+    }
 
+    private void scaleChoiceBoxListener() {
         scaleChoicebox.valueProperty().addListener((observable, oldValue, newValue) -> {
             Pattern pattern = Pattern.compile("-?[0-9]+([,.][0-9]+)?");
             Matcher matcher = pattern.matcher(newValue);
@@ -77,18 +114,20 @@ public class PolynomialController {
         });
     }
 
-    /**
-     * drawPolynomials each time a polynomial is submitted
-     */
-    private void drawPolynomials() {
-        for (Polynomial p : polynomialArray) {
-            this.mathCanvas.drawPolynomial(p);
-            this.showAttributes(p);
-        }
-    }
+    private void polynomialsCBListener() {
+        this.polynomialsCB.valueProperty().addListener((observable, oldValue, newValue) -> {
+            for (Polynomial p: polynomialArray) {
+                try {
+                    if (p.toString().contentEquals(newValue)) {
+                        this.selectedPolynomial = p;
+                        this.drawPolynomials();
+                    }
+                } catch (NullPointerException e) {
+                    System.out.println();
+                }
 
-    private void initializePolynomials() {
-        polynomialArray = mathCanvas.polynomialArray;
+            }
+        });
     }
 
     private void initializeMenuItems() {
@@ -191,6 +230,7 @@ public class PolynomialController {
             this.mathCanvas.polynomialArray.add(new Polynomial(coefficients));
             this.inputWarningLabel.setVisible(false);
             this.drawPolynomials();
+            this.updateChoiceBox(new Polynomial(coefficients));
         } catch (WrongInputSizeException inputSizeException) {
             this.inputWarningLabel.setVisible(true);
         }
@@ -200,21 +240,32 @@ public class PolynomialController {
      * (selectively) show attributes for each polynomial in array
      */
     private void showAttributes(Polynomial p) {
-        // show information about polynomial
-        showFunctionAsString(p);
-        showDegree(p);
         // show symmetry and roots if degree is <= 3
+        mathCanvas.contentGC.clearRect(0, 0, mathCanvas.contentLayer.getWidth(), mathCanvas.contentLayer.getHeight());
         if (p.getDegree() <= 3) {
             showSymmetry(p);
             showRoots(p);
             showExtrema(p);
             showInflectionPoints(p);
             showSaddlePoints(p);
+        } else {
+            clearLabels();
         }
+        // show information about polynomial
+        showDegree(p);
     }
     @FXML
     private void onResetButtonClicked() {
         mathCanvas.reset();
+        clearLabels();
+        resetChoiceBox();
+
+        initializeSpinners();
+        initializePolynomials();
+
+    }
+
+    private void clearLabels() {
         inputWarningLabel.setText("");
         symmetryLabel.setText("");
         rootLabel.setText("");
@@ -226,10 +277,6 @@ public class PolynomialController {
         extremaLabel.setText("");
         inflectionLabel.setText("");
         saddleLabel.setText("");
-        functionAsStringLabel.setText("");
-
-        initializeSpinners();
-        initializePolynomials();
     }
 
     private void addChangeListenerToIntegralInput(TextField integralInput) {
@@ -289,12 +336,6 @@ public class PolynomialController {
         });
 
     }
-
-    private void showFunctionAsString(Polynomial polynomial) {
-        String function = polynomial.toString();
-        functionAsStringLabel.setText(function);
-    }
-
     private void showDegree(Polynomial polynomial) {
         int degree = polynomial.getDegree();
         degreeLabel.setText(String.valueOf(degree));

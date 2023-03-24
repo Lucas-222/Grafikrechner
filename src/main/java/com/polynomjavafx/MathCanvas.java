@@ -7,6 +7,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.scene.control.ChoiceBox;
 
 public class MathCanvas extends StackPane {
     Canvas contentLayer;
@@ -40,7 +41,6 @@ public class MathCanvas extends StackPane {
         DEFAULT_CELL_AMOUNT = 10;
 
         this.polynomialArray = new ArrayList<>(10);
-
         //Booleans for showing / hiding parts of the coordinate system
         showGrid = true;
         showScales = true;
@@ -71,15 +71,6 @@ public class MathCanvas extends StackPane {
         this.xOffset = 0;
         this.yOffset = 0;
 
-    }
-
-    /**
-     * redraw polynomials after parameter adjustment
-     */
-    public void drawPolynomials() {
-        for (Polynomial p : polynomialArray) {
-            drawPolynomial(p);
-        }
     }
 
     /**
@@ -145,7 +136,7 @@ public class MathCanvas extends StackPane {
         xOffset += deltaX;
         yOffset += deltaY;
         drawCoordinateSystem();
-        if (polynomialArray.get(0) != null) {
+        if (!polynomialArray.isEmpty()) {
             contentGC.clearRect(0, 0, contentLayer.getWidth(), contentLayer.getHeight());
         }
     }
@@ -161,7 +152,7 @@ public class MathCanvas extends StackPane {
         updateRowSize();
         updateColSize();
         drawCoordinateSystem();
-        if (polynomialArray.get(0) != null) {
+        if (!polynomialArray.isEmpty()) {
             contentGC.clearRect(0, 0, contentLayer.getWidth(), contentLayer.getHeight());
         }
     }
@@ -246,7 +237,7 @@ public class MathCanvas extends StackPane {
         this.xOffset = 0;
         this.yOffset = 0;
         drawCoordinateSystem();
-        if (polynomialArray.get(0) != null) {
+        if (!polynomialArray.isEmpty()) {
             contentGC.clearRect(0, 0, contentLayer.getWidth(), contentLayer.getHeight());
         }
     }
@@ -260,7 +251,7 @@ public class MathCanvas extends StackPane {
         updateColSize();
         updateRowSize();
         drawCoordinateSystem();
-        if (polynomialArray.get(0) != null) {
+        if (!polynomialArray.isEmpty()) {
             contentGC.clearRect(0,0,coordinateSystemLayer.getWidth(), coordinateSystemLayer.getHeight());
         }
     }

@@ -16,14 +16,5 @@ public class Application extends javafx.application.Application {
         stage.setResizable(false);
         stage.show();
     }
-
-    public static void main(String[] args) {
-        launch();
-        try {
-            Polynomial polynomial = new Polynomial(new double[]{0.0, 0.0, 2.0, 0.0, 0.0, 0.0});
-            System.out.println(polynomial.getInflectionPoints());
-        } catch (ComputationFailedException | ArithmeticException | WrongInputSizeException e) {
-            System.out.println(e);
-        }
-    }
+    public static void main(String[] args) { launch(); }
 }
