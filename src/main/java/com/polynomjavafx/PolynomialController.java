@@ -146,10 +146,10 @@ public class PolynomialController {
         //Array of every spinner
         List<Spinner<Double>> spinners = Arrays.asList(coefficient5Spinner, coefficient4Spinner, coefficient3Spinner, coefficient2Spinner, coefficient1Spinner,
                 coefficient0Spinner);
-        StringConverter<Double> stringConverter= new StringConverter<>() {
+        StringConverter<Double> stringConverter = new StringConverter<>() {
             @Override
             public String toString(Double doubleInput) {
-                if(doubleInput == 0.0) {
+                if (doubleInput == 0.0) {
                     return "0.0";
                 }
                 return Double.toString(doubleInput);
@@ -157,30 +157,28 @@ public class PolynomialController {
 
             @Override
             public Double fromString(String string) {
-                if(Objects.equals(string, "")) {
+                if (Objects.equals(string, "")) {
                     return 0.0;
                 }
                 //Replace comma with point
-                string  = string.replace(",", ".");
+                string = string.replace(",", ".");
                 try {
                     return Double.parseDouble(string);
-                }
-                catch (NumberFormatException numberFormatException) {
+                } catch (NumberFormatException numberFormatException) {
                     return 0.0;
                 }
             }
         };
-        UnaryOperator<TextFormatter.Change> filter  = change -> {
+        UnaryOperator<TextFormatter.Change> filter = change -> {
             String newString = change.getControlNewText();
-            if(newString.matches("-?([0-9]+[.,]?[0-9]*)*")) {
+            if (newString.matches("-?([0-9]+[.,]?[0-9]*)*")) {
                 return change;
-            }
-            else return null;
+            } else return null;
         };
 
         //Loop that iterates trough spinners for less code repetition
         for (int i = 0; i < spinners.size(); i++) {
-            TextFormatter<Double> textFormatter = new TextFormatter<>(stringConverter, 0.0 , filter);
+            TextFormatter<Double> textFormatter = new TextFormatter<>(stringConverter, 0.0, filter);
             Spinner<Double> spinner = spinners.get(i);
             //Set value factory
             spinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
@@ -188,9 +186,9 @@ public class PolynomialController {
             spinner.getEditor().setTextFormatter(textFormatter);
 
             //Spinner is the last spinner in the list, so set eventHandler to submit input if enter is pressed
-            if(i == spinners.size()-1) {
+            if (i == spinners.size() - 1) {
                 spinner.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
-                    if(keyEvent.getCode() == KeyCode.ENTER) {
+                    if (keyEvent.getCode() == KeyCode.ENTER) {
                         submitInput();
                     }
                 });
@@ -199,17 +197,15 @@ public class PolynomialController {
             else {
                 Spinner<Double> nextSpinner = spinners.get(i + 1);
                 spinner.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-                    if(event.getCode() == KeyCode.ENTER) {
+                    if (event.getCode() == KeyCode.ENTER) {
                         nextSpinner.requestFocus();
                     }
                 });
             }
 
         }
-
-        // addChangeListenerToIntegralInput(integralTextField1);
-        // addChangeListenerToIntegralInput(integralTextField2);
-
+        addChangeListenerToIntegralInput(integralTextField1);
+        addChangeListenerToIntegralInput(integralTextField2);
     }
 
     private void initializeVisuals() {
@@ -280,6 +276,7 @@ public class PolynomialController {
     }
 
     private void addChangeListenerToIntegralInput(TextField integralInput) {
+
         ArrayList<Character> validCharacters = new ArrayList<>(List.of('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '-'));
         integralInput.textProperty().addListener((observable, oldValue, newValue) -> {
             // If change contains illegal character reset the field to old value
@@ -351,7 +348,6 @@ public class PolynomialController {
         } else {
             symmetry = "Keine Symmetrie";
         }
-
         symmetryLabel.setText(symmetry);
     }
 
@@ -400,11 +396,12 @@ public class PolynomialController {
     }
 
     private void showIntegral(Polynomial polynomial) throws WrongInputSizeException {
-        resetScaling();
-        double area = polynomial.getIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
-        System.out.println(area);
-        integralLabel.setText(String.valueOf(area));
-        // mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
+        if (!integralTextField1.getText().isEmpty() && !integralTextField2.getText().isEmpty()) {
+            System.out.println(integralTextField2.getText());
+            double area = polynomial.getIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
+            integralLabel.setText(String.valueOf(area));
+            mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
+        }
     }
 
     private void showInflectionPoints(Polynomial polynomial) {
@@ -452,8 +449,7 @@ public class PolynomialController {
         }
     }
 
-
-    public void onMouseScrolledOnCanvas(ScrollEvent scrollEvent) {
+    public void onMouseScrolledOnCanvas(ScrollEvent scrollEvent) throws WrongInputSizeException {
         if (scrollEvent.isControlDown()) {
             double delta = scrollEvent.getDeltaY()/10;
             mathCanvas.changeScale(delta, delta);
@@ -461,17 +457,20 @@ public class PolynomialController {
             mathCanvas.scroll(scrollEvent.getDeltaX(), scrollEvent.getDeltaY());
         }
         this.drawPolynomials();
+        this.showIntegral(selectedPolynomial);
         scaleChoicebox.setValue("");
+
     }
 
-    public void resetScaling()
-    {
+    public void resetScaling() throws WrongInputSizeException {
         mathCanvas.resetScaling();
         this.drawPolynomials();
+        this.showIntegral(selectedPolynomial);
     }
 
-    public void returnToOrigin() {
+    public void returnToOrigin() throws WrongInputSizeException {
         mathCanvas.returnToOrigin();
         this.drawPolynomials();
+        this.showIntegral(selectedPolynomial);
     }
 }

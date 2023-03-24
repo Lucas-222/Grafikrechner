@@ -117,7 +117,6 @@ public class Polynomial {
             antiderivativeCoefficients[i] = coefficients[i] / (i + 1);
         }
         antiderivativeCoefficients[coefficients.length] = c;
-        System.out.println(Arrays.toString(antiderivativeCoefficients));
         return antiderivativeCoefficients;
     }
 

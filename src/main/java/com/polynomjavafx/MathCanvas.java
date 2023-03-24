@@ -7,7 +7,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.scene.control.ChoiceBox;
 
 public class MathCanvas extends StackPane {
     Canvas contentLayer;
@@ -66,8 +65,7 @@ public class MathCanvas extends StackPane {
             drawCoordinateSystem();
         } ));
 
-
-        //Values that represent the space scrolled on the canvas in pixels
+        // values that represent the space scrolled on the canvas in pixels
         this.xOffset = 0;
         this.yOffset = 0;
 
@@ -125,7 +123,6 @@ public class MathCanvas extends StackPane {
             lastY = y;
         }
     }
-
 
     /**
      * Shifts view of  the Canvas up / down and left / right by amount of pixels give as params
@@ -266,7 +263,6 @@ public class MathCanvas extends StackPane {
         }
         drawVerticalLines();
         drawHorizontalLines();
-
     }
 
     /**
@@ -327,7 +323,6 @@ public class MathCanvas extends StackPane {
         }
         coordinateSysGC.fillText(labelText, x, y);
     }
-
 
     /**
      * Draws the horizontal lines of the coordinate system
@@ -410,7 +405,8 @@ public class MathCanvas extends StackPane {
     }
 
     public void setRange(double start, double end) throws InvalidRangeException {
-        if(start >= end) {
+
+        if (start >= end) {
             throw new InvalidRangeException(start, end);
         }
 
@@ -419,10 +415,8 @@ public class MathCanvas extends StackPane {
         this.xScale = this.getWidth()/range;
         this.yScale = this.getHeight()/range;
 
-
         double offset = Math.abs(start) - Math.abs(end);
         xOffset = offset * xScale;
-
 
         this.yOffset = 0;
         updateColSize();
@@ -430,11 +424,10 @@ public class MathCanvas extends StackPane {
         drawCoordinateSystem();
     }
 
-
-    /*public void drawIntegral(double start, double end) {
+    public void drawIntegral(double start, double end, Polynomial polynomial) {
         contentGC.setStroke(Color.BLUE);
         for (; start < end; start += 0.01) {
-            contentGC.strokeLine(mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(0.0), mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(polynom.functionValue(start)));
+            contentGC.strokeLine(mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(0.0), mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(polynomial.functionValue(start)));
         }
-    }*/
+    }
 }
