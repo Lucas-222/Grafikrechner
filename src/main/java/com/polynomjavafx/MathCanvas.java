@@ -405,7 +405,6 @@ public class MathCanvas extends StackPane {
     }
 
     public void setRange(double start, double end) throws InvalidRangeException {
-
         if (start >= end) {
             throw new InvalidRangeException(start, end);
         }
@@ -424,9 +423,9 @@ public class MathCanvas extends StackPane {
         drawCoordinateSystem();
     }
 
-    public void drawIntegral(double start, double end, Polynomial polynomial) {
+    public void drawIntegral(double x1, double x2, Polynomial polynomial) {
         contentGC.setStroke(Color.BLUE);
-        for (; start < end; start += 0.01) {
+        for (double start = Math.min(x1, x2); start < Math.max(x1, x2); start += 0.01) {
             contentGC.strokeLine(mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(0.0), mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(polynomial.functionValue(start)));
         }
     }

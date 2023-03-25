@@ -258,18 +258,18 @@ public class PolynomialController {
 
         initializeSpinners();
         initializePolynomials();
-
     }
 
     private void clearLabels() {
         inputWarningLabel.setText("");
         symmetryLabel.setText("");
         rootLabel.setText("");
-        inputWarningLabel.setText("");
         symmetryLabel.setText("");
         rootLabel.setText("");
         degreeLabel.setText("");
         integralLabel.setText("");
+        integralTextField1.setText("");
+        integralTextField2.setText("");
         extremaLabel.setText("");
         inflectionLabel.setText("");
         saddleLabel.setText("");
@@ -396,12 +396,10 @@ public class PolynomialController {
     }
 
     private void showIntegral(Polynomial polynomial) throws WrongInputSizeException {
-        if (!integralTextField1.getText().isEmpty() && !integralTextField2.getText().isEmpty()) {
-            System.out.println(integralTextField2.getText());
-            double area = polynomial.getIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
-            integralLabel.setText(String.valueOf(area));
-            mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
-        }
+        double area = polynomial.getIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
+        System.out.println("Integral area: " + area);
+        integralLabel.setText(String.valueOf(area));
+        mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
     }
 
     private void showInflectionPoints(Polynomial polynomial) {

@@ -278,16 +278,17 @@ public class Polynomial {
     }
 
     public double getIntegral(double x1, double x2) {
-        if (this.getDegree() == 0) {
-            return (Math.abs(x1) + Math.abs(x2)) * this.coefficients[0];
-        }
-
-        // get anti-derivative
-        Polynomial antiDerivative = this.antiderivationPolynom();
         // Get bigger x value
         double biggerX = Math.max(x1, x2);
         // Get smaller x value
         double smallerX = Math.min(x1, x2);
+
+        if (this.getDegree() == 0) {
+            return (Math.abs(biggerX) + Math.abs(smallerX)) * this.coefficients[0];
+        }
+
+        // get anti-derivative
+        Polynomial antiDerivative = this.antiderivationPolynom();
         // Get the integral
         return Math.abs(antiDerivative.functionValue(biggerX) - antiDerivative.functionValue(smallerX));
     }
