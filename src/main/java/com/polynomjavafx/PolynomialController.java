@@ -232,10 +232,13 @@ public class PolynomialController {
                     coefficient2Spinner.getValue(), coefficient3Spinner.getValue(),
                     coefficient4Spinner.getValue(), coefficient5Spinner.getValue()};
 
-            this.mathCanvas.polynomialArray.add(new Polynomial(coefficients));
+            this.polynomialArray.add(new Polynomial(coefficients));
             this.inputWarningLabel.setVisible(false);
-            this.drawPolynomials();
             this.updateChoiceBox(new Polynomial(coefficients));
+            // FIXME: this clears the canvas and doesn't draw the points?
+            // mathCanvas.drawPolynomial(selectedPolynomial);
+            this.redrawContent();
+
         } catch (WrongInputSizeException inputSizeException) {
             this.inputWarningLabel.setVisible(true);
         }
