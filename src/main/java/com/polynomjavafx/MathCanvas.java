@@ -1,7 +1,6 @@
 package com.polynomjavafx;
 
 import java.util.ArrayList;
-
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
@@ -9,6 +8,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 public class MathCanvas extends StackPane {
+    // Uninitialized Attributes
     Canvas contentLayer;
     Canvas coordinateSystemLayer;
     GraphicsContext contentGC;
@@ -19,14 +19,17 @@ public class MathCanvas extends StackPane {
     double yOffset;
     double colSize;
     double rowSize;
-    private final double DEFAULT_CELL_AMOUNT;
-    private boolean showAxis;
-    private boolean showGrid;
-    ArrayList<Polynomial> polynomialArray;
-    private boolean showScales;
     private double tickLineLength;
     private double xAxisPosition;
     private double yAxisPosition;
+    private final double DEFAULT_CELL_AMOUNT;
+    private boolean showAxis;
+    private boolean showGrid;
+    private boolean showScales;
+
+    // Initialized Attributes
+    ArrayList<Polynomial> polynomialArray = new ArrayList<>(10);
+    ArrayList<double[]> pointsArray = new ArrayList<>();
 
     public MathCanvas() {
         super();
@@ -39,17 +42,17 @@ public class MathCanvas extends StackPane {
         this.getChildren().add(coordinateSystemLayer);
         DEFAULT_CELL_AMOUNT = 10;
 
-        this.polynomialArray = new ArrayList<>(10);
         //Booleans for showing / hiding parts of the coordinate system
         showGrid = true;
         showScales = true;
         showAxis = true;
 
-        //Add change listeners to keep size of child elements consistent with parten
+        // Add change listeners to keep size of child elements consistent with parent
         this.widthProperty().addListener((observable, oldValue, newValue) -> {
-            coordinateSystemLayer.setWidth((double)newValue);
-            contentLayer.setWidth((double)newValue);
+            coordinateSystemLayer.setWidth((double) newValue);
+            contentLayer.setWidth((double) newValue);
         });
+
         this.heightProperty().addListener(((observable, oldValue, newValue )-> {
             coordinateSystemLayer.setHeight((double) newValue);
             contentLayer.setHeight((double) newValue);
@@ -64,12 +67,13 @@ public class MathCanvas extends StackPane {
 
             drawCoordinateSystem();
         } ));
-
         // values that represent the space scrolled on the canvas in pixels
         this.xOffset = 0;
         this.yOffset = 0;
 
     }
+
+    // Show Methods
 
     /**
      * Set whether the axis should be shown
@@ -98,6 +102,105 @@ public class MathCanvas extends StackPane {
         drawCoordinateSystem();
     }
 
+    // Draw Methods (alphanumeric ascending)
+
+    /**
+     * Draws the axis onto the coordinate system canvas
+     */
+    private void drawAxis() {
+        double yAxisPos = yAxisPosition + xOffset;
+        double xAxisPos = xAxisPosition + yOffset;
+        coordinateSysGC.setStroke(Color.BLACK);
+        coordinateSysGC.setLineWidth(1.0);
+
+        //Draw x-axis
+        coordinateSysGC.strokeLine(0, xAxisPos, contentLayer.getWidth(), xAxisPos);
+
+        //Draw y-axis
+        coordinateSysGC.strokeLine(yAxisPos, contentLayer.getHeight(), yAxisPos, 0);
+    }
+
+    /**
+     * Draws the coordinate system onto the canvas.
+     */
+    private void drawCoordinateSystem() {
+        coordinateSysGC.clearRect(0, 0, contentLayer.getWidth(), coordinateSystemLayer.getHeight());
+        if(showAxis) {
+            drawAxis();
+        }
+        drawVerticalLines();
+        drawHorizontalLines();
+    }
+
+    /**
+     * Draws the horizontal lines of the coordinate system
+     */
+    private void drawHorizontalLines() {
+        double majorScaleDistance = colSize; //The pixel amount between major scales
+        //Set color and width of the lines to stroke
+        double scrollingOffset = yOffset % majorScaleDistance; //The offset of the first line coordinates created by the y-offset
+        double scalingOffset = xAxisPosition % majorScaleDistance; //The offset created by the scale distance. Without this, the axis and grid could go out of alignment
+        //Only start loop if labels or gird are supposed to be shown
+        if(showGrid || showScales){
+            for(double yCoordinate = scrollingOffset + scalingOffset; yCoordinate <= coordinateSystemLayer.getHeight(); yCoordinate += majorScaleDistance) {
+                if (showGrid) {
+                    //Draw the vertical line of the grid at the curren y-coordinate
+                    coordinateSysGC.setStroke(Color.GRAY);
+                    coordinateSysGC.setLineWidth(0.5);
+                    coordinateSysGC.strokeLine(0, yCoordinate, coordinateSystemLayer.getWidth(), yCoordinate);
+                    for(double i = yCoordinate + majorScaleDistance/5; i < yCoordinate + majorScaleDistance; i+=majorScaleDistance/10) {
+                        coordinateSysGC.setLineWidth(0.1);
+                        coordinateSysGC.strokeLine(0, i, coordinateSystemLayer.getWidth(), i);
+                    }
+                }
+                if (showScales) {
+                    //Draw the label for the current y-Coordinate
+                    double label = canvasYCoordinateToMathYCoordinate(yCoordinate);
+                    drawYAxisLabel(Double.toString(label), yCoordinate);
+                }
+            }
+        }
+    }
+
+    public void drawIntegral(double start, double end, Polynomial polynomial) {
+        contentGC.setStroke(Color.BLUE);
+        for (; start < end; start += 0.01) {
+            contentGC.strokeLine(mathXCoordinateToCanvasXCoordinate(start),
+                    mathYCoordinateToCanvasYCoordinate(0.0),
+                    mathXCoordinateToCanvasXCoordinate(start),
+                    mathYCoordinateToCanvasYCoordinate(polynomial.functionValue(start)));
+        }
+    }
+
+    public void drawPoint(double x, double y) {
+        contentLayer.getGraphicsContext2D().fillOval(mathXCoordinateToCanvasXCoordinate(x) - 2.5,
+                mathYCoordinateToCanvasYCoordinate(y) - 2.5, 5.0, 5.0);
+    }
+
+    /**
+     * draw points retrieved from pointsArray attribute
+     * @param givenPoint only draws this point to the canvas if passed
+     */
+    public void drawPoints(double[] givenPoint) {
+        if (givenPoint.length == 0)  {
+            for (double[] point : pointsArray) {
+                this.drawPoint(mathXCoordinateToCanvasXCoordinate(point[0]),
+                        mathYCoordinateToCanvasYCoordinate(point[1]));
+
+                contentGC.fillText("(" + point[0] + ", " + point[1] + ")",
+                        mathXCoordinateToCanvasXCoordinate(point[0]) + 5,
+                        mathYCoordinateToCanvasYCoordinate(point[1]) - 2.5);
+            }
+        } else {
+            this.drawPoint(mathXCoordinateToCanvasXCoordinate(givenPoint[0]),
+                    mathYCoordinateToCanvasYCoordinate(givenPoint[1]));
+
+            contentGC.fillText("(" + givenPoint[0] + ", " + givenPoint[1] + ")",
+                    mathXCoordinateToCanvasXCoordinate(givenPoint[0]) + 5,
+                    mathYCoordinateToCanvasYCoordinate(givenPoint[1]) - 2.5);
+        }
+
+    }
     public void drawPolynomial(Polynomial polynomialToDraw) {
         contentGC.setStroke(polynomialToDraw.polyColor);
 
@@ -125,144 +228,32 @@ public class MathCanvas extends StackPane {
     }
 
     /**
-     * Shifts view of  the Canvas up / down and left / right by amount of pixels give as params
-     * @param deltaX pixels to scroll horizontally
-     * @param deltaY pixels to scroll vertically
+     * Draws the vertical lines of the coordinate system
      */
-    public void scroll(double deltaX, double deltaY) {
-        xOffset += deltaX;
-        yOffset += deltaY;
-        drawCoordinateSystem();
-        if (!polynomialArray.isEmpty()) {
-            contentGC.clearRect(0, 0, contentLayer.getWidth(), contentLayer.getHeight());
+    private void drawVerticalLines() {
+        double majorScaleDistance = rowSize;
+        double scrollingOffSet = xOffset % majorScaleDistance; //The offset of the first line coordinates created by the x-offset
+        double scalingOffset = coordinateSystemLayer.getWidth() / 2 % majorScaleDistance; //The offset created by the scale distance. Without this, the axis and grid could go out of alignment
+        if(showGrid || showScales) {
+            for (double xCoordinate = scrollingOffSet + scalingOffset; xCoordinate <= coordinateSystemLayer.getWidth(); xCoordinate += majorScaleDistance) {
+                if (showGrid) {
+                    coordinateSysGC.setStroke(Color.GRAY);
+                    coordinateSysGC.setLineWidth(0.5);
+                    coordinateSysGC.strokeLine(xCoordinate, 0, xCoordinate, coordinateSystemLayer.getHeight());
+
+
+                    //Draw 10 small lines between this line and the next
+                    for(double i = xCoordinate + majorScaleDistance/5; i < xCoordinate + majorScaleDistance; i+=majorScaleDistance/10) {
+                        coordinateSysGC.setLineWidth(0.1);
+                        coordinateSysGC.strokeLine(i , 0, i, coordinateSystemLayer.getHeight());
+                    }
+                }
+                if (showScales) {
+                    double label = canvasXCoordinateToMathXCoordinate(xCoordinate);
+                    drawXAxisLabel(Double.toString(label), xCoordinate);
+                }
+            }
         }
-    }
-
-    /**
-     * Increases or reduces y and x scaling with given parameters
-     * @param changeX x-scale to add/subtract
-     * @param changeY y-scale to add/subtract
-     */
-    public void changeScale(double changeX, double changeY) {
-        xScale += changeX * xScale / 100;
-        yScale += changeY * yScale / 100;
-        updateRowSize();
-        updateColSize();
-        drawCoordinateSystem();
-        if (!polynomialArray.isEmpty()) {
-            contentGC.clearRect(0, 0, contentLayer.getWidth(), contentLayer.getHeight());
-        }
-    }
-
-    /**
-     * Updates row size dependent on current scaling to avoid to small / big rows
-     */
-    private void updateRowSize() {
-        rowSize = xScale;
-        double canvasHeight = coordinateSystemLayer.getHeight();
-        while (canvasHeight / rowSize > 5) {
-            rowSize *= 10;
-        }
-        while (canvasHeight / rowSize < 2) {
-            rowSize /= 10;
-        }
-    }
-
-    /**
-     * Updates column size dependent on current scaling to avoid to small / big columns
-     */
-    private void updateColSize() {
-        colSize = yScale;
-        double canvasWidth = coordinateSystemLayer.getWidth();
-        while (canvasWidth / colSize > 5) {
-            colSize *= 10;
-        }
-        while (canvasWidth / colSize < 2) {
-            colSize /= 10;
-        }
-    }
-
-
-    /**
-     * Translates canvas x-coordinate to mathematical equivalent
-     * @param xCoordinate x-coordinate to translate
-     * @return translated coordinate
-     */
-    private double canvasXCoordinateToMathXCoordinate(double xCoordinate) {
-        double mathXCoordinate = (xCoordinate - contentLayer.getWidth() / 2.0 - xOffset) / xScale;
-        return Math.round(mathXCoordinate * 100) / 100.0;
-    }
-
-    /**
-     * Translates canvas y-coordinate to mathematical equivalent
-     * @param yCoordinate y-coordinate to translate
-     * @return translated coordinate
-     */
-    private double canvasYCoordinateToMathYCoordinate(double yCoordinate) {
-        double mathYCoordinate = -(yCoordinate - contentLayer.getHeight() / 2.0 - yOffset) / yScale;
-        return Math.round(mathYCoordinate * 100) / 100.0;
-    }
-
-
-    /**
-     * Translates an x-coordinate of a mathematical coordinate system to the equivalent x-coordinate on the canvas
-     * @param mathematicalXCoordinate x-coordinate to be translated
-     * @return translated x-coordinate
-     */
-    private double mathXCoordinateToCanvasXCoordinate(double mathematicalXCoordinate) {
-        return (mathematicalXCoordinate * xScale + contentLayer.getWidth() / 2.0) + xOffset;
-    }
-
-    /**
-     * Translates a y-coordinate of a mathematical coordinate system to the equivalent y-coordinate on the canvas
-     * @param mathematicalYCoordinate y-coordinate to be translated
-     * @return translated y-coordinate
-     */
-    private double mathYCoordinateToCanvasYCoordinate(double mathematicalYCoordinate) {
-        return (-mathematicalYCoordinate * yScale + contentLayer.getHeight() / 2.0) + yOffset;
-    }
-
-    public void highlightPoint(double x, double y) {
-        contentLayer.getGraphicsContext2D().fillOval(mathXCoordinateToCanvasXCoordinate(x) - 2.5,
-                mathYCoordinateToCanvasYCoordinate(y) - 2.5, 5.0, 5.0);
-    }
-
-    /**
-     * Returns view to origin
-     */
-    public void returnToOrigin() {
-        this.xOffset = 0;
-        this.yOffset = 0;
-        drawCoordinateSystem();
-        if (!polynomialArray.isEmpty()) {
-            contentGC.clearRect(0, 0, contentLayer.getWidth(), contentLayer.getHeight());
-        }
-    }
-
-    /**
-     * Resets scaling to default values
-     */
-    public void resetScaling() {
-        this.xScale = coordinateSystemLayer.getWidth() / DEFAULT_CELL_AMOUNT;
-        this.yScale = coordinateSystemLayer.getHeight() / DEFAULT_CELL_AMOUNT;
-        updateColSize();
-        updateRowSize();
-        drawCoordinateSystem();
-        if (!polynomialArray.isEmpty()) {
-            contentGC.clearRect(0,0,coordinateSystemLayer.getWidth(), coordinateSystemLayer.getHeight());
-        }
-    }
-
-    /**
-     * Draws the coordinate system onto the canvas.
-     */
-    private void drawCoordinateSystem() {
-        coordinateSysGC.clearRect(0, 0, contentLayer.getWidth(), coordinateSystemLayer.getHeight());
-        if(showAxis) {
-            drawAxis();
-        }
-        drawVerticalLines();
-        drawHorizontalLines();
     }
 
     /**
@@ -324,84 +315,17 @@ public class MathCanvas extends StackPane {
         coordinateSysGC.fillText(labelText, x, y);
     }
 
-    /**
-     * Draws the horizontal lines of the coordinate system
-     */
-    private void drawHorizontalLines() {
-        double majorScaleDistance = colSize; //The pixel amount between major scales
-        //Set color and width of the lines to stroke
-        double scrollingOffset = yOffset % majorScaleDistance; //The offset of the first line coordinates created by the y-offset
-        double scalingOffset = xAxisPosition % majorScaleDistance; //The offset created by the scale distance. Without this, the axis and grid could go out of alignment
-        //Only start loop if labels or gird are supposed to be shown
-        if(showGrid || showScales){
-            for(double yCoordinate = scrollingOffset + scalingOffset; yCoordinate <= coordinateSystemLayer.getHeight(); yCoordinate += majorScaleDistance) {
-                if (showGrid) {
-                    //Draw the vertical line of the grid at the curren y-coordinate
-                    coordinateSysGC.setStroke(Color.GRAY);
-                    coordinateSysGC.setLineWidth(0.5);
-                    coordinateSysGC.strokeLine(0, yCoordinate, coordinateSystemLayer.getWidth(), yCoordinate);
-                    for(double i = yCoordinate + majorScaleDistance/5; i < yCoordinate + majorScaleDistance; i+=majorScaleDistance/10) {
-                        coordinateSysGC.setLineWidth(0.1);
-                        coordinateSysGC.strokeLine(0, i, coordinateSystemLayer.getWidth(), i);
-                    }
-                }
-                if (showScales) {
-                    //Draw the label for the current y-Coordinate
-                    double label = canvasYCoordinateToMathYCoordinate(yCoordinate);
-                    drawYAxisLabel(Double.toString(label), yCoordinate);
-                }
-            }
-        }
-    }
+    // Update Methods/Change Methods
 
     /**
-     * Draws the vertical lines of the coordinate system
+     * Shifts view of  the Canvas up / down and left / right by amount of pixels give as params
+     * @param deltaX pixels to scroll horizontally
+     * @param deltaY pixels to scroll vertically
      */
-    private void drawVerticalLines() {
-        double majorScaleDistance = rowSize;
-        double scrollingOffSet = xOffset % majorScaleDistance; //The offset of the first line coordinates created by the x-offset
-        double scalingOffset = coordinateSystemLayer.getWidth() / 2 % majorScaleDistance; //The offset created by the scale distance. Without this, the axis and grid could go out of alignment
-        if(showGrid || showScales) {
-            for (double xCoordinate = scrollingOffSet + scalingOffset; xCoordinate <= coordinateSystemLayer.getWidth(); xCoordinate += majorScaleDistance) {
-                if (showGrid) {
-                    coordinateSysGC.setStroke(Color.GRAY);
-                    coordinateSysGC.setLineWidth(0.5);
-                    coordinateSysGC.strokeLine(xCoordinate, 0, xCoordinate, coordinateSystemLayer.getHeight());
-
-
-                    //Draw 10 small lines between this line and the next
-                    for(double i = xCoordinate + majorScaleDistance/5; i < xCoordinate + majorScaleDistance; i+=majorScaleDistance/10) {
-                        coordinateSysGC.setLineWidth(0.1);
-                        coordinateSysGC.strokeLine(i , 0, i, coordinateSystemLayer.getHeight());
-                    }
-                }
-                if (showScales) {
-                    double label = canvasXCoordinateToMathXCoordinate(xCoordinate);
-                    drawXAxisLabel(Double.toString(label), xCoordinate);
-                }
-            }
-        }
-    }
-    /**
-     * Draws the axis onto the coordinate system canvas
-     */
-    private void drawAxis() {
-        double yAxisPos = yAxisPosition + xOffset;
-        double xAxisPos = xAxisPosition + yOffset;
-        coordinateSysGC.setStroke(Color.BLACK);
-        coordinateSysGC.setLineWidth(1.0);
-
-        //Draw x-axis
-        coordinateSysGC.strokeLine(0, xAxisPos, contentLayer.getWidth(), xAxisPos);
-
-        //Draw y-axis
-        coordinateSysGC.strokeLine(yAxisPos, contentLayer.getHeight(), yAxisPos, 0);
-    }
-
-    //Clears the content displayed on the canvas
-    public void reset() {
-        this.contentGC.clearRect(0,0, contentLayer.getWidth(), contentLayer.getHeight());
-        this.polynomialArray = new ArrayList<>();
+    public void scroll(double deltaX, double deltaY) {
+        xOffset += deltaX;
+        yOffset += deltaY;
+        drawCoordinateSystem();
     }
 
     public void setRange(double start, double end) throws InvalidRangeException {
@@ -424,10 +348,121 @@ public class MathCanvas extends StackPane {
         drawCoordinateSystem();
     }
 
-    public void drawIntegral(double start, double end, Polynomial polynomial) {
-        contentGC.setStroke(Color.BLUE);
-        for (; start < end; start += 0.01) {
-            contentGC.strokeLine(mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(0.0), mathXCoordinateToCanvasXCoordinate(start), mathYCoordinateToCanvasYCoordinate(polynomial.functionValue(start)));
+    /**
+     * Increases or reduces y and x scaling with given parameters
+     * @param changeX x-scale to add/subtract
+     * @param changeY y-scale to add/subtract
+     */
+    public void changeScale(double changeX, double changeY) {
+        xScale += changeX * xScale / 100;
+        yScale += changeY * yScale / 100;
+        updateRowSize();
+        updateColSize();
+        drawCoordinateSystem();
+    }
+
+
+    /**
+     * Updates row size dependent on current scaling to avoid to small / big rows
+     */
+    private void updateRowSize() {
+        rowSize = xScale;
+        double canvasHeight = coordinateSystemLayer.getHeight();
+        while (canvasHeight / rowSize > 5) {
+            rowSize *= 10;
         }
+        while (canvasHeight / rowSize < 2) {
+            rowSize /= 10;
+        }
+    }
+
+    /**
+     * Updates column size dependent on current scaling to avoid to small / big columns
+     */
+    private void updateColSize() {
+        colSize = yScale;
+        double canvasWidth = coordinateSystemLayer.getWidth();
+        while (canvasWidth / colSize > 5) {
+            colSize *= 10;
+        }
+        while (canvasWidth / colSize < 2) {
+            colSize /= 10;
+        }
+    }
+
+    // Translation Methods/Adaption Methods
+
+    /**
+     * Translates canvas x-coordinate to mathematical equivalent
+     * @param xCoordinate x-coordinate to translate
+     * @return translated coordinate
+     */
+    public double canvasXCoordinateToMathXCoordinate(double xCoordinate) {
+        double mathXCoordinate = (xCoordinate - contentLayer.getWidth() / 2.0 - xOffset) / xScale;
+        return Math.round(mathXCoordinate * 100.0) / 100.0;
+    }
+
+    /**
+     * Translates canvas y-coordinate to mathematical equivalent
+     * @param yCoordinate y-coordinate to translate
+     * @return translated coordinate
+     */
+    public double canvasYCoordinateToMathYCoordinate(double yCoordinate) {
+        double mathYCoordinate = -(yCoordinate - contentLayer.getHeight() / 2.0 - yOffset) / yScale;
+        return Math.round(mathYCoordinate * 100.0) / 100.0;
+    }
+
+
+    /**
+     * Translates an x-coordinate of a mathematical coordinate system to the equivalent x-coordinate on the canvas
+     * @param mathematicalXCoordinate x-coordinate to be translated
+     * @return translated x-coordinate
+     */
+    private double mathXCoordinateToCanvasXCoordinate(double mathematicalXCoordinate) {
+        return (mathematicalXCoordinate * xScale + contentLayer.getWidth() / 2.0) + xOffset;
+    }
+
+    /**
+     * Translates a y-coordinate of a mathematical coordinate system to the equivalent y-coordinate on the canvas
+     * @param mathematicalYCoordinate y-coordinate to be translated
+     * @return translated y-coordinate
+     */
+    private double mathYCoordinateToCanvasYCoordinate(double mathematicalYCoordinate) {
+        return (-mathematicalYCoordinate * yScale + contentLayer.getHeight() / 2.0) + yOffset;
+    }
+
+    // Reset Methods/Clear Methods
+
+    /**
+     * Clears the content displayed on the canvas
+     */
+    public void reset() {
+        clearContentLayer();
+        this.pointsArray.clear();
+        this.polynomialArray.clear();
+    }
+
+    /**
+     * Resets scaling to default values
+     */
+    public void resetScaling() {
+        this.xScale = coordinateSystemLayer.getWidth() / DEFAULT_CELL_AMOUNT;
+        this.yScale = coordinateSystemLayer.getHeight() / DEFAULT_CELL_AMOUNT;
+        updateColSize();
+        updateRowSize();
+        drawCoordinateSystem();
+    }
+
+    /**
+     * Returns view to origin
+     */
+    public void returnToOrigin() {
+        this.xOffset = 0;
+        this.yOffset = 0;
+        drawCoordinateSystem();
+    }
+
+    public void clearContentLayer() {
+        this.contentGC.clearRect(0, 0, contentLayer.getWidth(), contentLayer.getHeight());
     }
 }
