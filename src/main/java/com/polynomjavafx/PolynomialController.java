@@ -403,10 +403,12 @@ public class PolynomialController {
     }
 
     private void showIntegral(Polynomial polynomial) throws WrongInputSizeException {
-        double area = polynomial.getIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
-        System.out.println("Integral area: " + area);
-        integralLabel.setText(String.valueOf(area));
-        mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
+        if (!integralTextField1.getText().isEmpty() && !integralTextField2.getText().isEmpty()) {
+            double area = polynomial.getIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
+            System.out.println("Integral area: " + area);
+            integralLabel.setText(String.valueOf(area));
+            mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
+        }
     }
 
     private void showInflectionPoints(Polynomial polynomial) {

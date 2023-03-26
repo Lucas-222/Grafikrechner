@@ -184,16 +184,14 @@ public class MathCanvas extends StackPane {
     public void drawPoints(double[] givenPoint) {
         if (givenPoint.length == 0)  {
             for (double[] point : pointsArray) {
-                this.drawPoint(mathXCoordinateToCanvasXCoordinate(point[0]),
-                        mathYCoordinateToCanvasYCoordinate(point[1]));
+                this.drawPoint(point[0], point[1]);
 
                 contentGC.fillText("(" + point[0] + ", " + point[1] + ")",
                         mathXCoordinateToCanvasXCoordinate(point[0]) + 5,
                         mathYCoordinateToCanvasYCoordinate(point[1]) - 2.5);
             }
         } else {
-            this.drawPoint(mathXCoordinateToCanvasXCoordinate(givenPoint[0]),
-                    mathYCoordinateToCanvasYCoordinate(givenPoint[1]));
+            this.drawPoint(givenPoint[0], givenPoint[1]);
 
             contentGC.fillText("(" + givenPoint[0] + ", " + givenPoint[1] + ")",
                     mathXCoordinateToCanvasXCoordinate(givenPoint[0]) + 5,
