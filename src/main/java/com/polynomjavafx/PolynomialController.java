@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.util.StringConverter;
@@ -61,9 +62,11 @@ public class PolynomialController {
      * drawPolynomials each time a polynomial is submitted/a new is picked out from the drop-down list
      */
     private void drawPolynomials() {
+        // FIXME: no way to clear points on canvas without spread to polynomials!
+        mathCanvas.clearContentLayer();
 
         if (selectedPolynomial != null) {
-            this.showAttributes(selectedPolynomial);
+            this.drawAttributes(selectedPolynomial);
         }
 
         for (Polynomial p : polynomialArray) {
@@ -72,7 +75,13 @@ public class PolynomialController {
 
     }
 
+    private void redrawContent() {
+        this.drawPolynomials();
+        mathCanvas.drawPoints(new double[]{});
+    }
+
     private void initializePolynomials() {
+        selectedPolynomial = null;
         polynomialArray = mathCanvas.polynomialArray;
     }
 
@@ -105,6 +114,7 @@ public class PolynomialController {
                     double end = Double.parseDouble(matcher.group());
                     try {
                         this.mathCanvas.setRange(start, end);
+                        this.redrawContent();
                     } catch (InvalidRangeException e) {
                         System.out.println("Ungültige Eingabe");
                     }
@@ -125,7 +135,6 @@ public class PolynomialController {
                 } catch (NullPointerException e) {
                     System.out.println();
                 }
-
             }
         });
     }
@@ -235,9 +244,8 @@ public class PolynomialController {
     /**
      * (selectively) show attributes for each polynomial in array
      */
-    private void showAttributes(Polynomial p) {
+    private void drawAttributes(Polynomial p) {
         // show symmetry and roots if degree is <= 3
-        mathCanvas.contentGC.clearRect(0, 0, mathCanvas.contentLayer.getWidth(), mathCanvas.contentLayer.getHeight());
         if (p.getDegree() <= 3) {
             showSymmetry(p);
             showRoots(p);
@@ -255,7 +263,6 @@ public class PolynomialController {
         mathCanvas.reset();
         clearLabels();
         resetChoiceBox();
-
         initializeSpinners();
         initializePolynomials();
 
@@ -356,7 +363,7 @@ public class PolynomialController {
 
         // draw roots
         for (Double root : roots) {
-            mathCanvas.highlightPoint(root, 0);
+            mathCanvas.drawPoint(root, 0);
         }
 
         if (polynomial.getDegree() > 3) {
@@ -383,7 +390,7 @@ public class PolynomialController {
             }
 
             for (double[] extrema : extremaArray) {
-                mathCanvas.highlightPoint(extrema[0], extrema[1]);
+                mathCanvas.drawPoint(extrema[0], extrema[1]);
                 labelText.append(Arrays.toString(extrema));
             }
 
@@ -414,7 +421,7 @@ public class PolynomialController {
             }
 
             for (double[] inflection : inflectionArray) {
-                mathCanvas.highlightPoint(inflection[0], inflection[1]);
+                mathCanvas.drawPoint(inflection[0], inflection[1]);
                 labelText.append(Arrays.toString(inflection));
             }
 
@@ -437,7 +444,7 @@ public class PolynomialController {
             }
 
             for (double[] saddlePoint : saddleArray) {
-                mathCanvas.highlightPoint(saddlePoint[0] , saddlePoint[1]);
+                mathCanvas.drawPoint(saddlePoint[0] , saddlePoint[1]);
                 labelText.append(Arrays.toString(saddlePoint));
             }
 
@@ -451,26 +458,34 @@ public class PolynomialController {
 
     public void onMouseScrolledOnCanvas(ScrollEvent scrollEvent) throws WrongInputSizeException {
         if (scrollEvent.isControlDown()) {
-            double delta = scrollEvent.getDeltaY()/10;
+            double delta = scrollEvent.getDeltaY() / 10;
             mathCanvas.changeScale(delta, delta);
         } else {
             mathCanvas.scroll(scrollEvent.getDeltaX(), scrollEvent.getDeltaY());
         }
-        this.drawPolynomials();
+        this.redrawContent();
         this.showIntegral(selectedPolynomial);
         scaleChoicebox.setValue("");
 
     }
 
+    public void onMouseClickedOnCanvas(MouseEvent mouseEvent) {
+        if (mathCanvas.pointsArray.size() <= 5) {
+            mathCanvas.pointsArray.add(new double[]{mathCanvas.canvasXCoordinateToMathXCoordinate(mouseEvent.getX()),
+                    mathCanvas.canvasYCoordinateToMathYCoordinate(mouseEvent.getY())});
+            mathCanvas.drawPoints(mathCanvas.pointsArray.get(mathCanvas.pointsArray.size() - 1));
+        }
+    }
+
     public void resetScaling() throws WrongInputSizeException {
         mathCanvas.resetScaling();
-        this.drawPolynomials();
+        this.redrawContent();
         this.showIntegral(selectedPolynomial);
     }
 
     public void returnToOrigin() throws WrongInputSizeException {
         mathCanvas.returnToOrigin();
-        this.drawPolynomials();
+        this.redrawContent();
         this.showIntegral(selectedPolynomial);
     }
 }
