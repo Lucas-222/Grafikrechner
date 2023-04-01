@@ -37,6 +37,9 @@ public class PolynomialController {
     public RadioMenuItem gridToggleMenuItem;
     public RadioMenuItem axisToggleMenuItem;
     public RadioMenuItem axisScalesMenuItemToggle;
+    public RadioMenuItem canvasPoints;
+    public RadioMenuItem polynomialPoints;
+    public ToggleGroup pointSelectionTG;
     public MenuItem returnToOriginMenuItem;
     public HBox infoHbox;
     public ChoiceBox<String> scaleChoicebox;
@@ -46,6 +49,7 @@ public class PolynomialController {
     private ChoiceBox<String> polynomialsCB;
     @FXML
     private MathCanvas mathCanvas;
+
 
     @FXML
     private void initialize() {
@@ -74,10 +78,9 @@ public class PolynomialController {
         }
 
     }
-
     private void redrawContent() {
         this.drawPolynomials();
-        mathCanvas.drawPoints(new double[]{});
+        mathCanvas.drawPoints(selectedPolynomial, canvasPoints.isSelected());
     }
 
     private void initializePolynomials() {
@@ -149,6 +152,12 @@ public class PolynomialController {
         axisScalesMenuItemToggle.selectedProperty().addListener((observable, oldValue, newValue) -> mathCanvas.setShowScales(newValue));
         axisToggleMenuItem.selectedProperty().addListener((observable, oldValue, newValue) -> mathCanvas.setShowAxis(newValue));
         gridToggleMenuItem.selectedProperty().addListener((observable, oldValue, newValue) -> mathCanvas.setShowGrid(newValue));
+
+
+        // add menuItems to toggle group to make selection mutually exclusive
+        pointSelectionTG = new ToggleGroup();
+        canvasPoints.setToggleGroup(pointSelectionTG);
+        polynomialPoints.setToggleGroup(pointSelectionTG);
     }
 
     private void initializeSpinners() {
@@ -410,6 +419,7 @@ public class PolynomialController {
             double area = polynomial.getIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
             System.out.println("Integral area: " + area);
             integralLabel.setText(String.valueOf(area));
+            integralLabel.setText(String.valueOf(area));
             mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
         }
     }
@@ -473,10 +483,26 @@ public class PolynomialController {
     }
 
     public void onMouseClickedOnCanvas(MouseEvent mouseEvent) {
-        if (mathCanvas.pointsArray.size() <= 5) {
+        if (mathCanvas.pointsArray.size() <= 5 && mouseEvent.getClickCount() == 1) {
             mathCanvas.pointsArray.add(new double[]{mathCanvas.canvasXCoordinateToMathXCoordinate(mouseEvent.getX()),
                     mathCanvas.canvasYCoordinateToMathYCoordinate(mouseEvent.getY())});
-            mathCanvas.drawPoints(mathCanvas.pointsArray.get(mathCanvas.pointsArray.size() - 1));
+            if (canvasPoints.isSelected()) {
+                mathCanvas.drawPointLabel(mathCanvas.pointsArray.get(mathCanvas.pointsArray.size() - 1)[0],
+                        mathCanvas.pointsArray.get(mathCanvas.pointsArray.size() - 1)[1]);
+            } else {
+                try {
+                    mathCanvas.drawPointLabel(mathCanvas.pointsArray.get(mathCanvas.pointsArray.size() - 1)[0],
+                            selectedPolynomial.functionValue(mathCanvas.pointsArray.get(
+                                    mathCanvas.pointsArray.size() - 1)[0]));
+                } catch (NullPointerException e) {
+                    System.out.println("Can't plot a point because no polynomial has been selected. Please select" +
+                            " a different mode from the menu or input a function to be drawn.");
+                    mathCanvas.pointsArray.remove(mathCanvas.pointsArray.size() - 1);
+                }
+            }
+        } else if (mathCanvas.pointsArray.size() > 1 && mouseEvent.getClickCount() > 1) {
+            mathCanvas.pointsArray.clear();
+            this.redrawContent();
         }
     }
 

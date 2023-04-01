@@ -177,28 +177,38 @@ public class MathCanvas extends StackPane {
                 mathYCoordinateToCanvasYCoordinate(y) - 2.5, 5.0, 5.0);
     }
 
+    public void drawPointLabel(double x, double y) {
+        double xRounded = Math.round(x * 100.0) / 100.0;
+        double yRounded = Math.round(y * 100.0) / 100.0;
+        contentLayer.getGraphicsContext2D().fillOval(mathXCoordinateToCanvasXCoordinate(x) - 2.5,
+                mathYCoordinateToCanvasYCoordinate(y) - 2.5, 5.0, 5.0);
+        contentLayer.getGraphicsContext2D().fillText("(" + xRounded + ", " + yRounded + ")",
+                mathXCoordinateToCanvasXCoordinate(x) + 5.0, mathYCoordinateToCanvasYCoordinate(y) - 2.5);
+    }
+
     /**
      * draw points retrieved from pointsArray attribute
-     * @param givenPoint only draws this point to the canvas if passed
+     * @param selectedPolynomial currently selected polynomial
+     * @param canvasPointsMode point mode selected in the menu
      */
-    public void drawPoints(double[] givenPoint) {
-        if (givenPoint.length == 0)  {
-            for (double[] point : pointsArray) {
-                this.drawPoint(point[0], point[1]);
+    public void drawPoints(Polynomial selectedPolynomial, boolean canvasPointsMode) {
 
-                contentGC.fillText("(" + point[0] + ", " + point[1] + ")",
-                        mathXCoordinateToCanvasXCoordinate(point[0]) + 5,
-                        mathYCoordinateToCanvasYCoordinate(point[1]) - 2.5);
-            }
+        ArrayList<double[]> arrayToUse = new ArrayList<>();
+
+        if (canvasPointsMode) {
+            arrayToUse = pointsArray;
         } else {
-            this.drawPoint(givenPoint[0], givenPoint[1]);
-
-            contentGC.fillText("(" + givenPoint[0] + ", " + givenPoint[1] + ")",
-                    mathXCoordinateToCanvasXCoordinate(givenPoint[0]) + 5,
-                    mathYCoordinateToCanvasYCoordinate(givenPoint[1]) - 2.5);
+            for (double[] point : pointsArray) {
+                arrayToUse.add(new double[]{point[0],
+                        selectedPolynomial.functionValue(point[0])});
+            }
         }
 
+        for (double[] point : arrayToUse) {
+            this.drawPointLabel(point[0], point[1]);
+        }
     }
+
     public void drawPolynomial(Polynomial polynomialToDraw) {
         contentGC.setStroke(polynomialToDraw.polyColor);
 

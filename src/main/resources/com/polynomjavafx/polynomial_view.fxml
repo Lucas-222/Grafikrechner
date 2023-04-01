@@ -10,31 +10,46 @@
     <VBox alignment="TOP_CENTER" layoutY="-2.0" prefHeight="606.0" prefWidth="1064.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <MenuBar prefHeight="12.0" prefWidth="974.0">
             <Menu mnemonicParsing="false" text="Anzeige">
+
                 <RadioMenuItem fx:id="axisToggleMenuItem" mnemonicParsing="false" text="Achsen">
                     <accelerator>
                         <KeyCodeCombination alt="UP" code="K" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </RadioMenuItem>
+
                 <RadioMenuItem fx:id="gridToggleMenuItem" mnemonicParsing="false" text="Gitter">
                     <accelerator>
                         <KeyCodeCombination alt="UP" code="G" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </RadioMenuItem>
+
                 <RadioMenuItem fx:id="axisScalesMenuItemToggle" mnemonicParsing="false" text="Achsenbeschriftung">
                     <accelerator>
                         <KeyCodeCombination alt="UP" code="L" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </RadioMenuItem>
+
                 <MenuItem fx:id="returnToOriginMenuItem" mnemonicParsing="false" onAction="#returnToOrigin" text="Zurück zum Ursprung">
                     <accelerator>
                         <KeyCodeCombination alt="UP" code="U" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </MenuItem>
+
                 <MenuItem mnemonicParsing="false" onAction="#resetScaling" text="Skalierung zurücksetzen">
                     <accelerator>
                         <KeyCodeCombination alt="UP" code="R" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </MenuItem>
+
+                <Menu mnemonicParsing="false" text="Punktauswahl Modus">
+                    <RadioMenuItem fx:id="polynomialPoints" text="Polynom" selected="true">
+
+                    </RadioMenuItem>
+                    <RadioMenuItem fx:id="canvasPoints" text="Canvas">
+
+                    </RadioMenuItem>
+                </Menu>
+
             </Menu>
         </MenuBar>
         <HBox alignment="CENTER" prefHeight="64.0" prefWidth="622.0" spacing="20.0">
