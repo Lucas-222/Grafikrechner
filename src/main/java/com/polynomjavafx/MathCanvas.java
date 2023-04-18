@@ -188,23 +188,9 @@ public class MathCanvas extends StackPane {
 
     /**
      * draw points retrieved from pointsArray attribute
-     * @param selectedPolynomial currently selected polynomial
-     * @param canvasPointsMode point mode selected in the menu
      */
-    public void drawPoints(Polynomial selectedPolynomial, boolean canvasPointsMode) {
-
-        ArrayList<double[]> arrayToUse = new ArrayList<>();
-
-        if (canvasPointsMode) {
-            arrayToUse = pointsArray;
-        } else {
-            for (double[] point : pointsArray) {
-                arrayToUse.add(new double[]{point[0],
-                        selectedPolynomial.functionValue(point[0])});
-            }
-        }
-
-        for (double[] point : arrayToUse) {
+    public void drawPoints() {
+        for (double[] point : pointsArray) {
             this.drawPointLabel(point[0], point[1]);
         }
     }

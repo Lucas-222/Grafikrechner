@@ -80,7 +80,7 @@ public class PolynomialController {
     }
     private void redrawContent() {
         this.drawPolynomials();
-        mathCanvas.drawPoints(selectedPolynomial, canvasPoints.isSelected());
+        mathCanvas.drawPoints();
     }
 
     private void initializePolynomials() {
@@ -134,6 +134,7 @@ public class PolynomialController {
                     if (p.toString().contentEquals(newValue)) {
                         this.selectedPolynomial = p;
                         this.drawPolynomials();
+                        this.mathCanvas.drawPoints();
                     }
                 } catch (NullPointerException e) {
                     System.out.println();
@@ -479,25 +480,25 @@ public class PolynomialController {
         this.redrawContent();
         this.showIntegral(selectedPolynomial);
         scaleChoicebox.setValue("");
-
     }
 
     public void onMouseClickedOnCanvas(MouseEvent mouseEvent) {
+        double mathX = mathCanvas.canvasXCoordinateToMathXCoordinate(mouseEvent.getX());
+        double mathY = mathCanvas.canvasYCoordinateToMathYCoordinate(mouseEvent.getY());
         if (mathCanvas.pointsArray.size() <= 5 && mouseEvent.getClickCount() == 1) {
-            mathCanvas.pointsArray.add(new double[]{mathCanvas.canvasXCoordinateToMathXCoordinate(mouseEvent.getX()),
-                    mathCanvas.canvasYCoordinateToMathYCoordinate(mouseEvent.getY())});
             if (canvasPoints.isSelected()) {
-                mathCanvas.drawPointLabel(mathCanvas.pointsArray.get(mathCanvas.pointsArray.size() - 1)[0],
-                        mathCanvas.pointsArray.get(mathCanvas.pointsArray.size() - 1)[1]);
+                mathCanvas.drawPointLabel(mathX, mathY);
+                mathCanvas.pointsArray.add(new double[]{mathX, mathY});
             } else {
                 try {
-                    mathCanvas.drawPointLabel(mathCanvas.pointsArray.get(mathCanvas.pointsArray.size() - 1)[0],
-                            selectedPolynomial.functionValue(mathCanvas.pointsArray.get(
-                                    mathCanvas.pointsArray.size() - 1)[0]));
+                    mathCanvas.drawPointLabel(mathX, selectedPolynomial.functionValue(mathX));
+                    mathCanvas.pointsArray.add(new double[]{mathX, selectedPolynomial.functionValue(mathX)});
                 } catch (NullPointerException e) {
                     System.out.println("Can't plot a point because no polynomial has been selected. Please select" +
                             " a different mode from the menu or input a function to be drawn.");
-                    mathCanvas.pointsArray.remove(mathCanvas.pointsArray.size() - 1);
+                    if (mathCanvas.pointsArray.size() != 0) {
+                        mathCanvas.pointsArray.remove(mathCanvas.pointsArray.size() - 1);
+                    }
                 }
             }
         } else if (mathCanvas.pointsArray.size() > 1 && mouseEvent.getClickCount() > 1) {
