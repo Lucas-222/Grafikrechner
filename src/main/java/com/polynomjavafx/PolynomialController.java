@@ -1,30 +1,27 @@
 package com.polynomjavafx;
 
+import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.StringConverter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.io.IOException;
+import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PolynomialController {
-    public Spinner<Double> coefficient5Spinner;
-    public Spinner<Double> coefficient4Spinner;
-    public Spinner<Double> coefficient3Spinner;
-    public Spinner<Double> coefficient2Spinner;
-    public Spinner<Double> coefficient1Spinner;
-    public Spinner<Double> coefficient0Spinner;
-    public Label inputWarningLabel;
     public Label symmetryLabel;
     public Label degreeLabel;
     public Label rootLabel;
@@ -54,7 +51,6 @@ public class PolynomialController {
     @FXML
     private void initialize() {
         initializeVisuals();
-        initializeSpinners();
         initializeMenuItems();
         initializePolynomials();
         initScaleChoiceBox();
@@ -78,6 +74,7 @@ public class PolynomialController {
         }
 
     }
+
     private void redrawContent() {
         this.drawPolynomials();
         mathCanvas.drawPoints();
@@ -129,7 +126,7 @@ public class PolynomialController {
 
     private void polynomialsCBListener() {
         this.polynomialsCB.valueProperty().addListener((observable, oldValue, newValue) -> {
-            for (Polynomial p: polynomialArray) {
+            for (Polynomial p : polynomialArray) {
                 try {
                     if (p.toString().contentEquals(newValue)) {
                         this.selectedPolynomial = p;
@@ -161,10 +158,7 @@ public class PolynomialController {
         polynomialPoints.setToggleGroup(pointSelectionTG);
     }
 
-    private void initializeSpinners() {
-        //Array of every spinner
-        List<Spinner<Double>> spinners = Arrays.asList(coefficient5Spinner, coefficient4Spinner, coefficient3Spinner, coefficient2Spinner, coefficient1Spinner,
-                coefficient0Spinner);
+    private void initializeSpinners(List<Spinner<Double>> spinners) {
         StringConverter<Double> stringConverter = new StringConverter<>() {
             @Override
             public String toString(Double doubleInput) {
@@ -188,6 +182,7 @@ public class PolynomialController {
                 }
             }
         };
+
         UnaryOperator<TextFormatter.Change> filter = change -> {
             String newString = change.getControlNewText();
             if (newString.matches("-?([0-9]+[.,]?[0-9]*)*")) {
@@ -208,7 +203,7 @@ public class PolynomialController {
             if (i == spinners.size() - 1) {
                 spinner.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
                     if (keyEvent.getCode() == KeyCode.ENTER) {
-                        submitInput();
+                        System.out.println("Ready for confirmation");
                     }
                 });
             }
@@ -228,30 +223,86 @@ public class PolynomialController {
     }
 
     private void initializeVisuals() {
-
     }
 
-    @FXML
-    private void onSubmitButtonClicked() {
-        submitInput();
-    }
-
-    private void submitInput() {
+    @SuppressWarnings("unchecked")
+    public void addPolynomial() {
         try {
-            double[] coefficients = {coefficient0Spinner.getValue(), coefficient1Spinner.getValue(),
-                    coefficient2Spinner.getValue(), coefficient3Spinner.getValue(),
-                    coefficient4Spinner.getValue(), coefficient5Spinner.getValue()};
+            // load DialogPane and its contents
+            FXMLLoader loadDialog = new FXMLLoader(Objects.requireNonNull(getClass().getResource("input_dialog.fxml")));
+            // define dialog along with its child elements
+            Dialog<String> polyDialog = new Dialog<>();
+            DialogPane polyPane = polyDialog.getDialogPane();
+            Parent root = loadDialog.load();
+            polyPane.setContent(root);
+            Stage stage = (Stage) polyPane.getScene().getWindow();
+            ObservableMap<String, Object> namespace = loadDialog.getNamespace();
+            ArrayList<Spinner<Double>> spinners = new ArrayList<>(6);
+            ColorPicker colorPicker = (ColorPicker) namespace.get("polyColorPicker");
+            polyDialog.setTitle("Polynomial Input");
+            stage.setResizable(true);
+            colorPicker.setValue(Color.rgb(new Random().nextInt(256), new Random().nextInt(256),
+                    new Random().nextInt(256)));
 
-            this.polynomialArray.add(new Polynomial(coefficients));
-            this.inputWarningLabel.setVisible(false);
-            this.updateChoiceBox(new Polynomial(coefficients));
-            // FIXME: this clears the canvas and doesn't draw the points?
-            // mathCanvas.drawPolynomial(selectedPolynomial);
-            this.redrawContent();
+            for (int i = 5; i >= 0; i--) {
+                try {
+                    spinners.add((Spinner<Double>) namespace.get("coefficient" + i + "spinner"));
+                } catch (ClassCastException e) {
+                    e.printStackTrace();
+                }
+            }
 
-        } catch (WrongInputSizeException inputSizeException) {
-            this.inputWarningLabel.setVisible(true);
+            initializeSpinners(spinners);
+            Button okButton = (Button) namespace.get("confirmButton");
+            okButton.setOnAction(event -> {
+                try {
+                    double[] coefficients = new double[]{spinners.get(5).getValue(), spinners.get(4).getValue(),
+                    spinners.get(3).getValue(), spinners.get(2).getValue(), spinners.get(1).getValue(),
+                    spinners.get(0).getValue()};
+                    boolean allZeroes = true;
+                    for (double coefficient : coefficients) {
+                        if (coefficient != 0.0) {
+                            allZeroes = false;
+                            break;
+                        }
+                    }
+                    if (!allZeroes) {
+                        submitInput(coefficients, colorPicker.getValue());
+                    }
+                } catch (WrongInputSizeException e) {
+                    Label inputWarningLabel = (Label) namespace.get("inputWarningLabel");
+                    HBox warningHBox = (HBox) namespace.get("warningHBox");
+                    warningHBox.setManaged(true);
+                    inputWarningLabel.setVisible(true);
+                }
+            });
+
+            Button cancelButton = (Button) namespace.get("cancelButton");
+            cancelButton.setOnAction(event -> polyPane.fireEvent(new WindowEvent(polyPane.getScene().getWindow(),
+                    WindowEvent.WINDOW_CLOSE_REQUEST)));
+
+            stage.setOnCloseRequest(event -> {
+                polyDialog.setResult(null);
+                polyDialog.close();
+            });
+
+            stage.sizeToScene();
+            polyDialog.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
+
+    private void submitInput(double[] coefficients, Color color) throws WrongInputSizeException {
+        Polynomial newPolynomial;
+        newPolynomial = new Polynomial(coefficients, color);
+        System.out.println(newPolynomial.getDegree());
+        this.polynomialArray.add(newPolynomial);
+        this.updateChoiceBox(newPolynomial);
+        // FIXME: this clears the canvas and doesn't draw the points?
+        // mathCanvas.drawPolynomial(selectedPolynomial);
+        this.redrawContent();
     }
 
     /**
@@ -276,12 +327,10 @@ public class PolynomialController {
         mathCanvas.reset();
         clearLabels();
         resetChoiceBox();
-        initializeSpinners();
         initializePolynomials();
     }
 
     private void clearLabels() {
-        inputWarningLabel.setText("");
         symmetryLabel.setText("");
         rootLabel.setText("");
         symmetryLabel.setText("");
@@ -485,6 +534,7 @@ public class PolynomialController {
     public void onMouseClickedOnCanvas(MouseEvent mouseEvent) {
         double mathX = mathCanvas.canvasXCoordinateToMathXCoordinate(mouseEvent.getX());
         double mathY = mathCanvas.canvasYCoordinateToMathYCoordinate(mouseEvent.getY());
+
         if (mathCanvas.pointsArray.size() <= 5 && mouseEvent.getClickCount() == 1) {
             if (canvasPoints.isSelected()) {
                 mathCanvas.drawPointLabel(mathX, mathY);

@@ -13,7 +13,6 @@ public class Polynomial {
     ArrayList<double[]> extrema = new ArrayList<>();
     ArrayList<double[]> inflections = new ArrayList<>();
     ArrayList<double[]> saddles = new ArrayList<>();
-    ArrayList<double[]> drawnPoints = new ArrayList<>();
     Color polyColor;
 
     public Polynomial(double[] coefficients, Color... color) throws WrongInputSizeException {
