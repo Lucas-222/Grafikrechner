@@ -13,7 +13,7 @@ public class Application extends javafx.application.Application {
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("Grafikrechner");
         stage.setScene(scene);
-        stage.setResizable(false);
+        stage.setResizable(true);
         stage.show();
     }
 

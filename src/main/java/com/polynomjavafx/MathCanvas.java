@@ -1,6 +1,7 @@
 package com.polynomjavafx;
 
 import java.util.ArrayList;
+
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
@@ -17,8 +18,7 @@ public class MathCanvas extends StackPane {
     double yScale;
     double xOffset;
     double yOffset;
-    double colSize;
-    double rowSize;
+    double cellSize;
     private double tickLineLength;
     private double xAxisPosition;
     private double yAxisPosition;
@@ -47,26 +47,42 @@ public class MathCanvas extends StackPane {
         showScales = true;
         showAxis = true;
 
+
         // Add change listeners to keep size of child elements consistent with parent
         this.widthProperty().addListener((observable, oldValue, newValue) -> {
-            coordinateSystemLayer.setWidth((double) newValue);
-            contentLayer.setWidth((double) newValue);
+            double oldWidth =(double)oldValue;
+            double newWidth = (double) newValue;
+            coordinateSystemLayer.setWidth((newWidth));
+            contentLayer.setWidth(newWidth);
+
+            //If xScale is 0 (only during initialization) use default cell amount, otherwise get current cell amount from dividing old width by cell size
+            double cellAmount = xScale != 0 ? oldWidth / cellSize : newWidth / DEFAULT_CELL_AMOUNT;
+
+            //Calculate new xScale by dividing width by cell amount
+            xScale = newWidth / cellAmount;
+
+            this.yScale = xScale;
+            cellSize = xScale;
+            updateCellSize();
+            yAxisPosition =  mathXCoordinateToCanvasXCoordinate(0);
+            drawCoordinateSystem();
         });
 
         this.heightProperty().addListener(((observable, oldValue, newValue )-> {
-            coordinateSystemLayer.setHeight((double) newValue);
-            contentLayer.setHeight((double) newValue);
-            this.yScale = contentLayer.getHeight() / DEFAULT_CELL_AMOUNT;
-            this.xScale = contentLayer.getWidth() / DEFAULT_CELL_AMOUNT;
+            System.out.println("Height changed");
+            double newHeight = (double) newValue;
+
+            coordinateSystemLayer.setHeight(newHeight);
+            contentLayer.setHeight(newHeight);
+
             tickLineLength = this.getHeight()/100;
-            rowSize = yScale;
-            colSize = xScale;
 
+
+            updateCellSize();
             xAxisPosition = mathYCoordinateToCanvasYCoordinate(0);
-            yAxisPosition = mathXCoordinateToCanvasXCoordinate(0);
-
             drawCoordinateSystem();
         } ));
+
         // values that represent the space scrolled on the canvas in pixels
         this.xOffset = 0;
         this.yOffset = 0;
@@ -108,16 +124,16 @@ public class MathCanvas extends StackPane {
      * Draws the axis onto the coordinate system canvas
      */
     private void drawAxis() {
-        double yAxisPos = yAxisPosition + xOffset;
-        double xAxisPos = xAxisPosition + yOffset;
+        double yAxisCanvasPos = yAxisPosition;
+        double xAxisCanvasPos = xAxisPosition;
         coordinateSysGC.setStroke(Color.BLACK);
         coordinateSysGC.setLineWidth(1.0);
 
         //Draw x-axis
-        coordinateSysGC.strokeLine(0, xAxisPos, contentLayer.getWidth(), xAxisPos);
+        coordinateSysGC.strokeLine(0, xAxisCanvasPos, contentLayer.getWidth(), xAxisCanvasPos);
 
         //Draw y-axis
-        coordinateSysGC.strokeLine(yAxisPos, contentLayer.getHeight(), yAxisPos, 0);
+        coordinateSysGC.strokeLine(yAxisCanvasPos, contentLayer.getHeight(), yAxisCanvasPos, 0);
     }
 
     /**
@@ -136,7 +152,7 @@ public class MathCanvas extends StackPane {
      * Draws the horizontal lines of the coordinate system
      */
     private void drawHorizontalLines() {
-        double majorScaleDistance = colSize; //The pixel amount between major scales
+        double majorScaleDistance = cellSize; //The pixel amount between major scales
         //Set color and width of the lines to stroke
         double scrollingOffset = yOffset % majorScaleDistance; //The offset of the first line coordinates created by the y-offset
         double scalingOffset = xAxisPosition % majorScaleDistance; //The offset created by the scale distance. Without this, the axis and grid could go out of alignment
@@ -216,6 +232,7 @@ public class MathCanvas extends StackPane {
         contentGC.setLineWidth(polynomialWidth);
         //Set step size so the function value is calculated for every pixel on the canvas
         double stepSize = (contentLayer.getWidth() / xScale) / contentLayer.getWidth();
+        System.out.println(stepSize);
 
         //Set starting point of the first drawn line to far left side of the canvas
         double lastX = ((-contentLayer.getWidth()) - xOffset / xScale) / 2.0;
@@ -239,7 +256,7 @@ public class MathCanvas extends StackPane {
      * Draws the vertical lines of the coordinate system
      */
     private void drawVerticalLines() {
-        double majorScaleDistance = rowSize;
+        double majorScaleDistance = cellSize;
         double scrollingOffSet = xOffset % majorScaleDistance; //The offset of the first line coordinates created by the x-offset
         double scalingOffset = coordinateSystemLayer.getWidth() / 2 % majorScaleDistance; //The offset created by the scale distance. Without this, the axis and grid could go out of alignment
         if(showGrid || showScales) {
@@ -344,14 +361,13 @@ public class MathCanvas extends StackPane {
         double range = Math.abs(end - start);
         //Set scale to be able to display range
         this.xScale = this.getWidth()/range;
-        this.yScale = this.getHeight()/range;
+        this.yScale = xScale;
 
         double offset = Math.abs(start) - Math.abs(end);
         xOffset = offset * xScale;
 
         this.yOffset = 0;
-        updateColSize();
-        updateRowSize();
+        updateCellSize();
         drawCoordinateSystem();
     }
 
@@ -363,37 +379,22 @@ public class MathCanvas extends StackPane {
     public void changeScale(double changeX, double changeY) {
         xScale += changeX * xScale / 100;
         yScale += changeY * yScale / 100;
-        updateRowSize();
-        updateColSize();
+        updateCellSize();
         drawCoordinateSystem();
     }
 
 
     /**
-     * Updates row size dependent on current scaling to avoid to small / big rows
-     */
-    private void updateRowSize() {
-        rowSize = xScale;
-        double canvasHeight = coordinateSystemLayer.getHeight();
-        while (canvasHeight / rowSize > 5) {
-            rowSize *= 10;
-        }
-        while (canvasHeight / rowSize < 2) {
-            rowSize /= 10;
-        }
-    }
-
-    /**
      * Updates column size dependent on current scaling to avoid to small / big columns
      */
-    private void updateColSize() {
-        colSize = yScale;
+    private void updateCellSize() {
+        cellSize = xScale;
         double canvasWidth = coordinateSystemLayer.getWidth();
-        while (canvasWidth / colSize > 5) {
-            colSize *= 10;
+        while (canvasWidth / cellSize > 5) {
+            cellSize *= 10;
         }
-        while (canvasWidth / colSize < 2) {
-            colSize /= 10;
+        while (canvasWidth / cellSize < 2) {
+            cellSize /= 10;
         }
     }
 
@@ -454,9 +455,8 @@ public class MathCanvas extends StackPane {
      */
     public void resetScaling() {
         this.xScale = coordinateSystemLayer.getWidth() / DEFAULT_CELL_AMOUNT;
-        this.yScale = coordinateSystemLayer.getHeight() / DEFAULT_CELL_AMOUNT;
-        updateColSize();
-        updateRowSize();
+        this.yScale = xScale;
+        updateCellSize();
         drawCoordinateSystem();
     }
 
