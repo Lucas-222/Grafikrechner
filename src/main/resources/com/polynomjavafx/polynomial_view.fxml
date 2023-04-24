@@ -6,43 +6,44 @@
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane  prefHeight="450" prefWidth="1064.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.polynomjavafx.PolynomialController" >
-    <VBox alignment="TOP_CENTER" layoutY="-2.0" prefHeight="300" prefWidth="1064.0" spacing="5.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <MenuBar prefHeight="12.0" prefWidth="974.0">
-            <Menu mnemonicParsing="false" text="Anzeige">
+<BorderPane prefHeight="606.0" prefWidth="1064.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.polynomjavafx.PolynomialController">
+   <top>
+          <VBox alignment="TOP_CENTER" prefHeight="40.0" prefWidth="1039.0" spacing="5.0" BorderPane.alignment="CENTER">
+              <MenuBar prefHeight="12.0" prefWidth="974.0">
+                  <Menu mnemonicParsing="false" text="Anzeige">
 
-                <RadioMenuItem fx:id="axisToggleMenuItem" mnemonicParsing="false" text="Achsen">
-                    <accelerator>
-                        <KeyCodeCombination alt="UP" code="K" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                    </accelerator>
-                </RadioMenuItem>
+                      <RadioMenuItem fx:id="axisToggleMenuItem" mnemonicParsing="false" text="Achsen">
+                          <accelerator>
+                              <KeyCodeCombination alt="UP" code="K" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                          </accelerator>
+                      </RadioMenuItem>
 
-                <RadioMenuItem fx:id="gridToggleMenuItem" mnemonicParsing="false" text="Gitter">
-                    <accelerator>
-                        <KeyCodeCombination alt="UP" code="G" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                    </accelerator>
-                </RadioMenuItem>
+                      <RadioMenuItem fx:id="gridToggleMenuItem" mnemonicParsing="false" text="Gitter">
+                          <accelerator>
+                              <KeyCodeCombination alt="UP" code="G" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                          </accelerator>
+                      </RadioMenuItem>
 
-                <RadioMenuItem fx:id="axisScalesMenuItemToggle" mnemonicParsing="false" text="Achsenbeschriftung">
-                    <accelerator>
-                        <KeyCodeCombination alt="UP" code="L" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                    </accelerator>
-                </RadioMenuItem>
+                      <RadioMenuItem fx:id="axisScalesMenuItemToggle" mnemonicParsing="false" text="Achsenbeschriftung">
+                          <accelerator>
+                              <KeyCodeCombination alt="UP" code="L" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                          </accelerator>
+                      </RadioMenuItem>
 
-                <MenuItem fx:id="returnToOriginMenuItem" mnemonicParsing="false" onAction="#returnToOrigin" text="Zurück zum Ursprung">
-                    <accelerator>
-                        <KeyCodeCombination alt="UP" code="U" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                    </accelerator>
-                </MenuItem>
+                      <MenuItem fx:id="returnToOriginMenuItem" mnemonicParsing="false" onAction="#returnToOrigin" text="Zurück zum Ursprung">
+                          <accelerator>
+                              <KeyCodeCombination alt="UP" code="U" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                          </accelerator>
+                      </MenuItem>
 
-                <MenuItem mnemonicParsing="false" onAction="#resetScaling" text="Skalierung zurücksetzen">
-                    <accelerator>
-                        <KeyCodeCombination alt="UP" code="R" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                    </accelerator>
-                </MenuItem>
+                      <MenuItem mnemonicParsing="false" onAction="#resetScaling" text="Skalierung zurücksetzen">
+                          <accelerator>
+                              <KeyCodeCombination alt="UP" code="R" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                          </accelerator>
+                      </MenuItem>
 
-                <Menu mnemonicParsing="false" text="Punktauswahl Modus">
-                    <RadioMenuItem fx:id="polynomialPoints" selected="true" text="Polynom">
+                      <Menu mnemonicParsing="false" text="Punktauswahl Modus">
+                          <RadioMenuItem fx:id="polynomialPoints" selected="true" text="Polynom">
 
                     </RadioMenuItem>
                     <RadioMenuItem fx:id="canvasPoints" text="Canvas">
@@ -57,7 +58,7 @@
                 <GridPane alignment="CENTER" prefHeight="350.0" prefWidth="481.0">
                     <columnConstraints>
                         <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -99,13 +100,19 @@
                     <Label fx:id="integralLabel" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="8" />
 
                 </GridPane>
-
-
-
             <ChoiceBox fx:id="scaleChoicebox" prefHeight="34.0" prefWidth="150.0" />
                 <Button mnemonicParsing="false" onAction="#onResetButtonClicked" prefHeight="25.0" prefWidth="180.0" text="Reset" />
             </VBox>
-            <MathCanvas fx:id="mathCanvas" maxHeight="500.0" maxWidth="500.0" minHeight="500.0" minWidth="500.0" onMouseClicked="#onMouseClickedOnCanvas" onScroll="#onMouseScrolledOnCanvas" prefHeight="500.0" prefWidth="500.0" />
-        </HBox>
-    </VBox>
-</AnchorPane>
+   </left>
+   <center>
+      <HBox fillHeight="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="10.0" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <VBox fillWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="10.0" prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
+               <children>
+                        <MathCanvas fx:id="mathCanvas" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="10.0" onMouseClicked="#onMouseClickedOnCanvas" onScroll="#onMouseScrolledOnCanvas" prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </center>
+</BorderPane>
