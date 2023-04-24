@@ -20,8 +20,6 @@ public class MathCanvas extends StackPane {
     double yOffset;
     double cellSize;
     private double tickLineLength;
-    private double xAxisPosition;
-    private double yAxisPosition;
     private final double DEFAULT_CELL_AMOUNT;
     private boolean showAxis;
     private boolean showGrid;
@@ -64,12 +62,10 @@ public class MathCanvas extends StackPane {
             this.yScale = xScale;
             cellSize = xScale;
             updateCellSize();
-            yAxisPosition =  mathXCoordinateToCanvasXCoordinate(0);
             drawCoordinateSystem();
         });
 
         this.heightProperty().addListener(((observable, oldValue, newValue )-> {
-            System.out.println("Height changed");
             double newHeight = (double) newValue;
 
             coordinateSystemLayer.setHeight(newHeight);
@@ -79,7 +75,6 @@ public class MathCanvas extends StackPane {
 
 
             updateCellSize();
-            xAxisPosition = mathYCoordinateToCanvasYCoordinate(0);
             drawCoordinateSystem();
         } ));
 
@@ -124,8 +119,10 @@ public class MathCanvas extends StackPane {
      * Draws the axis onto the coordinate system canvas
      */
     private void drawAxis() {
-        double yAxisCanvasPos = yAxisPosition;
-        double xAxisCanvasPos = xAxisPosition;
+        double yAxisPosition = 0;
+        double yAxisCanvasPos = mathXCoordinateToCanvasXCoordinate(yAxisPosition);
+        double xAxisPosition = 0;
+        double xAxisCanvasPos = mathYCoordinateToCanvasYCoordinate(xAxisPosition);
         coordinateSysGC.setStroke(Color.BLACK);
         coordinateSysGC.setLineWidth(1.0);
 
@@ -155,7 +152,7 @@ public class MathCanvas extends StackPane {
         double majorScaleDistance = cellSize; //The pixel amount between major scales
         //Set color and width of the lines to stroke
         double scrollingOffset = yOffset % majorScaleDistance; //The offset of the first line coordinates created by the y-offset
-        double scalingOffset = xAxisPosition % majorScaleDistance; //The offset created by the scale distance. Without this, the axis and grid could go out of alignment
+        double scalingOffset = coordinateSystemLayer.getHeight() / 2 % majorScaleDistance; //The offset created by the scale distance. Without this, the axis and grid could go out of alignment
         //Only start loop if labels or gird are supposed to be shown
         if(showGrid || showScales){
             for(double yCoordinate = scrollingOffset + scalingOffset; yCoordinate <= coordinateSystemLayer.getHeight(); yCoordinate += majorScaleDistance) {
@@ -232,7 +229,6 @@ public class MathCanvas extends StackPane {
         contentGC.setLineWidth(polynomialWidth);
         //Set step size so the function value is calculated for every pixel on the canvas
         double stepSize = (contentLayer.getWidth() / xScale) / contentLayer.getWidth();
-        System.out.println(stepSize);
 
         //Set starting point of the first drawn line to far left side of the canvas
         double lastX = ((-contentLayer.getWidth()) - xOffset / xScale) / 2.0;
