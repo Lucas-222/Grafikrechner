@@ -78,6 +78,9 @@ public class PolynomialController {
     private void redrawContent() {
         this.drawPolynomials();
         mathCanvas.drawPoints();
+        if (!integralTextField1.getText().isEmpty() && !integralTextField2.getText().isEmpty()) {
+            mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
+        }
     }
 
     private void initializePolynomials() {
@@ -232,8 +235,8 @@ public class PolynomialController {
             FXMLLoader loadDialog = new FXMLLoader(Objects.requireNonNull(getClass().getResource("input_dialog.fxml")));
             // define dialog along with its child elements
             Dialog<String> polyDialog = new Dialog<>();
-            DialogPane polyPane = polyDialog.getDialogPane();
             Parent root = loadDialog.load();
+            DialogPane polyPane = polyDialog.getDialogPane();
             polyPane.setContent(root);
             Stage stage = (Stage) polyPane.getScene().getWindow();
             ObservableMap<String, Object> namespace = loadDialog.getNamespace();
@@ -337,8 +340,6 @@ public class PolynomialController {
         rootLabel.setText("");
         degreeLabel.setText("");
         integralLabel.setText("");
-        integralTextField1.setText("");
-        integralTextField2.setText("");
         extremaLabel.setText("");
         inflectionLabel.setText("");
         saddleLabel.setText("");

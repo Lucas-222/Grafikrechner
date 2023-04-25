@@ -1,15 +1,12 @@
 package com.polynomjavafx;
 
-import java.util.ArrayList;
-
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+
+import java.util.ArrayList;
 
 public class MathCanvas extends StackPane {
     // Uninitialized Attributes
@@ -164,7 +161,7 @@ public class MathCanvas extends StackPane {
                     coordinateSysGC.setStroke(Color.GRAY);
                     coordinateSysGC.setLineWidth(0.5);
                     coordinateSysGC.strokeLine(0, yCoordinate, coordinateSystemLayer.getWidth(), yCoordinate);
-                    for(double i = yCoordinate + majorScaleDistance/5; i < yCoordinate + majorScaleDistance; i+=majorScaleDistance/10) {
+                    for(double i = yCoordinate + majorScaleDistance/10; i < yCoordinate + majorScaleDistance; i+=majorScaleDistance/10) {
                         coordinateSysGC.setLineWidth(0.1);
                         coordinateSysGC.strokeLine(0, i, coordinateSystemLayer.getWidth(), i);
                     }
@@ -180,7 +177,8 @@ public class MathCanvas extends StackPane {
 
     public void drawIntegral(double x1, double x2, Polynomial polynomial) {
         contentGC.setStroke(Color.BLUE);
-        for (double start = Math.min(x1, x2); start < Math.max(x1, x2); start += 0.01) {
+        double stepSize = (contentLayer.getWidth() / xScale) / contentLayer.getWidth();
+        for (double start = Math.min(x1, x2); start < Math.max(x1, x2); start += stepSize) {
             contentGC.strokeLine(mathXCoordinateToCanvasXCoordinate(start),
                     mathYCoordinateToCanvasYCoordinate(0.0),
                     mathXCoordinateToCanvasXCoordinate(start),
