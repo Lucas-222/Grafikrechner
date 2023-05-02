@@ -251,7 +251,7 @@ public class MathCanvas extends StackPane {
 
 
                     //Draw 10 small lines between this line and the next
-                    for(double i = xCoordinate + majorScaleDistance/5; i < xCoordinate + majorScaleDistance; i+=majorScaleDistance/10) {
+                    for(double i = xCoordinate + majorScaleDistance/10; i < xCoordinate + majorScaleDistance; i+=majorScaleDistance/10) {
                         coordinateSysGC.setLineWidth(0.1);
                         coordinateSysGC.strokeLine(i , 0, i, coordinateSystemLayer.getHeight());
                     }
@@ -368,7 +368,7 @@ public class MathCanvas extends StackPane {
 
 
     /**
-     * Updates column size dependent on current scaling to avoid to small / big columns
+     * Updates cell size dependent on current scaling to avoid to small / big columns
      */
     private void updateCellSize() {
         cellSize = xScale;
