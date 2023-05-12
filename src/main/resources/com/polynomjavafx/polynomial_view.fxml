@@ -107,7 +107,7 @@
                     <Label text="Sattelpunkte:" GridPane.halignment="LEFT" GridPane.rowIndex="8">
                         <padding><Insets left="10.0" /></padding>
                     </Label>
-                    <Label text="Integral:" GridPane.halignment="LEFT" GridPane.rowIndex="9">
+                    <Label text="Integralfläche:" GridPane.halignment="LEFT" GridPane.rowIndex="9">
                         <padding><Insets left="10.0" /></padding>
                     </Label>
                     <Label text="Skalen:" GridPane.halignment="LEFT" GridPane.rowIndex="10">

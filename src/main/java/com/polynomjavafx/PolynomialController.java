@@ -1,5 +1,6 @@
 package com.polynomjavafx;
 
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -55,6 +56,7 @@ public class PolynomialController {
         initializeMenuItems();
         initializePolynomials();
         initScaleChoiceBox();
+        initIntegralTextFields();
         scaleChoiceBoxListener();
         polynomialsCBListener();
     }
@@ -63,8 +65,7 @@ public class PolynomialController {
      * drawPolynomials each time a polynomial is submitted/a new is picked out from the drop-down list
      */
     private void drawPolynomials() {
-        // FIXME: no way to clear points on canvas without spread to polynomials!
-        mathCanvas.clearContentLayer();
+        mathCanvas.clearLayers();
 
         for (Polynomial p : polynomialArray) {
             this.mathCanvas.drawPolynomial(p);
@@ -79,9 +80,6 @@ public class PolynomialController {
     private void redrawContent() {
         this.drawPolynomials();
         mathCanvas.drawPoints();
-        if (!integralTextField1.getText().isEmpty() && !integralTextField2.getText().isEmpty()) {
-            mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
-        }
     }
 
     private void initializePolynomials() {
@@ -134,8 +132,9 @@ public class PolynomialController {
                 try {
                     if (p.toString().contentEquals(newValue)) {
                         this.selectedPolynomial = p;
-                        this.drawPolynomials();
-                        this.mathCanvas.drawPoints();
+                        mathCanvas.integralGC.clearRect(0, 0, mathCanvas.integralLayer.getWidth(),
+                                mathCanvas.integralLayer.getHeight());
+                        this.drawAttributes(p);
                     }
                 } catch (NullPointerException e) {
                     System.out.println();
@@ -160,6 +159,28 @@ public class PolynomialController {
         pointSelectionTG = new ToggleGroup();
         canvasPoints.setToggleGroup(pointSelectionTG);
         polynomialPoints.setToggleGroup(pointSelectionTG);
+    }
+
+    private void initIntegralTextFields() {
+        ChangeListener<String> listener = (observable, oldValue, newValue) -> {
+            // some notes about regular expressions:
+            // ^ and $ are string anchors to exclude the rest of the string.
+            // [] are used to define a character set, and the ? makes it optional
+            // some chars like the period have special meanings in regular expressions and must be escaped with \\
+            // the + means the pattern may be repeated one or more times
+            if (newValue.matches("^[+-]?[0-9]+(\\.[0-9]+)?$")) {
+                mathCanvas.integralGC.clearRect(0, 0, mathCanvas.integralLayer.getWidth(),
+                        mathCanvas.integralLayer.getHeight());
+                try {
+                    this.showIntegral(selectedPolynomial);
+                } catch (WrongInputSizeException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+
+        integralTextField1.textProperty().addListener(listener);
+        integralTextField2.textProperty().addListener(listener);
     }
 
     private void initializeSpinners(List<Spinner<Double>> spinners) {
@@ -304,8 +325,6 @@ public class PolynomialController {
         System.out.println(newPolynomial.getDegree());
         this.polynomialArray.add(newPolynomial);
         this.updateChoiceBox(newPolynomial);
-        // FIXME: this clears the canvas and doesn't draw the points?
-        // mathCanvas.drawPolynomial(selectedPolynomial);
         this.redrawContent();
     }
 
@@ -320,18 +339,17 @@ public class PolynomialController {
             showExtrema(p);
             showInflectionPoints(p);
             showSaddlePoints(p);
-            try {
-                showIntegral(p);
-            } catch (WrongInputSizeException e) {
-                e.printStackTrace();
-            }
-
         } else {
             clearLabels();
         }
         // show information about polynomial
         showDegree(p);
         showYIntercept(p);
+        try {
+            showIntegral(p);
+        } catch (WrongInputSizeException e) {
+            e.printStackTrace();
+        }
     }
     @FXML
     private void onResetButtonClicked() {
@@ -351,6 +369,7 @@ public class PolynomialController {
         extremaLabel.setText("");
         inflectionLabel.setText("");
         saddleLabel.setText("");
+        yInterceptLabel.setText("");
     }
 
     private void addChangeListenerToIntegralInput(TextField integralInput) {
@@ -481,7 +500,6 @@ public class PolynomialController {
     private void showIntegral(Polynomial polynomial) throws WrongInputSizeException {
         if (!integralTextField1.getText().isEmpty() && !integralTextField2.getText().isEmpty()) {
             double area = polynomial.getIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
-            System.out.println("Integral area: " + area);
             integralLabel.setText(String.valueOf(area));
             integralLabel.setText(String.valueOf(area));
             mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
@@ -541,7 +559,6 @@ public class PolynomialController {
             mathCanvas.scroll(scrollEvent.getDeltaX(), scrollEvent.getDeltaY());
         }
         this.redrawContent();
-        this.showIntegral(selectedPolynomial);
         scaleChoiceBox.setValue("");
     }
 
@@ -567,19 +584,18 @@ public class PolynomialController {
             }
         } else if (mathCanvas.pointsArray.size() > 1 && mouseEvent.getClickCount() > 1) {
             mathCanvas.pointsArray.clear();
-            this.redrawContent();
+            mathCanvas.pointsGC.clearRect(0, 0, mathCanvas.integralLayer.getWidth(),
+                    mathCanvas.integralLayer.getHeight());
         }
     }
 
-    public void resetScaling() throws WrongInputSizeException {
+    public void resetScaling() {
         mathCanvas.resetScaling();
         this.redrawContent();
-        this.showIntegral(selectedPolynomial);
     }
 
-    public void returnToOrigin() throws WrongInputSizeException {
+    public void returnToOrigin() {
         mathCanvas.returnToOrigin();
         this.redrawContent();
-        this.showIntegral(selectedPolynomial);
     }
 }
