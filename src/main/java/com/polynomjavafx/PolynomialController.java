@@ -29,6 +29,7 @@ public class PolynomialController {
     public Label inflectionLabel;
     public Label saddleLabel;
     public Label integralLabel;
+    public Label yInterceptLabel;
     public TextField integralTextField1;
     public TextField integralTextField2;
     public RadioMenuItem gridToggleMenuItem;
@@ -39,7 +40,7 @@ public class PolynomialController {
     public ToggleGroup pointSelectionTG;
     public MenuItem returnToOriginMenuItem;
     public HBox infoHbox;
-    public ChoiceBox<String> scaleChoicebox;
+    public ChoiceBox<String> scaleChoiceBox;
     private ArrayList<Polynomial> polynomialArray;
     private Polynomial selectedPolynomial;
     @FXML
@@ -65,12 +66,12 @@ public class PolynomialController {
         // FIXME: no way to clear points on canvas without spread to polynomials!
         mathCanvas.clearContentLayer();
 
-        if (selectedPolynomial != null) {
-            this.drawAttributes(selectedPolynomial);
-        }
-
         for (Polynomial p : polynomialArray) {
             this.mathCanvas.drawPolynomial(p);
+        }
+
+        if (selectedPolynomial != null) {
+            this.drawAttributes(selectedPolynomial);
         }
 
     }
@@ -98,16 +99,16 @@ public class PolynomialController {
     }
 
     private void initScaleChoiceBox() {
-        scaleChoicebox.getItems().add("-5 bis 5");
-        scaleChoicebox.getItems().add("-10 bis 10");
-        scaleChoicebox.getItems().add("-50 bis 50");
-        scaleChoicebox.getItems().add("-100 bis 100");
-        scaleChoicebox.getItems().add("-500 bis 500");
-        scaleChoicebox.getItems().add("-1000 bis 1000");
+        scaleChoiceBox.getItems().add("-5 bis 5");
+        scaleChoiceBox.getItems().add("-10 bis 10");
+        scaleChoiceBox.getItems().add("-50 bis 50");
+        scaleChoiceBox.getItems().add("-100 bis 100");
+        scaleChoiceBox.getItems().add("-500 bis 500");
+        scaleChoiceBox.getItems().add("-1000 bis 1000");
     }
 
     private void scaleChoiceBoxListener() {
-        scaleChoicebox.valueProperty().addListener((observable, oldValue, newValue) -> {
+        scaleChoiceBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             Pattern pattern = Pattern.compile("-?[0-9]+([,.][0-9]+)?");
             Matcher matcher = pattern.matcher(newValue);
 
@@ -319,11 +320,18 @@ public class PolynomialController {
             showExtrema(p);
             showInflectionPoints(p);
             showSaddlePoints(p);
+            try {
+                showIntegral(p);
+            } catch (WrongInputSizeException e) {
+                e.printStackTrace();
+            }
+
         } else {
             clearLabels();
         }
         // show information about polynomial
         showDegree(p);
+        showYIntercept(p);
     }
     @FXML
     private void onResetButtonClicked() {
@@ -406,6 +414,11 @@ public class PolynomialController {
     private void showDegree(Polynomial polynomial) {
         int degree = polynomial.getDegree();
         degreeLabel.setText(String.valueOf(degree));
+    }
+
+    private void showYIntercept(Polynomial polynomial) {
+        double yIntercept = polynomial.functionValue(0.0);
+        yInterceptLabel.setText(String.valueOf(yIntercept));
     }
 
     private void showSymmetry(Polynomial polynomial) {
@@ -529,7 +542,7 @@ public class PolynomialController {
         }
         this.redrawContent();
         this.showIntegral(selectedPolynomial);
-        scaleChoicebox.setValue("");
+        scaleChoiceBox.setValue("");
     }
 
     public void onMouseClickedOnCanvas(MouseEvent mouseEvent) {

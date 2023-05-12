@@ -14,6 +14,8 @@ public class Application extends javafx.application.Application {
         stage.setTitle("Grafikrechner");
         stage.setScene(scene);
         stage.setResizable(true);
+        stage.setMinHeight(606.0);
+        stage.setMinWidth(1064.0);
         stage.show();
     }
 
