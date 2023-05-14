@@ -256,18 +256,19 @@ public class PolynomialController {
             // load DialogPane and its contents
             FXMLLoader loadDialog = new FXMLLoader(Objects.requireNonNull(getClass().getResource("input_dialog.fxml")));
             // define dialog along with its child elements
-            Dialog<String> polyDialog = new Dialog<>();
+            Dialog<double[]> polyDialog = new Dialog<>();
             Parent root = loadDialog.load();
             DialogPane polyPane = polyDialog.getDialogPane();
             polyPane.setContent(root);
-            Stage stage = (Stage) polyPane.getScene().getWindow();
             ObservableMap<String, Object> namespace = loadDialog.getNamespace();
             ArrayList<Spinner<Double>> spinners = new ArrayList<>(6);
             ColorPicker colorPicker = (ColorPicker) namespace.get("polyColorPicker");
             polyDialog.setTitle("Polynomial Input");
-            stage.setResizable(true);
             colorPicker.setValue(Color.rgb(new Random().nextInt(256), new Random().nextInt(256),
                     new Random().nextInt(256)));
+            ButtonType okButton = new ButtonType("Bestätigen", ButtonBar.ButtonData.OK_DONE);
+            ButtonType cancelButton = new ButtonType("Abbrechen", ButtonBar.ButtonData.CANCEL_CLOSE);
+            polyPane.getButtonTypes().addAll(okButton, cancelButton);
 
             for (int i = 5; i >= 0; i--) {
                 try {
@@ -277,22 +278,26 @@ public class PolynomialController {
                 }
             }
 
-            initializeSpinners(spinners);
-            Button okButton = (Button) namespace.get("confirmButton");
-            okButton.setOnAction(event -> {
+            polyDialog.setResultConverter(buttonType -> {
+                if (buttonType.getButtonData() == ButtonBar.ButtonData.OK_DONE) {
+                    return new double[]{spinners.get(5).getValue(), spinners.get(4).getValue(),
+                            spinners.get(3).getValue(), spinners.get(2).getValue(), spinners.get(1).getValue(),
+                            spinners.get(0).getValue()};
+                }
+                return null;
+            });
+
+            polyDialog.showAndWait().ifPresent(result -> {
                 try {
-                    double[] coefficients = new double[]{spinners.get(5).getValue(), spinners.get(4).getValue(),
-                    spinners.get(3).getValue(), spinners.get(2).getValue(), spinners.get(1).getValue(),
-                    spinners.get(0).getValue()};
                     boolean allZeroes = true;
-                    for (double coefficient : coefficients) {
+                    for (double coefficient : result) {
                         if (coefficient != 0.0) {
                             allZeroes = false;
                             break;
                         }
                     }
                     if (!allZeroes) {
-                        submitInput(coefficients, colorPicker.getValue());
+                        submitInput(result, colorPicker.getValue());
                     }
                 } catch (WrongInputSizeException e) {
                     Label inputWarningLabel = (Label) namespace.get("inputWarningLabel");
@@ -301,18 +306,6 @@ public class PolynomialController {
                     inputWarningLabel.setVisible(true);
                 }
             });
-
-            Button cancelButton = (Button) namespace.get("cancelButton");
-            cancelButton.setOnAction(event -> polyPane.fireEvent(new WindowEvent(polyPane.getScene().getWindow(),
-                    WindowEvent.WINDOW_CLOSE_REQUEST)));
-
-            stage.setOnCloseRequest(event -> {
-                polyDialog.setResult(null);
-                polyDialog.close();
-            });
-
-            stage.sizeToScene();
-            polyDialog.showAndWait();
 
         } catch (IOException e) {
             e.printStackTrace();

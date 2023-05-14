@@ -1,51 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<DialogPane fx:id="polyDialogPane" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
-    <content>
-        <VBox spacing="5">
-            <ScrollPane fitToWidth="true" hbarPolicy="ALWAYS">
-                <HBox spacing="5">
-                    <Spinner fx:id="coefficient5spinner" amountToStepBy="0.1" editable="true" initialValue="0.0" max="1000000000.0" min="0.0" minWidth="80" />
-                    <Label alignment="BASELINE_CENTER" minWidth="30" text="x⁵ +">
-                    <font><Font size="14" /></font>
-                    </Label>
-                    <Spinner fx:id="coefficient4spinner" amountToStepBy="0.1" editable="true" initialValue="0.0" max="1000000000.0" min="0.0" minWidth="80" />
-                    <Label alignment="BASELINE_CENTER" minWidth="30" text="x⁴ +">
-                        <font><Font size="14" /></font>
-                    </Label>
-                    <Spinner fx:id="coefficient3spinner" amountToStepBy="0.1" editable="true" initialValue="0.0" max="1000000000.0" min="0.0" minWidth="80" />
-                    <Label alignment="BASELINE_CENTER" minWidth="30" text="x³ +">
-                        <font><Font size="14" /></font>
-                    </Label>
-                    <Spinner fx:id="coefficient2spinner" amountToStepBy="0.1" editable="true" initialValue="0.0" max="1000000000.0" min="0.0" minWidth="80" />
-                    <Label alignment="BASELINE_CENTER" minWidth="30" text="x² +">
-                        <font><Font size="14" /></font>
-                    </Label>
-                    <Spinner fx:id="coefficient1spinner" amountToStepBy="0.1" editable="true" initialValue="0.0" max="1000000000.0" min="0.0" minWidth="80" />
-                    <Label alignment="BASELINE_CENTER" minWidth="30" text="x +">
-                        <font><Font size="14" /></font>
-                    </Label>
-                    <Spinner fx:id="coefficient0spinner" amountToStepBy="0.1" editable="true" initialValue="0.0" max="1000000000.0" min="0.0" minWidth="80" />
-                </HBox>
-            </ScrollPane>
-            <ColorPicker fx:id="polyColorPicker" prefHeight="25" prefWidth="100" styleClass="split-button" />
-            <HBox fx:id="warningHBox" alignment="CENTER" managed="false" prefHeight="58.0">
-                <Label fx:id="inputWarningLabel" text="Ungültige Eingabe" textFill="red" visible="false" />
-            </HBox>
+<VBox spacing="5" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
 
-            <HBox alignment="CENTER_RIGHT">
-                <Button fx:id="confirmButton" text="Bestätigen">
-                <HBox.margin>
-                    <Insets right="10" />
-                </HBox.margin>
-                </Button>
-                <Button fx:id="cancelButton" text="Abbrechen" />
+        <ScrollPane hbarPolicy="ALWAYS" hvalue="1.0" prefWidth="500.0" vbarPolicy="NEVER">
+            <HBox spacing="5">
+                <Spinner fx:id="coefficient5spinner" amountToStepBy="0.1" editable="true" initialValue="0.0" max="1000000000.0" min="0.0" minWidth="80" />
+                <Label alignment="BASELINE_CENTER" minWidth="30" text="x⁵ +">
+                <font><Font size="14" /></font>
+                </Label>
+                <Spinner fx:id="coefficient4spinner" amountToStepBy="0.1" editable="true" initialValue="0.0" max="1000000000.0" min="0.0" minWidth="80" />
+                <Label alignment="BASELINE_CENTER" minWidth="30" text="x⁴ +">
+                    <font><Font size="14" /></font>
+                </Label>
+                <Spinner fx:id="coefficient3spinner" amountToStepBy="0.1" editable="true" initialValue="0.0" max="1000000000.0" min="0.0" minWidth="80" />
+                <Label alignment="BASELINE_CENTER" minWidth="30" text="x³ +">
+                    <font><Font size="14" /></font>
+                </Label>
+                <Spinner fx:id="coefficient2spinner" amountToStepBy="0.1" editable="true" initialValue="0.0" max="1000000000.0" min="0.0" minWidth="80" />
+                <Label alignment="BASELINE_CENTER" minWidth="30" text="x² +">
+                    <font><Font size="14" /></font>
+                </Label>
+                <Spinner fx:id="coefficient1spinner" amountToStepBy="0.1" editable="true" initialValue="0.0" max="1000000000.0" min="0.0" minWidth="80" />
+                <Label alignment="BASELINE_CENTER" minWidth="30" text="x +">
+                    <font><Font size="14" /></font>
+                </Label>
+                <Spinner fx:id="coefficient0spinner" amountToStepBy="0.1" editable="true" initialValue="0.0" max="1000000000.0" min="0.0" minWidth="80" />
             </HBox>
-        </VBox>
-    </content>
-</DialogPane>
+        </ScrollPane>
+        <ColorPicker fx:id="polyColorPicker" prefHeight="25" prefWidth="100" styleClass="split-button" />
+        <HBox fx:id="warningHBox" alignment="CENTER" managed="false" prefHeight="58.0">
+            <Label fx:id="inputWarningLabel" text="Ungültige Eingabe" textFill="red" visible="false" />
+        </HBox>
+
+    </VBox>

@@ -52,8 +52,8 @@
             </Menu>
         </MenuBar>
           </VBox>
-
    </top>
+
     <left>
         <HBox fx:id="infoHbox" prefHeight="566.0" prefWidth="281.0" BorderPane.alignment="TOP_LEFT">
             <VBox alignment="TOP_CENTER" nodeOrientation="LEFT_TO_RIGHT" prefHeight="545.0" prefWidth="539.0">
@@ -114,7 +114,8 @@
                         <padding><Insets left="10.0" /></padding>
                     </Label>
                     <TextField fx:id="integralTextField1" GridPane.columnIndex="0" GridPane.rowIndex="11" />
-                    <Button mnemonicParsing="false" onAction="#onResetButtonClicked" prefHeight="25.0" prefWidth="180.0" text="Reset" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="12" />
+                    <Button alignment="CENTER" mnemonicParsing="false" onAction="#onResetButtonClicked" prefHeight="25.0"
+                            prefWidth="180.0" text="Reset" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="12" />
 
                     <!-- column 1 -->
                     <ChoiceBox fx:id="polynomialsCB" prefWidth="100" GridPane.columnIndex="1" GridPane.rowIndex="1" />
