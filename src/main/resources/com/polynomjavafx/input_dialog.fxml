@@ -6,7 +6,7 @@
 
 <VBox spacing="5" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
 
-        <ScrollPane hbarPolicy="ALWAYS" hvalue="1.0" prefWidth="500.0" vbarPolicy="NEVER">
+        <ScrollPane hbarPolicy="ALWAYS" prefWidth="550.0" vbarPolicy="NEVER">
             <HBox spacing="5">
                 <Spinner fx:id="coefficient5spinner" amountToStepBy="0.1" editable="true" initialValue="0.0" max="1000000000.0" min="0.0" minWidth="80" />
                 <Label alignment="BASELINE_CENTER" minWidth="30" text="x⁵ +">

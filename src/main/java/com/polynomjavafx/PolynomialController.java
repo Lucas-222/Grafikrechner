@@ -12,8 +12,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import javafx.util.StringConverter;
 
 import java.io.IOException;
@@ -134,7 +132,10 @@ public class PolynomialController {
                         this.selectedPolynomial = p;
                         mathCanvas.integralGC.clearRect(0, 0, mathCanvas.integralLayer.getWidth(),
                                 mathCanvas.integralLayer.getHeight());
+                        mathCanvas.pointsGC.clearRect(0, 0, mathCanvas.pointsLayer.getWidth(),
+                                mathCanvas.pointsLayer.getHeight());
                         this.drawAttributes(p);
+                        mathCanvas.drawPoints();
                     }
                 } catch (NullPointerException e) {
                     System.out.println();
@@ -235,9 +236,10 @@ public class PolynomialController {
             //Spinner is not the last in list, set event handler to set focus on next spinner when enter is pressed
             else {
                 Spinner<Double> nextSpinner = spinners.get(i + 1);
-                spinner.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-                    if (event.getCode() == KeyCode.ENTER) {
+                spinner.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
+                    if (keyEvent.getCode() == KeyCode.ENTER) {
                         nextSpinner.requestFocus();
+                        keyEvent.consume();
                     }
                 });
             }
@@ -269,6 +271,7 @@ public class PolynomialController {
             ButtonType okButton = new ButtonType("Bestätigen", ButtonBar.ButtonData.OK_DONE);
             ButtonType cancelButton = new ButtonType("Abbrechen", ButtonBar.ButtonData.CANCEL_CLOSE);
             polyPane.getButtonTypes().addAll(okButton, cancelButton);
+            polyPane.lookupButton(okButton).setStyle("-fx-base: #f4f4f4;");
 
             for (int i = 5; i >= 0; i--) {
                 try {
@@ -277,6 +280,7 @@ public class PolynomialController {
                     e.printStackTrace();
                 }
             }
+            initializeSpinners(spinners);
 
             polyDialog.setResultConverter(buttonType -> {
                 if (buttonType.getButtonData() == ButtonBar.ButtonData.OK_DONE) {
@@ -544,7 +548,7 @@ public class PolynomialController {
         }
     }
 
-    public void onMouseScrolledOnCanvas(ScrollEvent scrollEvent) throws WrongInputSizeException {
+    public void onMouseScrolledOnCanvas(ScrollEvent scrollEvent) {
         if (scrollEvent.isControlDown()) {
             double delta = scrollEvent.getDeltaY() / 10;
             mathCanvas.changeScale(delta, delta);
