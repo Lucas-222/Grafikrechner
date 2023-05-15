@@ -479,15 +479,18 @@ public class PolynomialController {
 
             if (extremaArray.size() == 0) {
                 labelText.append("Keine Extremstellen");
+            } else {
+                for (double[] extrema : extremaArray) {
+                    mathCanvas.drawPoint(extrema[0], extrema[1]);
+                    labelText.append("(")
+                            .append(extrema[0])
+                            .append(", ")
+                            .append(extrema[1])
+                            .append("); ");
+                }
+                labelText.delete(labelText.length() - 2, labelText.length());
             }
-
-            for (double[] extrema : extremaArray) {
-                mathCanvas.drawPoint(extrema[0], extrema[1]);
-                labelText.append(Arrays.toString(extrema));
-            }
-
             extremaLabel.setText(labelText.toString());
-
         } catch (ArithmeticException e) {
             System.out.println(e.getMessage());
             extremaLabel.setText("Keine Extrempunkte");
@@ -510,13 +513,17 @@ public class PolynomialController {
 
             if (inflectionArray.size() == 0) {
                 labelText.append("Keine Wendepunkte");
+            } else {
+                for (double[] inflection : inflectionArray) {
+                    mathCanvas.drawPoint(inflection[0], inflection[1]);
+                    labelText.append("(")
+                            .append(inflection[0])
+                            .append(", ")
+                            .append(inflection[1])
+                            .append("); ");
+                }
+                labelText.delete(labelText.length() - 2, labelText.length());
             }
-
-            for (double[] inflection : inflectionArray) {
-                mathCanvas.drawPoint(inflection[0], inflection[1]);
-                labelText.append(Arrays.toString(inflection));
-            }
-
             inflectionLabel.setText(labelText.toString());
 
         } catch (ArithmeticException e) {
@@ -533,15 +540,18 @@ public class PolynomialController {
 
             if (saddleArray.size() == 0) {
                 labelText.append("Keine Sattelpunkte");
+            } else {
+                for (double[] saddlePoint : saddleArray) {
+                    mathCanvas.drawPoint(saddlePoint[0] , saddlePoint[1]);
+                    labelText.append("(")
+                            .append(saddlePoint[0])
+                            .append(", ")
+                            .append(saddlePoint[1])
+                            .append("); ");
+                }
+                labelText.delete(labelText.length() - 2, labelText.length());
             }
-
-            for (double[] saddlePoint : saddleArray) {
-                mathCanvas.drawPoint(saddlePoint[0] , saddlePoint[1]);
-                labelText.append(Arrays.toString(saddlePoint));
-            }
-
             saddleLabel.setText(labelText.toString());
-
         } catch (ArithmeticException e) {
             System.out.println(e.getMessage());
             saddleLabel.setText("Keine Sattelpunkte");

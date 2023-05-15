@@ -59,8 +59,8 @@
             <VBox alignment="TOP_CENTER" nodeOrientation="LEFT_TO_RIGHT" prefHeight="545.0" prefWidth="539.0">
                 <GridPane prefHeight="350.0" prefWidth="481.0" VBox.vgrow="ALWAYS">
                     <columnConstraints>
-                        <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="140.0" minWidth="10.0" prefWidth="117.0" />
-                        <ColumnConstraints hgrow="ALWAYS" maxWidth="201.0" minWidth="10.0" prefWidth="164.0" />
+                        <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="127.0" />
+                        <ColumnConstraints hgrow="ALWAYS" maxWidth="191.0" minWidth="10.0" prefWidth="154.0" />
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints minHeight="10.0" prefHeight="0.0" vgrow="SOMETIMES" />
@@ -80,31 +80,31 @@
 
                     <!-- column 0 -->
                     <AnchorPane GridPane.columnSpan="2">
-                    <Button alignment="CENTER" layoutY="5.0" onAction="#addPolynomial" text="Create Polynomial" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                    <Button alignment="CENTER" layoutY="5.0" onAction="#addPolynomial" text="Polynom Erstellen" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
                     </AnchorPane>
 
                     <Label alignment="TOP_LEFT" snapToPixel="false" text="Funktion:" GridPane.halignment="LEFT" GridPane.rowIndex="1">
                         <padding><Insets left="10.0" /></padding>
                     </Label>
-                    <Label contentDisplay="CENTER" text="Symmetirien:" GridPane.halignment="LEFT" GridPane.rowIndex="2">
+                    <Label contentDisplay="CENTER" text="Symmetrien:" GridPane.halignment="LEFT" GridPane.rowIndex="2">
                         <padding><Insets left="10.0" /></padding>
                     </Label>
                     <Label prefWidth="119.0" text="Grad der Funktion:" GridPane.halignment="LEFT" GridPane.rowIndex="3">
                         <padding><Insets left="10.0" /></padding>
                     </Label>
-                    <Label text="Y-Achsenabschnitt:" GridPane.halignment="LEFT" GridPane.rowIndex="4">
+                    <Label text="Y-Achsenabschnitt(e):" GridPane.halignment="LEFT" GridPane.rowIndex="4">
                         <padding><Insets left="10.0" /></padding>
                     </Label>
-                    <Label text="Nullstellen:" GridPane.halignment="LEFT" GridPane.rowIndex="5">
+                    <Label text="Nullstelle(n):" GridPane.halignment="LEFT" GridPane.rowIndex="5">
                         <padding><Insets left="10.0" /></padding>
                     </Label>
-                    <Label text="Extremstellen: " GridPane.halignment="LEFT" GridPane.rowIndex="6">
+                    <Label text="Extremstelle(n): " GridPane.halignment="LEFT" GridPane.rowIndex="6">
                         <padding><Insets left="10.0" /></padding>
                     </Label>
-                    <Label text="Wendepunkte: " GridPane.halignment="LEFT" GridPane.rowIndex="7">
+                    <Label text="Wendepunkt(e): " GridPane.halignment="LEFT" GridPane.rowIndex="7">
                         <padding><Insets left="10.0" /></padding>
                     </Label>
-                    <Label text="Sattelpunkte:" GridPane.halignment="LEFT" GridPane.rowIndex="8">
+                    <Label text="Sattelpunkt(e):" GridPane.halignment="LEFT" GridPane.rowIndex="8">
                         <padding><Insets left="10.0" /></padding>
                     </Label>
                     <Label text="Integralfläche:" GridPane.halignment="LEFT" GridPane.rowIndex="9">
@@ -114,8 +114,7 @@
                         <padding><Insets left="10.0" /></padding>
                     </Label>
                     <TextField fx:id="integralTextField1" GridPane.columnIndex="0" GridPane.rowIndex="11" />
-                    <Button alignment="CENTER" mnemonicParsing="false" onAction="#onResetButtonClicked" prefHeight="25.0"
-                            prefWidth="180.0" text="Reset" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="12" />
+                    <Button alignment="CENTER" mnemonicParsing="false" onAction="#onResetButtonClicked" prefHeight="25.0" prefWidth="180.0" text="Zurücksetzen" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="12" />
 
                     <!-- column 1 -->
                     <ChoiceBox fx:id="polynomialsCB" prefWidth="100" GridPane.columnIndex="1" GridPane.rowIndex="1" />
