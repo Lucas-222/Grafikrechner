@@ -12,8 +12,12 @@ public class MathCanvas extends StackPane {
     // Uninitialized Attributes
     Canvas contentLayer;
     Canvas coordinateSystemLayer;
+    Canvas integralLayer;
+    Canvas pointsLayer;
     GraphicsContext contentGC;
     GraphicsContext coordinateSysGC;
+    GraphicsContext integralGC;
+    GraphicsContext pointsGC;
     double xScale;
     double yScale;
     double xOffset;
@@ -38,10 +42,17 @@ public class MathCanvas extends StackPane {
 
         this.contentLayer = new Canvas();
         this.coordinateSystemLayer = new Canvas();
-        contentGC = contentLayer.getGraphicsContext2D();
-        coordinateSysGC = coordinateSystemLayer.getGraphicsContext2D();
+        this.integralLayer = new Canvas();
+        this.pointsLayer = new Canvas();
+        this.contentGC = contentLayer.getGraphicsContext2D();
+        this.coordinateSysGC = coordinateSystemLayer.getGraphicsContext2D();
+        this.integralGC = integralLayer.getGraphicsContext2D();
+        this.pointsGC = pointsLayer.getGraphicsContext2D();
         this.getChildren().add(contentLayer);
         this.getChildren().add(coordinateSystemLayer);
+        this.getChildren().add(integralLayer);
+        this.getChildren().add(pointsLayer);
+        this.DEFAULT_CELL_AMOUNT = 10;
 
         //Booleans for showing / hiding parts of the coordinate system
         showGrid = true;
@@ -55,6 +66,8 @@ public class MathCanvas extends StackPane {
             double newWidth = (double) newValue;
             coordinateSystemLayer.setWidth((newWidth));
             contentLayer.setWidth(newWidth);
+            integralLayer.setWidth(newWidth);
+            pointsLayer.setWidth(newWidth);
 
             //If xScale is 0 (only during initialization) use default cell amount, otherwise get current cell amount from dividing old width by cell size
             double cellAmount = xScale != 0 ? oldWidth / cellSize : newWidth / DEFAULT_CELL_AMOUNT;
@@ -73,6 +86,8 @@ public class MathCanvas extends StackPane {
 
             coordinateSystemLayer.setHeight(newHeight);
             contentLayer.setHeight(newHeight);
+            integralLayer.setHeight(newHeight);
+            pointsLayer.setHeight(newHeight);
 
 
             updateCellSize();
@@ -136,7 +151,7 @@ public class MathCanvas extends StackPane {
      * Draws the coordinate system onto the canvas.
      */
     private void drawCoordinateSystem() {
-        coordinateSysGC.clearRect(0, 0, contentLayer.getWidth(), coordinateSystemLayer.getHeight());
+        coordinateSysGC.clearRect(0, 0, contentLayer.getWidth(), contentLayer.getHeight());
         if(showAxis) {
             drawAxis();
         }
@@ -174,11 +189,11 @@ public class MathCanvas extends StackPane {
         }
     }
 
-    public void drawIntegral(double x1, double x2, Polynomial polynomial, Color color) {
-        contentGC.setStroke(color);
-        double stepSize = (contentLayer.getWidth() / xScale) / contentLayer.getWidth();
+    public void drawIntegral(double x1, double x2, Polynomial polynomial) {
+        integralGC.setStroke(Color.BLUE);
+        double stepSize = (integralLayer.getWidth() / xScale) / integralLayer.getWidth();
         for (double start = Math.min(x1, x2); start < Math.max(x1, x2); start += stepSize) {
-            contentGC.strokeLine(mathXCoordinateToCanvasXCoordinate(start),
+            integralGC.strokeLine(mathXCoordinateToCanvasXCoordinate(start),
                     mathYCoordinateToCanvasYCoordinate(0.0),
                     mathXCoordinateToCanvasXCoordinate(start),
                     mathYCoordinateToCanvasYCoordinate(polynomial.functionValue(start)));
@@ -186,16 +201,16 @@ public class MathCanvas extends StackPane {
     }
 
     public void drawPoint(double x, double y) {
-        contentLayer.getGraphicsContext2D().fillOval(mathXCoordinateToCanvasXCoordinate(x) - 2.5,
+        pointsGC.fillOval(mathXCoordinateToCanvasXCoordinate(x) - 2.5,
                 mathYCoordinateToCanvasYCoordinate(y) - 2.5, 5.0, 5.0);
     }
 
     public void drawPointLabel(double x, double y) {
         double xRounded = Math.round(x * 100.0) / 100.0;
         double yRounded = Math.round(y * 100.0) / 100.0;
-        contentLayer.getGraphicsContext2D().fillOval(mathXCoordinateToCanvasXCoordinate(x) - 2.5,
+        pointsGC.fillOval(mathXCoordinateToCanvasXCoordinate(x) - 2.5,
                 mathYCoordinateToCanvasYCoordinate(y) - 2.5, 5.0, 5.0);
-        contentLayer.getGraphicsContext2D().fillText("(" + xRounded + ", " + yRounded + ")",
+        pointsGC.fillText("(" + xRounded + ", " + yRounded + ")",
                 mathXCoordinateToCanvasXCoordinate(x) + 5.0, mathYCoordinateToCanvasYCoordinate(y) - 2.5);
     }
 
@@ -428,7 +443,7 @@ public class MathCanvas extends StackPane {
      * Clears the content displayed on the canvas
      */
     public void reset() {
-        clearContentLayer();
+        clearLayers();
         this.pointsArray.clear();
         this.polynomialArray.clear();
     }
@@ -452,7 +467,9 @@ public class MathCanvas extends StackPane {
         drawCoordinateSystem();
     }
 
-    public void clearContentLayer() {
+    public void clearLayers() {
         this.contentGC.clearRect(0, 0, contentLayer.getWidth(), contentLayer.getHeight());
+        this.pointsGC.clearRect(0, 0, pointsLayer.getWidth(), pointsLayer.getHeight());
+        this.integralGC.clearRect(0, 0, integralLayer.getWidth(), integralLayer.getHeight());
     }
 }

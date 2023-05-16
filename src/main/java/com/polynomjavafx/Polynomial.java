@@ -149,7 +149,7 @@ public class Polynomial {
             double notRounded = Math.abs(roots.get(i));
 
             if (getDifference(rounded, notRounded) <= 0.0001) {
-                roots.set(i, (double) Math.round(roots.get(i)));
+                roots.set(i, Math.round(roots.get(i)*100.0)/100.0);
             }
 
         }
