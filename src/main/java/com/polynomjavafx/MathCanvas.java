@@ -20,7 +20,6 @@ public class MathCanvas extends StackPane {
     double yOffset;
     double cellSize;
     private double tickLineLength;
-    private final double DEFAULT_CELL_AMOUNT;
     private boolean showAxis;
     private boolean showGrid;
     private boolean showScales;
@@ -28,6 +27,11 @@ public class MathCanvas extends StackPane {
     // Initialized Attributes
     ArrayList<Polynomial> polynomialArray = new ArrayList<>(10);
     ArrayList<double[]> pointsArray = new ArrayList<>();
+    double DEFAULT_CELL_AMOUNT = 10;
+
+    double mathXAxisPos = 0;
+    double mathYAxisPos = 0;
+
 
     public MathCanvas() {
         super();
@@ -38,7 +42,6 @@ public class MathCanvas extends StackPane {
         coordinateSysGC = coordinateSystemLayer.getGraphicsContext2D();
         this.getChildren().add(contentLayer);
         this.getChildren().add(coordinateSystemLayer);
-        DEFAULT_CELL_AMOUNT = 10;
 
         //Booleans for showing / hiding parts of the coordinate system
         showGrid = true;
@@ -70,8 +73,6 @@ public class MathCanvas extends StackPane {
 
             coordinateSystemLayer.setHeight(newHeight);
             contentLayer.setHeight(newHeight);
-
-            tickLineLength = this.getHeight()/100;
 
 
             updateCellSize();
@@ -119,10 +120,8 @@ public class MathCanvas extends StackPane {
      * Draws the axis onto the coordinate system canvas
      */
     private void drawAxis() {
-        double yAxisPosition = 0;
-        double yAxisCanvasPos = mathXCoordinateToCanvasXCoordinate(yAxisPosition);
-        double xAxisPosition = 0;
-        double xAxisCanvasPos = mathYCoordinateToCanvasYCoordinate(xAxisPosition);
+        double yAxisCanvasPos = mathXCoordinateToCanvasXCoordinate(mathYAxisPos);
+        double xAxisCanvasPos = mathYCoordinateToCanvasYCoordinate(mathXAxisPos);
         coordinateSysGC.setStroke(Color.BLACK);
         coordinateSysGC.setLineWidth(1.0);
 
@@ -175,8 +174,8 @@ public class MathCanvas extends StackPane {
         }
     }
 
-    public void drawIntegral(double x1, double x2, Polynomial polynomial) {
-        contentGC.setStroke(Color.BLUE);
+    public void drawIntegral(double x1, double x2, Polynomial polynomial, Color color) {
+        contentGC.setStroke(color);
         double stepSize = (contentLayer.getWidth() / xScale) / contentLayer.getWidth();
         for (double start = Math.min(x1, x2); start < Math.max(x1, x2); start += stepSize) {
             contentGC.strokeLine(mathXCoordinateToCanvasXCoordinate(start),
@@ -251,7 +250,7 @@ public class MathCanvas extends StackPane {
 
 
                     //Draw 10 small lines between this line and the next
-                    for(double i = xCoordinate + majorScaleDistance/5; i < xCoordinate + majorScaleDistance; i+=majorScaleDistance/10) {
+                    for(double i = xCoordinate + majorScaleDistance/10; i < xCoordinate + majorScaleDistance; i+=majorScaleDistance/10) {
                         coordinateSysGC.setLineWidth(0.1);
                         coordinateSysGC.strokeLine(i , 0, i, coordinateSystemLayer.getHeight());
                     }
@@ -277,16 +276,17 @@ public class MathCanvas extends StackPane {
         coordinateSysGC.setStroke(Color.BLACK);
 
         //If the axis is visible, draw at the location of the axis
+        double axisPos = mathYCoordinateToCanvasYCoordinate(mathXAxisPos);
         if(coordinateSystemLayer.getHeight()/2  -labelHeight > yOffset && yOffset > -coordinateSystemLayer.getHeight()/2) {
-            y = coordinateSystemLayer.getHeight() / 2 + yOffset + labelHeight + tickLineLength;
+            y = axisPos + labelHeight + tickLineLength;
 
             //Stroke a small line from the axis
             coordinateSysGC.setStroke(Color.BLACK);
             coordinateSysGC.setLineWidth(1);
-            coordinateSysGC.strokeLine(x, coordinateSystemLayer.getHeight() / 2 + yOffset, x, coordinateSystemLayer.getHeight() / 2 + yOffset + tickLineLength);
+            coordinateSysGC.strokeLine(x, axisPos, x, axisPos + tickLineLength);
         }
         //If the axis ist too far below, draw to the bottom of the canvas
-        else if(yOffset > -coordinateSystemLayer.getHeight()/2) {
+        else if(yOffset > axisPos) {
             y = coordinateSystemLayer.getHeight();
         }
         //If the two previous conditions are false, axis is too far up, draw to the top of the canvas
@@ -305,12 +305,12 @@ public class MathCanvas extends StackPane {
         double x;
         //If the axis is visible, draw at the location of the axis
         if( coordinateSystemLayer.getWidth()/2 > xOffset && xOffset > -coordinateSystemLayer.getWidth()/2 + labelWidth) {
-            x = coordinateSystemLayer.getWidth() / 2 + xOffset - labelWidth - tickLineLength; // X-coordinate of the label
+            x = mathXCoordinateToCanvasXCoordinate(mathYAxisPos) - labelWidth - tickLineLength; // X-coordinate of the label
 
             //Stroke a small line from the axis
             coordinateSysGC.setStroke(Color.BLACK);
             coordinateSysGC.setLineWidth(1);
-            coordinateSysGC.strokeLine(coordinateSystemLayer.getWidth() / 2 + xOffset, y, coordinateSystemLayer.getWidth() / 2 + xOffset - tickLineLength, y);
+            coordinateSysGC.strokeLine(mathXCoordinateToCanvasXCoordinate(mathYAxisPos), y, mathXCoordinateToCanvasXCoordinate(mathYAxisPos) - tickLineLength, y);
         }
         //If the axis ist too far to the left, draw to the left side of the canvas
         else if((coordinateSystemLayer.getWidth()/2 - labelWidth) > xOffset) {
@@ -368,7 +368,7 @@ public class MathCanvas extends StackPane {
 
 
     /**
-     * Updates column size dependent on current scaling to avoid to small / big columns
+     * Updates cell size dependent on current scaling to avoid to small / big columns
      */
     private void updateCellSize() {
         cellSize = xScale;

@@ -79,7 +79,7 @@ public class PolynomialController {
         this.drawPolynomials();
         mathCanvas.drawPoints();
         if (!integralTextField1.getText().isEmpty() && !integralTextField2.getText().isEmpty()) {
-            mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
+            mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial, selectedPolynomial.polyColor);
         }
     }
 
@@ -135,6 +135,7 @@ public class PolynomialController {
                         this.selectedPolynomial = p;
                         this.drawPolynomials();
                         this.mathCanvas.drawPoints();
+                        mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial, selectedPolynomial.polyColor);
                     }
                 } catch (NullPointerException e) {
                     System.out.println();
@@ -397,6 +398,8 @@ public class PolynomialController {
 
             try {
                 showIntegral(selectedPolynomial);
+                redrawContent();
+                mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial, selectedPolynomial.polyColor);
             } catch (WrongInputSizeException e) {
                 e.printStackTrace();
             }
@@ -471,7 +474,7 @@ public class PolynomialController {
             System.out.println("Integral area: " + area);
             integralLabel.setText(String.valueOf(area));
             integralLabel.setText(String.valueOf(area));
-            mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
+            mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial, selectedPolynomial.polyColor);
         }
     }
 

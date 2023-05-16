@@ -109,9 +109,9 @@
         </HBox>
    </left>
    <center>
-       <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="10.0" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-           <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="10.0" prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
-               <MathCanvas fx:id="mathCanvas" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="10.0" onMouseClicked="#onMouseClickedOnCanvas" onScroll="#onMouseScrolledOnCanvas" prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS" />
+       <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER">
+           <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <MathCanvas fx:id="mathCanvas" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="100.0" minWidth="300.0" onMouseClicked="#onMouseClickedOnCanvas" onScroll="#onMouseScrolledOnCanvas" VBox.vgrow="ALWAYS" />
            </VBox>
        </HBox>
    </center>
