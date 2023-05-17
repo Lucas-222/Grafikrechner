@@ -311,8 +311,7 @@ public class PolynomialController {
                         } else {
                             mathCanvas.polynomialArray.remove(selectedPolynomial);
                             polynomialsCB.getItems().remove(selectedPolynomial.toString());
-                            selectedPolynomial.setCoefficients(result);
-                            selectedPolynomial.polyColor = colorPicker.getValue();
+                            selectedPolynomial = new Polynomial(result, colorPicker.getValue());
                             mathCanvas.polynomialArray.add(selectedPolynomial);
                             updatePolynomialChoiceBox(selectedPolynomial);
                             redrawContent();
