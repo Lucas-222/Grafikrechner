@@ -2,6 +2,7 @@ package com.polynomjavafx;
 
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableMap;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -36,7 +37,7 @@ public class PolynomialController {
     public RadioMenuItem axisScalesMenuItemToggle;
     public RadioMenuItem canvasPoints;
     public RadioMenuItem polynomialPoints;
-    public ToggleGroup pointSelectionTG;
+    public RadioMenuItem aboveThirdDegree;
     public MenuItem returnToOriginMenuItem;
     public HBox infoHbox;
     public ChoiceBox<String> scaleChoiceBox;
@@ -46,6 +47,7 @@ public class PolynomialController {
     private ChoiceBox<String> polynomialsCB;
     @FXML
     private MathCanvas mathCanvas;
+
 
 
     @FXML
@@ -157,7 +159,7 @@ public class PolynomialController {
 
 
         // add menuItems to toggle group to make selection mutually exclusive
-        pointSelectionTG = new ToggleGroup();
+        ToggleGroup pointSelectionTG = new ToggleGroup();
         canvasPoints.setToggleGroup(pointSelectionTG);
         polynomialPoints.setToggleGroup(pointSelectionTG);
     }
@@ -253,10 +255,12 @@ public class PolynomialController {
     }
 
     @SuppressWarnings("unchecked")
-    public void addPolynomial() {
+    public void addPolynomial(ActionEvent event) {
         try {
             // load DialogPane and its contents
             FXMLLoader loadDialog = new FXMLLoader(Objects.requireNonNull(getClass().getResource("input_dialog.fxml")));
+            // load the button that made the call
+            Button callButton = (Button) event.getTarget();
             // define dialog along with its child elements
             Dialog<double[]> polyDialog = new Dialog<>();
             Parent root = loadDialog.load();
@@ -265,9 +269,8 @@ public class PolynomialController {
             ObservableMap<String, Object> namespace = loadDialog.getNamespace();
             ArrayList<Spinner<Double>> spinners = new ArrayList<>(6);
             ColorPicker colorPicker = (ColorPicker) namespace.get("polyColorPicker");
-            polyDialog.setTitle("Polynomial Input");
-            colorPicker.setValue(Color.rgb(new Random().nextInt(256), new Random().nextInt(256),
-                    new Random().nextInt(256)));
+            polyDialog.setTitle("Polynom Erstellen");
+
             ButtonType okButton = new ButtonType("Bestätigen", ButtonBar.ButtonData.OK_DONE);
             ButtonType cancelButton = new ButtonType("Abbrechen", ButtonBar.ButtonData.CANCEL_CLOSE);
             polyPane.getButtonTypes().addAll(okButton, cancelButton);
@@ -275,12 +278,25 @@ public class PolynomialController {
 
             for (int i = 5; i >= 0; i--) {
                 try {
-                    spinners.add((Spinner<Double>) namespace.get("coefficient" + i + "spinner"));
+                    Spinner<Double> spinner = (Spinner<Double>) namespace.get("coefficient" + i + "spinner");
+                    spinners.add(spinner);
+                    if (callButton.getUserData().equals("edit") && selectedPolynomial != null) {
+                        spinner.getValueFactory().setValue(selectedPolynomial.getCoefficients()[i]);
+                    } else if (callButton.getUserData().equals("edit")) {
+                        return;
+                    }
                 } catch (ClassCastException e) {
                     e.printStackTrace();
                 }
             }
             initializeSpinners(spinners);
+
+            if (callButton.getUserData().equals("edit")) {
+                System.out.println();
+            } else {
+                colorPicker.setValue(Color.rgb(new Random().nextInt(256), new Random().nextInt(256),
+                        new Random().nextInt(256)));
+            }
 
             polyDialog.setResultConverter(buttonType -> {
                 if (buttonType.getButtonData() == ButtonBar.ButtonData.OK_DONE) {
@@ -316,6 +332,10 @@ public class PolynomialController {
         }
     }
 
+    public void deletePolynomial() {
+
+    }
+
     private void submitInput(double[] coefficients, Color color) throws WrongInputSizeException {
         Polynomial newPolynomial;
         newPolynomial = new Polynomial(coefficients, color);
@@ -329,15 +349,14 @@ public class PolynomialController {
      * (selectively) show attributes for each polynomial in array
      */
     private void drawAttributes(Polynomial p) {
-        // show symmetry and roots if degree is <= 3
-        if (p.getDegree() <= 3) {
+        clearLabels();
+        // show symmetry and roots
+        if (p.getDegree() <= 3 || aboveThirdDegree.isSelected()){
             showSymmetry(p);
             showRoots(p);
             showExtrema(p);
             showInflectionPoints(p);
             showSaddlePoints(p);
-        } else {
-            clearLabels();
         }
         // show information about polynomial
         showDegree(p);
@@ -452,28 +471,25 @@ public class PolynomialController {
 
     private void showRoots(Polynomial polynomial) {
         ArrayList<Double> roots = polynomial.getRoots();
-
-        // draw roots
-        for (Double root : roots) {
-            mathCanvas.drawPoint(root, 0);
-        }
-
-        if (polynomial.getDegree() > 3) {
-            rootLabel.setText("Grad zu hoch");
-            return;
-        }
+        StringBuilder labelText = new StringBuilder();
 
         if (roots.size() == 0) {
-            rootLabel.setText("Keine Nullstellen");
+            labelText.append("Keine Nullstellen");
+        } else if (!aboveThirdDegree.isSelected() && polynomial.getDegree() > 3) {
+            labelText.append("Grad zu hoch");
         } else {
-            rootLabel.setText(roots.toString());
+            for (Double root : roots) {
+                mathCanvas.drawPoint(root, 0.0);
+                labelText.append(root).append("; ");
+            }
+            labelText.delete(labelText.length() - 2, labelText.length());
         }
 
+        rootLabel.setText(labelText.toString());
     }
 
     private void showExtrema(Polynomial polynomial) {
         try {
-
             ArrayList<double[]> extremaArray = polynomial.extrema;
             StringBuilder labelText = new StringBuilder();
 
@@ -593,7 +609,24 @@ public class PolynomialController {
             mathCanvas.pointsArray.clear();
             mathCanvas.pointsGC.clearRect(0, 0, mathCanvas.integralLayer.getWidth(),
                     mathCanvas.integralLayer.getHeight());
+            redrawPolynomialPoints();
         }
+    }
+
+    public void redrawPolynomialPoints() {
+        List<ArrayList<double[]>> criticalPoints = Arrays.asList(selectedPolynomial.extrema,
+                selectedPolynomial.inflections, selectedPolynomial.saddles);
+
+        for (ArrayList<double[]> points: criticalPoints) {
+            for (double[] point: points) {
+                mathCanvas.drawPoint(point[0], point[1]);
+            }
+        }
+
+        for (double root: selectedPolynomial.getRoots()) {
+            mathCanvas.drawPoint(root, 0.0);
+        }
+
     }
 
     public void resetScaling() {
