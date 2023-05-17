@@ -41,7 +41,6 @@ public class PolynomialController {
     public MenuItem returnToOriginMenuItem;
     public HBox infoHbox;
     public ChoiceBox<String> scaleChoiceBox;
-    private ArrayList<Polynomial> polynomialArray;
     private Polynomial selectedPolynomial;
     @FXML
     private ChoiceBox<String> polynomialsCB;
@@ -54,7 +53,6 @@ public class PolynomialController {
     private void initialize() {
         initializeVisuals();
         initializeMenuItems();
-        initializePolynomials();
         initScaleChoiceBox();
         initIntegralTextFields();
         scaleChoiceBoxListener();
@@ -67,7 +65,7 @@ public class PolynomialController {
     private void drawPolynomials() {
         mathCanvas.clearLayers();
 
-        for (Polynomial p : polynomialArray) {
+        for (Polynomial p : mathCanvas.polynomialArray) {
             this.mathCanvas.drawPolynomial(p);
         }
 
@@ -82,18 +80,33 @@ public class PolynomialController {
         mathCanvas.drawPoints();
     }
 
-    private void initializePolynomials() {
-        selectedPolynomial = null;
-        polynomialArray = mathCanvas.polynomialArray;
-    }
-
-    private void updateChoiceBox(Polynomial polynomial) {
+    private void updatePolynomialChoiceBox(Polynomial polynomial) {
         this.polynomialsCB.getItems().add(polynomial.toString());
         this.polynomialsCB.setValue(polynomial.toString());
     }
 
-    private void resetChoiceBox() {
+    private void resetPolynomialChoiceBox() {
         this.polynomialsCB.getItems().clear();
+    }
+
+    private void polynomialsCBListener() {
+        this.polynomialsCB.valueProperty().addListener((observable, oldValue, newValue) -> {
+            for (Polynomial p : mathCanvas.polynomialArray) {
+                try {
+                    if (p.toString().contentEquals(newValue)) {
+                        this.selectedPolynomial = p;
+                        mathCanvas.integralGC.clearRect(0, 0, mathCanvas.integralLayer.getWidth(),
+                                mathCanvas.integralLayer.getHeight());
+                        mathCanvas.pointsGC.clearRect(0, 0, mathCanvas.pointsLayer.getWidth(),
+                                mathCanvas.pointsLayer.getHeight());
+                        this.drawAttributes(p);
+                        mathCanvas.drawPoints();
+                    }
+                } catch (NullPointerException e) {
+                    System.out.println();
+                }
+            }
+        });
     }
 
     private void initScaleChoiceBox() {
@@ -123,26 +136,6 @@ public class PolynomialController {
                 }
             }
 
-        });
-    }
-
-    private void polynomialsCBListener() {
-        this.polynomialsCB.valueProperty().addListener((observable, oldValue, newValue) -> {
-            for (Polynomial p : polynomialArray) {
-                try {
-                    if (p.toString().contentEquals(newValue)) {
-                        this.selectedPolynomial = p;
-                        mathCanvas.integralGC.clearRect(0, 0, mathCanvas.integralLayer.getWidth(),
-                                mathCanvas.integralLayer.getHeight());
-                        mathCanvas.pointsGC.clearRect(0, 0, mathCanvas.pointsLayer.getWidth(),
-                                mathCanvas.pointsLayer.getHeight());
-                        this.drawAttributes(p);
-                        mathCanvas.drawPoints();
-                    }
-                } catch (NullPointerException e) {
-                    System.out.println();
-                }
-            }
         });
     }
 
@@ -254,7 +247,6 @@ public class PolynomialController {
     private void initializeVisuals() {
     }
 
-    @SuppressWarnings("unchecked")
     public void addPolynomial(ActionEvent event) {
         try {
             // load DialogPane and its contents
@@ -269,33 +261,30 @@ public class PolynomialController {
             ObservableMap<String, Object> namespace = loadDialog.getNamespace();
             ArrayList<Spinner<Double>> spinners = new ArrayList<>(6);
             ColorPicker colorPicker = (ColorPicker) namespace.get("polyColorPicker");
-            polyDialog.setTitle("Polynom Erstellen");
+
 
             ButtonType okButton = new ButtonType("Bestätigen", ButtonBar.ButtonData.OK_DONE);
             ButtonType cancelButton = new ButtonType("Abbrechen", ButtonBar.ButtonData.CANCEL_CLOSE);
             polyPane.getButtonTypes().addAll(okButton, cancelButton);
             polyPane.lookupButton(okButton).setStyle("-fx-base: #f4f4f4;");
 
-            for (int i = 5; i >= 0; i--) {
-                try {
-                    Spinner<Double> spinner = (Spinner<Double>) namespace.get("coefficient" + i + "spinner");
-                    spinners.add(spinner);
-                    if (callButton.getUserData().equals("edit") && selectedPolynomial != null) {
-                        spinner.getValueFactory().setValue(selectedPolynomial.getCoefficients()[i]);
-                    } else if (callButton.getUserData().equals("edit")) {
-                        return;
-                    }
-                } catch (ClassCastException e) {
-                    e.printStackTrace();
-                }
-            }
+            // add spinners to array
+            spinners.addAll(getSpinners(namespace));
+            // initialize the spinners after they've been added to the array
             initializeSpinners(spinners);
-
-            if (callButton.getUserData().equals("edit")) {
-                System.out.println();
+            // initialize spinners with values if user clicked on edit
+            if (callButton.getUserData().equals("edit") && selectedPolynomial != null) {
+                for (int i = 0; i < spinners.size(); i++) {
+                    spinners.get(spinners.size() - 1 - i).getValueFactory().setValue(selectedPolynomial.getCoefficients()[i]);
+                }
+                colorPicker.setValue(selectedPolynomial.polyColor);
+                polyDialog.setTitle("Polynom Bearbeiten");
+            } else if (callButton.getUserData().equals("edit")) {
+                return;
             } else {
                 colorPicker.setValue(Color.rgb(new Random().nextInt(256), new Random().nextInt(256),
                         new Random().nextInt(256)));
+                polyDialog.setTitle("Polynom Erstellen");
             }
 
             polyDialog.setResultConverter(buttonType -> {
@@ -317,7 +306,17 @@ public class PolynomialController {
                         }
                     }
                     if (!allZeroes) {
-                        submitInput(result, colorPicker.getValue());
+                        if (!callButton.getUserData().equals("edit")) {
+                            submitInput(result, colorPicker.getValue());
+                        } else {
+                            mathCanvas.polynomialArray.remove(selectedPolynomial);
+                            polynomialsCB.getItems().remove(selectedPolynomial.toString());
+                            selectedPolynomial.setCoefficients(result);
+                            selectedPolynomial.polyColor = colorPicker.getValue();
+                            mathCanvas.polynomialArray.add(selectedPolynomial);
+                            updatePolynomialChoiceBox(selectedPolynomial);
+                            redrawContent();
+                        }
                     }
                 } catch (WrongInputSizeException e) {
                     Label inputWarningLabel = (Label) namespace.get("inputWarningLabel");
@@ -332,6 +331,20 @@ public class PolynomialController {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public ArrayList<Spinner<Double>> getSpinners(ObservableMap<String, Object> namespace) {
+        ArrayList<Spinner<Double>> returnArray = new ArrayList<>();
+        for (int i = 5; i >= 0; i--) {
+            try {
+                Spinner<Double> spinner = (Spinner<Double>) namespace.get("coefficient" + i + "spinner");
+                returnArray.add(spinner);
+            } catch (ClassCastException e) {
+                e.printStackTrace();
+            }
+        }
+        return returnArray;
+    }
+
     public void deletePolynomial() {
 
     }
@@ -340,8 +353,8 @@ public class PolynomialController {
         Polynomial newPolynomial;
         newPolynomial = new Polynomial(coefficients, color);
         System.out.println(newPolynomial.getDegree());
-        this.polynomialArray.add(newPolynomial);
-        this.updateChoiceBox(newPolynomial);
+        this.mathCanvas.polynomialArray.add(newPolynomial);
+        this.updatePolynomialChoiceBox(newPolynomial);
         this.redrawContent();
     }
 
@@ -371,8 +384,8 @@ public class PolynomialController {
     private void onResetButtonClicked() {
         mathCanvas.reset();
         clearLabels();
-        resetChoiceBox();
-        initializePolynomials();
+        resetPolynomialChoiceBox();
+        this.selectedPolynomial = null;
     }
 
     private void clearLabels() {
@@ -422,7 +435,7 @@ public class PolynomialController {
                 }
             }
 
-            if (polynomialArray.isEmpty()) {
+            if (mathCanvas.polynomialArray.isEmpty()) {
                 return;
             }
 
