@@ -211,10 +211,9 @@ public class Polynomial {
         }
 
         ArrayList<double[]> returnList = new ArrayList<>();
-        for (double firstDerivNull: firstDerivNulls){
-            returnList.add(new double[]{Math.round(firstDerivNull*100.0)/100.0, Math.round(this.functionValue(firstDerivNull)*100.0)/100.0});
+        for (double firstDerivNull: firstDerivNulls) {
+            returnList.add(new double[]{firstDerivNull, this.functionValue(firstDerivNull)});
         }
-
         // return the array of null-value pairs
         return returnList;
     }
@@ -235,7 +234,7 @@ public class Polynomial {
         ArrayList<double[]> returnList = new ArrayList<>();
         for (double secDerivNull : secDerivNulls) {
             // example: 0.49249068954058 -> 490.0 -> 0.49
-            returnList.add(new double[]{Math.round(secDerivNull*100.0)/100.0, Math.round(this.functionValue(secDerivNull)*100.0)/100.0});
+            returnList.add(new double[]{secDerivNull, this.functionValue(secDerivNull)});
         }
 
         // return an array of the inflection points
@@ -261,10 +260,9 @@ public class Polynomial {
         ArrayList<double[]> returnList = new ArrayList<>();
         for (double secDerivNull: secDerivNulls) {
             if (firstDerivative.functionValue(secDerivNull) == 0.0) {
-                returnList.add(new double[]{Math.floor(secDerivNull*100.0)/100.0, Math.floor(this.functionValue(secDerivNull)*100.0)/100.0});
+                returnList.add(new double[]{secDerivNull, this.functionValue(secDerivNull)});
             }
         }
-
         return returnList;
     }
 
@@ -281,7 +279,7 @@ public class Polynomial {
         // get anti-derivative
         Polynomial antiDerivative = this.antiderivationPolynom();
         // Get the integral
-        return Math.round(Math.abs(antiDerivative.functionValue(biggerX) - antiDerivative.functionValue(smallerX))*100.0)/100.0;
+        return Math.abs(antiDerivative.functionValue(biggerX) - antiDerivative.functionValue(smallerX));
     }
 
     private String getOperator(int i) {

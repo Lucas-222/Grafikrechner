@@ -345,7 +345,18 @@ public class PolynomialController {
     }
 
     public void deletePolynomial() {
-
+        if (selectedPolynomial != null) {
+            ArrayList<Polynomial> polyArray = mathCanvas.polynomialArray;
+            polyArray.remove(selectedPolynomial);
+            polynomialsCB.getItems().remove(selectedPolynomial.toString());
+            if (polyArray.size() > 0) {
+                selectedPolynomial = polyArray.get(polyArray.size() - 1);
+            } else {
+                selectedPolynomial = null;
+            }
+            clearLabels();
+            redrawContent();
+        }
     }
 
     private void submitInput(double[] coefficients, Color color) throws WrongInputSizeException {
@@ -511,9 +522,9 @@ public class PolynomialController {
                 for (double[] extrema : extremaArray) {
                     mathCanvas.drawPoint(extrema[0], extrema[1]);
                     labelText.append("(")
-                            .append(extrema[0])
+                            .append(UtilityClasses.roundToSecondDecimalPoint(extrema[0]))
                             .append(", ")
-                            .append(extrema[1])
+                            .append(UtilityClasses.roundToSecondDecimalPoint(extrema[1]))
                             .append("); ");
                 }
                 labelText.delete(labelText.length() - 2, labelText.length());
@@ -528,8 +539,7 @@ public class PolynomialController {
     private void showIntegral(Polynomial polynomial) throws WrongInputSizeException {
         if (!integralTextField1.getText().isEmpty() && !integralTextField2.getText().isEmpty()) {
             double area = polynomial.getIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
-            integralLabel.setText(String.valueOf(area));
-            integralLabel.setText(String.valueOf(area));
+            integralLabel.setText(String.valueOf(UtilityClasses.roundToSecondDecimalPoint(area)));
             mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
         }
     }
@@ -545,9 +555,9 @@ public class PolynomialController {
                 for (double[] inflection : inflectionArray) {
                     mathCanvas.drawPoint(inflection[0], inflection[1]);
                     labelText.append("(")
-                            .append(inflection[0])
+                            .append(UtilityClasses.roundToSecondDecimalPoint(inflection[0]))
                             .append(", ")
-                            .append(inflection[1])
+                            .append(UtilityClasses.roundToSecondDecimalPoint(inflection[1]))
                             .append("); ");
                 }
                 labelText.delete(labelText.length() - 2, labelText.length());
@@ -572,9 +582,9 @@ public class PolynomialController {
                 for (double[] saddlePoint : saddleArray) {
                     mathCanvas.drawPoint(saddlePoint[0] , saddlePoint[1]);
                     labelText.append("(")
-                            .append(saddlePoint[0])
+                            .append(UtilityClasses.roundToSecondDecimalPoint(saddlePoint[0]))
                             .append(", ")
-                            .append(saddlePoint[1])
+                            .append(UtilityClasses.roundToSecondDecimalPoint(saddlePoint[1]))
                             .append("); ");
                 }
                 labelText.delete(labelText.length() - 2, labelText.length());
