@@ -1,14 +1,11 @@
 package com.polynomjavafx;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import javafx.scene.paint.Color;
 
 public class Polynomial {
-    private final double[] coefficients;
+    private double[] coefficients;
     private int derivationCounter = 0;
     ArrayList<double[]> extrema = new ArrayList<>();
     ArrayList<double[]> inflections = new ArrayList<>();
@@ -26,8 +23,8 @@ public class Polynomial {
             this.extrema = getExtrema();
             this.inflections = getInflectionPoints();
             this.saddles = getSaddlePoints();
-        } catch (ComputationFailedException | ArithmeticException e) {
-            System.out.println(e);
+        } catch (ComputationFailedException e) {
+            e.printStackTrace();
         }
 
     }
@@ -136,35 +133,31 @@ public class Polynomial {
                 x -= delta;
 
                 if (Math.abs(delta) < tol) {
-                    roots.add(x);
+                    // round roots if they are close to the next integer
+                    // get difference between rounded root and root
+                    if (getDifference(Math.round(Math.abs(x)), Math.abs(x)) <= 0.0001) {
+                        roots.add((double) Math.round(x));
+                    } else {
+                        roots.add(Math.round(x*100.0)/100.0);
+                    }
                     break; // break out of the loop once a root has been found
                 }
             }
         }
 
-        // round roots if they are close to the next integer
-        for (int i = 0; i < roots.size(); i++){
-            // get difference between rounded root and root
-            double rounded = Math.round(Math.abs(roots.get(i)));
-            double notRounded = Math.abs(roots.get(i));
+        // remove duplicate roots (much more efficiently)
+        HashSet<Double> uniqueSet = new HashSet<>();
+        ArrayList<Double> rootsNoDuplicates = new ArrayList<>();
 
-            if (getDifference(rounded, notRounded) <= 0.0001) {
-                roots.set(i, Math.round(roots.get(i)*100.0)/100.0);
-            }
-
-        }
-
-        // remove duplicate roots
-        for (int i = 0; i < roots.size() - 1; i++) {
-            for (int j = i + 1; j < roots.size(); j++) {
-                if (getDifference(roots.get(i), roots.get(j)) <= 0.0001) {
-                    roots.remove(j);
-                    j--; // adjust index after removing an element
-                }
+        for (double root : roots) {
+            // taking advantage of a key quality of HashSets, which is that an element e isn't added
+            // if an element e2 is already in the set, instead returning false
+            if (uniqueSet.add(root)) {
+                rootsNoDuplicates.add(root);
             }
         }
-
-        return roots;
+        Collections.sort(rootsNoDuplicates);
+        return rootsNoDuplicates;
     }
 
     public double getDifference(double x, double y) {
@@ -192,25 +185,24 @@ public class Polynomial {
             for (double i = -size / 2.0; i <= size / 2.0; i += range) {
                 startingValues.add(i);
             }
-        }
-
-        for (double root : roots) {
-            for (double i = root - size / 2.0; i <= root + size / 2.0; i += range) {
-                startingValues.add(i);
+        } else {
+            for (double root : roots) {
+                for (double i = root - size / 2.0; i <= root + size / 2.0; i += range) {
+                    startingValues.add(i);
+                }
             }
         }
 
         return startingValues.stream().mapToDouble(Double::doubleValue).toArray();
     }
 
-    public ArrayList<double[]> getExtrema() throws ArithmeticException, ComputationFailedException {
+    public ArrayList<double[]> getExtrema() throws ComputationFailedException {
+        // before anything, return empty array list for degrees < 2
+        if (this.getDegree() < 2) {
+            return new ArrayList<>();
+        }
         // first, get the derivative of the polynomial
         Polynomial firstDerivative = this.derivationPolynom();
-
-        // don't forget to handle cases where no extrema exist
-        if (this.getDegree() < 2) {
-            throw new ArithmeticException("Can't compute the extrema of a polynomial below the second degree");
-        }
 
         // then, get the roots of the derivative and their function values
         ArrayList<Double> firstDerivNulls = firstDerivative.getRoots();
@@ -219,21 +211,19 @@ public class Polynomial {
         }
 
         ArrayList<double[]> returnList = new ArrayList<>();
-        for (double firstDerivNull: firstDerivNulls){
-            returnList.add(new double[]{Math.round(firstDerivNull*100.0)/100.0, Math.round(this.functionValue(firstDerivNull)*100.0)/100.0});
+        for (double firstDerivNull: firstDerivNulls) {
+            returnList.add(new double[]{firstDerivNull, this.functionValue(firstDerivNull)});
         }
-
         // return the array of null-value pairs
         return returnList;
     }
 
-    public ArrayList<double[]> getInflectionPoints() throws ArithmeticException, ComputationFailedException {
+    public ArrayList<double[]> getInflectionPoints() throws ComputationFailedException {
+        if (this.getDegree() < 3) {
+            return new ArrayList<>();
+        }
         // get the first and second derivatives of current function
         Polynomial secondDerivative = this.derivationPolynom().derivationPolynom();
-
-        if (this.getDegree() < 3) {
-            throw new ArithmeticException("Can't compute the inflections of a polynomial below the third degree");
-        }
 
         ArrayList<Double> secDerivNulls = secondDerivative.getRoots();
         if (secDerivNulls.isEmpty()) {
@@ -244,20 +234,20 @@ public class Polynomial {
         ArrayList<double[]> returnList = new ArrayList<>();
         for (double secDerivNull : secDerivNulls) {
             // example: 0.49249068954058 -> 490.0 -> 0.49
-            returnList.add(new double[]{Math.round(secDerivNull*100.0)/100.0, Math.round(this.functionValue(secDerivNull)*100.0)/100.0});
+            returnList.add(new double[]{secDerivNull, this.functionValue(secDerivNull)});
         }
 
         // return an array of the inflection points
         return returnList;
     }
 
-    public ArrayList<double[]> getSaddlePoints() throws ArithmeticException, ComputationFailedException {
+    public ArrayList<double[]> getSaddlePoints() throws ComputationFailedException {
+        if (this.getDegree() < 3) {
+            return new ArrayList<>();
+        }
         // a function has a saddle point if its first and second derivatives equal zero
         Polynomial firstDerivative = this.derivationPolynom();
         Polynomial secondDerivative = firstDerivative.derivationPolynom();
-        if (this.getDegree() < 3) {
-            throw new ArithmeticException("Polynomials below the third degree can't have saddle points");
-        }
 
         // get the zero of the second derivative and plug into the first derivative.
         // if both are zero, it's a saddle point.
@@ -270,10 +260,9 @@ public class Polynomial {
         ArrayList<double[]> returnList = new ArrayList<>();
         for (double secDerivNull: secDerivNulls) {
             if (firstDerivative.functionValue(secDerivNull) == 0.0) {
-                returnList.add(new double[]{Math.floor(secDerivNull*100.0)/100.0, Math.floor(this.functionValue(secDerivNull)*100.0)/100.0});
+                returnList.add(new double[]{secDerivNull, this.functionValue(secDerivNull)});
             }
         }
-
         return returnList;
     }
 
@@ -321,8 +310,16 @@ public class Polynomial {
                 builder.append(this.getOperator(i)).append(this.getNumber(i)).append(this.getExponent(i));
             }
         }
-
         return builder.toString();
     }
+
+    public double[] getCoefficients() {
+        return coefficients;
+    }
+
+    public void setCoefficients(double[] coefficients) {
+        this.coefficients = coefficients;
+    }
+
 
 }
