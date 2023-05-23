@@ -27,11 +27,11 @@ public class MathCanvas extends StackPane {
     private boolean showAxis;
     private boolean showGrid;
     private boolean showScales;
+    double DEFAULT_CELL_AMOUNT;
 
     // Initialized Attributes
     ArrayList<Polynomial> polynomialArray = new ArrayList<>(10);
     ArrayList<double[]> pointsArray = new ArrayList<>();
-    double DEFAULT_CELL_AMOUNT = 10;
 
     double mathXAxisPos = 0;
     double mathYAxisPos = 0;
@@ -352,17 +352,17 @@ public class MathCanvas extends StackPane {
     }
 
     public void setRange(double start, double end) throws InvalidRangeException {
-        if (start >= end) {
+        if (start == end) {
             throw new InvalidRangeException(start, end);
         }
 
-        double range = Math.abs(end - start);
+        double delta = Math.abs(end - start);
         //Set scale to be able to display range
-        this.xScale = this.getWidth()/range;
+        this.xScale = this.getWidth()/delta;
         this.yScale = xScale;
 
-        double offset = Math.abs(start) - Math.abs(end);
-        xOffset = offset * xScale;
+        //set xOffset so the start of the range is displayed on the left most side of the canvas
+        xOffset = -(start * xScale + contentLayer.getWidth() / 2.0);
 
         this.yOffset = 0;
         updateCellSize();

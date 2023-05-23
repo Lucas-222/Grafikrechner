@@ -41,6 +41,8 @@ public class PolynomialController {
     public MenuItem returnToOriginMenuItem;
     public HBox infoHbox;
     public ChoiceBox<String> scaleChoiceBox;
+    public TextField scaleTextField1;
+    public TextField scaleTextField2;
     private Polynomial selectedPolynomial;
     @FXML
     private ChoiceBox<String> polynomialsCB;
@@ -55,8 +57,12 @@ public class PolynomialController {
         initializeMenuItems();
         initScaleChoiceBox();
         initIntegralTextFields();
+        initScaleTextFields();
         scaleChoiceBoxListener();
         polynomialsCBListener();
+    }
+
+    private void initScaleTextFields() {
     }
 
     /**
@@ -127,9 +133,10 @@ public class PolynomialController {
                 double start = Double.parseDouble(matcher.group());
                 if (matcher.find()) {
                     double end = Double.parseDouble(matcher.group());
+                        this.scaleTextField1.setText(Double.toString(start));
+                        this.scaleTextField2.setText(Double.toString(end));
                     try {
-                        this.mathCanvas.setRange(start, end);
-                        this.redrawContent();
+                        setScale();
                     } catch (InvalidRangeException e) {
                         System.out.println("Ungültige Eingabe");
                     }
@@ -463,6 +470,8 @@ public class PolynomialController {
 
             try {
                 showIntegral(selectedPolynomial);
+                redrawContent();
+                mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
             } catch (WrongInputSizeException e) {
                 e.printStackTrace();
             }
@@ -605,6 +614,8 @@ public class PolynomialController {
         }
         this.redrawContent();
         scaleChoiceBox.setValue("");
+        scaleTextField1.clear();
+        scaleTextField2.clear();
     }
 
     public void onMouseClickedOnCanvas(MouseEvent mouseEvent) {
@@ -659,5 +670,13 @@ public class PolynomialController {
     public void returnToOrigin() {
         mathCanvas.returnToOrigin();
         this.redrawContent();
+    }
+
+    public void setScale() throws InvalidRangeException {
+        if(scaleTextField1.getText().matches("-?[0-9]+(\\.[0-9]+)?") && scaleTextField2.getText().matches("-?[0-9]+(\\.[0-9]+)?")) {
+            double rangeInput1 = Double.parseDouble(scaleTextField1.getText());
+            double rangeInput2 = Double.parseDouble(scaleTextField2.getText());
+            mathCanvas.setRange(Math.min(rangeInput1, rangeInput2), Math.max(rangeInput1, rangeInput2));
+        }
     }
 }
