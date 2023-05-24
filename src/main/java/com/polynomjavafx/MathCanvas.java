@@ -23,7 +23,7 @@ public class MathCanvas extends StackPane {
     double xOffset;
     double yOffset;
     double cellSize;
-    private double tickLineLength;
+    private final double tickLineLength;
     private boolean showAxis;
     private boolean showGrid;
     private boolean showScales;
@@ -53,6 +53,7 @@ public class MathCanvas extends StackPane {
         this.getChildren().add(integralLayer);
         this.getChildren().add(pointsLayer);
         this.DEFAULT_CELL_AMOUNT = 10;
+        this.tickLineLength = 10;
 
         //Booleans for showing / hiding parts of the coordinate system
         showGrid = true;
