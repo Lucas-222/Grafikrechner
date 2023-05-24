@@ -33,8 +33,6 @@ public class MathCanvas extends StackPane {
     ArrayList<Polynomial> polynomialArray = new ArrayList<>(10);
     ArrayList<double[]> pointsArray = new ArrayList<>();
 
-    double mathXAxisPos = 0;
-    double mathYAxisPos = 0;
 
 
     public MathCanvas() {
@@ -98,7 +96,6 @@ public class MathCanvas extends StackPane {
         // values that represent the space scrolled on the canvas in pixels
         this.xOffset = 0;
         this.yOffset = 0;
-
     }
 
     // Show Methods
@@ -136,8 +133,8 @@ public class MathCanvas extends StackPane {
      * Draws the axis onto the coordinate system canvas
      */
     private void drawAxis() {
-        double yAxisCanvasPos = mathXCoordinateToCanvasXCoordinate(mathYAxisPos);
-        double xAxisCanvasPos = mathYCoordinateToCanvasYCoordinate(mathXAxisPos);
+        double yAxisCanvasPos = mathXCoordinateToCanvasXCoordinate(0);
+        double xAxisCanvasPos = mathYCoordinateToCanvasYCoordinate(0);
         coordinateSysGC.setStroke(Color.BLACK);
         coordinateSysGC.setLineWidth(1.0);
 
@@ -291,22 +288,23 @@ public class MathCanvas extends StackPane {
         coordinateSysGC.setLineWidth(1);
         coordinateSysGC.setStroke(Color.BLACK);
 
-        //If the axis is visible, draw at the location of the axis
-        double axisPos = mathYCoordinateToCanvasYCoordinate(mathXAxisPos);
-        if(coordinateSystemLayer.getHeight()/2  -labelHeight > yOffset && yOffset > -coordinateSystemLayer.getHeight()/2) {
-            y = axisPos + labelHeight + tickLineLength;
-
-            //Stroke a small line from the axis
-            coordinateSysGC.setStroke(Color.BLACK);
-            coordinateSysGC.setLineWidth(1);
-            coordinateSysGC.strokeLine(x, axisPos, x, axisPos + tickLineLength);
-        }
-        //If the axis ist too far below, draw to the bottom of the canvas
-        else if(yOffset > axisPos) {
+        double axisPos = mathYCoordinateToCanvasYCoordinate(0);
+        //If the axis is below displayed area, draw at the bottom
+        if(isBelowView(axisPos + labelHeight + tickLineLength)) {
             y = coordinateSystemLayer.getHeight();
         }
-        //If the two previous conditions are false, axis is too far up, draw to the top of the canvas
-        else y= labelHeight;
+
+        //If the axis is above the displayed area, draw at the top
+        else if(isAboveView(axisPos)) {
+            y= labelHeight;
+        }
+
+        //If the axis is visible, draw at the location of the axis
+        else {
+            y = axisPos + labelHeight + tickLineLength;
+            //Stroke a small tick line from the axis
+            coordinateSysGC.strokeLine(x, axisPos, x, axisPos + tickLineLength);
+        }
         coordinateSysGC.fillText(labelText, x, y);
     }
 
@@ -319,22 +317,20 @@ public class MathCanvas extends StackPane {
         Text label = new Text(labelText);
         double labelWidth = label.getBoundsInLocal().getWidth();
         double x;
-        //If the axis is visible, draw at the location of the axis
-        if( coordinateSystemLayer.getWidth()/2 > xOffset && xOffset > -coordinateSystemLayer.getWidth()/2 + labelWidth) {
-            x = mathXCoordinateToCanvasXCoordinate(mathYAxisPos) - labelWidth - tickLineLength; // X-coordinate of the label
-
-            //Stroke a small line from the axis
-            coordinateSysGC.setStroke(Color.BLACK);
-            coordinateSysGC.setLineWidth(1);
-            coordinateSysGC.strokeLine(mathXCoordinateToCanvasXCoordinate(mathYAxisPos), y, mathXCoordinateToCanvasXCoordinate(mathYAxisPos) - tickLineLength, y);
-        }
-        //If the axis ist too far to the left, draw to the left side of the canvas
-        else if((coordinateSystemLayer.getWidth()/2 - labelWidth) > xOffset) {
+        coordinateSysGC.setStroke(Color.BLACK);
+        coordinateSysGC.setLineWidth(1);
+        double axisPos = mathXCoordinateToCanvasXCoordinate(0);
+        if(isLeftToView(axisPos - labelWidth - tickLineLength)) {
             x = 0;
         }
-        //If the two previous conditions are false, axis is too far to the right, draw to right side of the screen
-        else {
+        else if(isRightToView(axisPos)) {
             x = coordinateSystemLayer.getWidth() - labelWidth;
+        }
+
+        else {
+            x = axisPos - labelWidth - tickLineLength; // X-coordinate of the label
+            //Stroke a small line from the axis
+            coordinateSysGC.strokeLine(mathXCoordinateToCanvasXCoordinate(0), y, mathXCoordinateToCanvasXCoordinate(0) - tickLineLength, y);
         }
         coordinateSysGC.fillText(labelText, x, y);
     }
@@ -472,5 +468,26 @@ public class MathCanvas extends StackPane {
         this.contentGC.clearRect(0, 0, contentLayer.getWidth(), contentLayer.getHeight());
         this.pointsGC.clearRect(0, 0, pointsLayer.getWidth(), pointsLayer.getHeight());
         this.integralGC.clearRect(0, 0, integralLayer.getWidth(), integralLayer.getHeight());
+    }
+
+    //Check methods
+
+    private boolean isAboveView(double canvasYCoordinate) {
+        return canvasYCoordinate < 0;
+    }
+
+
+    private boolean isBelowView(double canvasYCoordinate) {
+        return canvasYCoordinate > coordinateSystemLayer.getHeight();
+    }
+
+
+    private boolean isLeftToView(double canvasXCoordinate) {
+        return canvasXCoordinate < 0;
+    }
+
+
+    private boolean isRightToView(double canvasXCoordinate) {
+        return canvasXCoordinate > coordinateSystemLayer.getWidth();
     }
 }
