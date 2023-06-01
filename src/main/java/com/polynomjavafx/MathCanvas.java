@@ -350,7 +350,7 @@ public class MathCanvas extends StackPane {
 
     public void setRange(double start, double end) throws InvalidRangeException {
         if (start == end) {
-            throw new InvalidRangeException(start, end);
+            throw new InvalidRangeException();
         }
 
         double delta = Math.abs(end - start);

@@ -135,11 +135,7 @@ public class PolynomialController {
                     double end = Double.parseDouble(matcher.group());
                         this.scaleTextField1.setText(Double.toString(start));
                         this.scaleTextField2.setText(Double.toString(end));
-                    try {
                         setScale();
-                    } catch (InvalidRangeException e) {
-                        System.out.println("Ungültige Eingabe");
-                    }
                 }
             }
 
@@ -672,11 +668,19 @@ public class PolynomialController {
         this.redrawContent();
     }
 
-    public void setScale() throws InvalidRangeException {
+    public void setScale(){
         if(scaleTextField1.getText().matches("-?[0-9]+(\\.[0-9]+)?") && scaleTextField2.getText().matches("-?[0-9]+(\\.[0-9]+)?")) {
             double rangeInput1 = Double.parseDouble(scaleTextField1.getText());
             double rangeInput2 = Double.parseDouble(scaleTextField2.getText());
-            mathCanvas.setRange(Math.min(rangeInput1, rangeInput2), Math.max(rangeInput1, rangeInput2));
+            try {
+                mathCanvas.setRange(Math.min(rangeInput1, rangeInput2), Math.max(rangeInput1, rangeInput2));
+                scaleTextField1.setStyle("-fx-text-fill: black;");
+                scaleTextField2.setStyle("-fx-text-fill: black;");
+            }
+            catch (InvalidRangeException e) {
+                scaleTextField1.setStyle("-fx-text-fill: red;");
+                scaleTextField2.setStyle("-fx-text-fill: red;");
+            }
         }
     }
 }
