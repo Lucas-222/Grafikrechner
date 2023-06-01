@@ -37,19 +37,24 @@ public class MathCanvas extends StackPane {
 
     public MathCanvas() {
         super();
-
+        //Layers
         this.contentLayer = new Canvas();
         this.coordinateSystemLayer = new Canvas();
         this.integralLayer = new Canvas();
         this.pointsLayer = new Canvas();
+
+        //GCs for drawing to layers
         this.contentGC = contentLayer.getGraphicsContext2D();
         this.coordinateSysGC = coordinateSystemLayer.getGraphicsContext2D();
         this.integralGC = integralLayer.getGraphicsContext2D();
         this.pointsGC = pointsLayer.getGraphicsContext2D();
+
+        //Add layers to stack pane
         this.getChildren().add(contentLayer);
         this.getChildren().add(coordinateSystemLayer);
         this.getChildren().add(integralLayer);
         this.getChildren().add(pointsLayer);
+
         this.DEFAULT_CELL_AMOUNT = 10;
         this.tickLineLength = 10;
 
@@ -101,7 +106,7 @@ public class MathCanvas extends StackPane {
     // Show Methods
 
     /**
-     * Set whether the axis should be shown
+     * Set whether axis should be shown
      * @param showAxis value to set to
      */
     public void setShowAxis(boolean showAxis) {
@@ -198,14 +203,16 @@ public class MathCanvas extends StackPane {
         }
     }
 
-    public void drawPoint(double x, double y) {
+    public void drawPoint(double x, double y, Color color) {
+        this.pointsGC.setFill(color);
         pointsGC.fillOval(mathXCoordinateToCanvasXCoordinate(x) - 2.5,
                 mathYCoordinateToCanvasYCoordinate(y) - 2.5, 5.0, 5.0);
     }
 
-    public void drawPointLabel(double x, double y) {
+    public void drawPointLabel(double x, double y, Color color) {
         double xRounded = Math.round(x * 100.0) / 100.0;
         double yRounded = Math.round(y * 100.0) / 100.0;
+        pointsGC.setFill(color);
         pointsGC.fillOval(mathXCoordinateToCanvasXCoordinate(x) - 2.5,
                 mathYCoordinateToCanvasYCoordinate(y) - 2.5, 5.0, 5.0);
         pointsGC.fillText("(" + xRounded + ", " + yRounded + ")",
@@ -215,9 +222,9 @@ public class MathCanvas extends StackPane {
     /**
      * draw points retrieved from pointsArray attribute
      */
-    public void drawPoints() {
+    public void drawPoints(Color color) {
         for (double[] point : pointsArray) {
-            this.drawPointLabel(point[0], point[1]);
+            this.drawPointLabel(point[0], point[1], color);
         }
     }
 
