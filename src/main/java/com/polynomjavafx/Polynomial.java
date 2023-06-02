@@ -10,7 +10,10 @@ public class Polynomial {
     ArrayList<double[]> extrema = new ArrayList<>();
     ArrayList<double[]> inflections = new ArrayList<>();
     ArrayList<double[]> saddles = new ArrayList<>();
+
+    private ArrayList<Double> roots = new ArrayList<>();
     Color polyColor;
+
 
     public Polynomial(double[] coefficients, Color... color) throws WrongInputSizeException {
         // Test if input is the wrong size
@@ -20,14 +23,20 @@ public class Polynomial {
         this.coefficients = coefficients;
         this.polyColor = color.length != 0 ? color[0] : generateColor();
         try {
-            this.extrema = getExtrema();
-            this.inflections = getInflectionPoints();
-            this.saddles = getSaddlePoints();
+            this.roots = calculateRoots();
+            this.extrema = calculateExtrema();
+            this.inflections = calculateInflectionPoints();
+            this.saddles = calculateSaddlePoints();
         } catch (ComputationFailedException e) {
             e.printStackTrace();
         }
 
     }
+
+    public ArrayList<Double> getRoots() {
+        return roots;
+    }
+
 
     private static Color generateColor() {
         Random genRandom = new Random();
@@ -121,7 +130,7 @@ public class Polynomial {
         return new Polynomial(this.antiderivativeCoefficients(), 0);
     }
 
-    public ArrayList<Double> getRoots() {
+    private ArrayList<Double> calculateRoots() {
         double[] startingValues = getStartingValues();
         double tol = 1.0e-6; // 1 * 10 ^ -6
         int maxIter = 10000;
@@ -179,7 +188,7 @@ public class Polynomial {
         // Range of the values
         double range = 0.5;
 
-        ArrayList<Double> roots = this.getDegree() >= 1 ? this.derivationPolynom().getRoots() : new ArrayList<>(List.of(0.0));
+        ArrayList<Double> roots = this.getDegree() >= 1 ? this.derivationPolynom().calculateRoots() : new ArrayList<>(List.of(0.0));
 
         if (roots.size() == 0) {
             for (double i = -size / 2.0; i <= size / 2.0; i += range) {
@@ -196,7 +205,7 @@ public class Polynomial {
         return startingValues.stream().mapToDouble(Double::doubleValue).toArray();
     }
 
-    public ArrayList<double[]> getExtrema() throws ComputationFailedException {
+    public ArrayList<double[]> calculateExtrema() throws ComputationFailedException {
         // before anything, return empty array list for degrees < 2
         if (this.getDegree() < 2) {
             return new ArrayList<>();
@@ -205,7 +214,7 @@ public class Polynomial {
         Polynomial firstDerivative = this.derivationPolynom();
 
         // then, get the roots of the derivative and their function values
-        ArrayList<Double> firstDerivNulls = firstDerivative.getRoots();
+        ArrayList<Double> firstDerivNulls = firstDerivative.calculateRoots();
         if (firstDerivNulls.isEmpty()) {
             throw new ComputationFailedException("extrema", this.toString(), "the first derivative has no roots/zeroes");
         }
@@ -218,14 +227,14 @@ public class Polynomial {
         return returnList;
     }
 
-    public ArrayList<double[]> getInflectionPoints() throws ComputationFailedException {
+    public ArrayList<double[]> calculateInflectionPoints() throws ComputationFailedException {
         if (this.getDegree() < 3) {
             return new ArrayList<>();
         }
         // get the first and second derivatives of current function
         Polynomial secondDerivative = this.derivationPolynom().derivationPolynom();
 
-        ArrayList<Double> secDerivNulls = secondDerivative.getRoots();
+        ArrayList<Double> secDerivNulls = secondDerivative.calculateRoots();
         if (secDerivNulls.isEmpty()) {
             throw new ComputationFailedException("inflection points", this.toString(), "the second derivative of the function " +
                     "has no roots/zeroes");
@@ -241,7 +250,7 @@ public class Polynomial {
         return returnList;
     }
 
-    public ArrayList<double[]> getSaddlePoints() throws ComputationFailedException {
+    public ArrayList<double[]> calculateSaddlePoints() throws ComputationFailedException {
         if (this.getDegree() < 3) {
             return new ArrayList<>();
         }
@@ -251,7 +260,7 @@ public class Polynomial {
 
         // get the zero of the second derivative and plug into the first derivative.
         // if both are zero, it's a saddle point.
-        ArrayList<Double> secDerivNulls = secondDerivative.getRoots();
+        ArrayList<Double> secDerivNulls = secondDerivative.calculateRoots();
         if (secDerivNulls.isEmpty()) {
             throw new ComputationFailedException("saddle points", this.toString(), "the second derivative of the function " +
                     "has no roots/zeroes");

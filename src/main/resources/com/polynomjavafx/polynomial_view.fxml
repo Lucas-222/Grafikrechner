@@ -85,8 +85,8 @@
 
                     <!-- column 0 -->
                         <HBox alignment="CENTER" maxWidth="298.0" spacing="10.0" GridPane.columnSpan="3">
-                            <Button onAction="#addPolynomial" prefHeight="40.0" style="-fx-font-size: 10px;" text="Polynom Erstellen" textAlignment="CENTER" wrapText="true" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="181.0" AnchorPane.topAnchor="2.0" userData="add"/>
-                            <Button onAction="#addPolynomial" prefHeight="40.0" style="-fx-font-size: 10px;" text="Polynom Bearbeiten" textAlignment="CENTER" wrapText="true" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="110.0" AnchorPane.topAnchor="2.0" userData="edit"/>
+                            <Button onAction="#addPolynomial" prefHeight="40.0" style="-fx-font-size: 10px;" text="Polynom Erstellen" textAlignment="CENTER" userData="add" wrapText="true" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="181.0" AnchorPane.topAnchor="2.0" />
+                            <Button onAction="#addPolynomial" prefHeight="40.0" style="-fx-font-size: 10px;" text="Polynom Bearbeiten" textAlignment="CENTER" userData="edit" wrapText="true" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="110.0" AnchorPane.topAnchor="2.0" />
                             <Button layoutX="110.0" onAction="#deletePolynomial" prefHeight="40.0" style="-fx-font-size: 10px;" text="Polynom Löschen" textAlignment="CENTER" wrapText="true" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="210.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="2.0" />
                         </HBox>
 
@@ -133,8 +133,14 @@
                     <Label fx:id="inflectionLabel" prefWidth="300.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="7" />
                     <Label fx:id="saddleLabel" prefWidth="300.0" wrapText="true" GridPane.ColumnIndex="1" GridPane.rowIndex="8" />
                     <Label fx:id="integralLabel" prefWidth="300.0" GridPane.columnIndex="1" GridPane.rowIndex="9" />
-                    <ChoiceBox fx:id="scaleChoiceBox" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+                    <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="10">
+                        <TextField fx:id="scaleTextField1" onAction="#setScale" prefHeight="25.0" prefWidth="90.0" />
+                        <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="10.0" text="-" />
+                        <TextField fx:id="scaleTextField2" onAction="#setScale" prefHeight="25.0" prefWidth="90.0" />
+                        <ChoiceBox fx:id="scaleChoiceBox" />
+                    </HBox>
                     <TextField fx:id="integralTextField2" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+
 
 
                 </GridPane>

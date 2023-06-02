@@ -23,32 +23,40 @@ public class MathCanvas extends StackPane {
     double xOffset;
     double yOffset;
     double cellSize;
-    private double tickLineLength;
-    private final double DEFAULT_CELL_AMOUNT;
+    private final double tickLineLength;
     private boolean showAxis;
     private boolean showGrid;
     private boolean showScales;
+    double DEFAULT_CELL_AMOUNT;
 
     // Initialized Attributes
     ArrayList<Polynomial> polynomialArray = new ArrayList<>(10);
     ArrayList<double[]> pointsArray = new ArrayList<>();
 
+
+
     public MathCanvas() {
         super();
-
+        //Layers
         this.contentLayer = new Canvas();
         this.coordinateSystemLayer = new Canvas();
         this.integralLayer = new Canvas();
         this.pointsLayer = new Canvas();
+
+        //GCs for drawing to layers
         this.contentGC = contentLayer.getGraphicsContext2D();
         this.coordinateSysGC = coordinateSystemLayer.getGraphicsContext2D();
         this.integralGC = integralLayer.getGraphicsContext2D();
         this.pointsGC = pointsLayer.getGraphicsContext2D();
+
+        //Add layers to stack pane
         this.getChildren().add(contentLayer);
         this.getChildren().add(coordinateSystemLayer);
         this.getChildren().add(integralLayer);
         this.getChildren().add(pointsLayer);
+
         this.DEFAULT_CELL_AMOUNT = 10;
+        this.tickLineLength = 10;
 
         //Booleans for showing / hiding parts of the coordinate system
         showGrid = true;
@@ -85,8 +93,6 @@ public class MathCanvas extends StackPane {
             integralLayer.setHeight(newHeight);
             pointsLayer.setHeight(newHeight);
 
-            tickLineLength = this.getHeight()/100;
-
 
             updateCellSize();
             drawCoordinateSystem();
@@ -95,13 +101,12 @@ public class MathCanvas extends StackPane {
         // values that represent the space scrolled on the canvas in pixels
         this.xOffset = 0;
         this.yOffset = 0;
-
     }
 
     // Show Methods
 
     /**
-     * Set whether the axis should be shown
+     * Set whether axis should be shown
      * @param showAxis value to set to
      */
     public void setShowAxis(boolean showAxis) {
@@ -133,10 +138,8 @@ public class MathCanvas extends StackPane {
      * Draws the axis onto the coordinate system canvas
      */
     private void drawAxis() {
-        double yAxisPosition = 0;
-        double yAxisCanvasPos = mathXCoordinateToCanvasXCoordinate(yAxisPosition);
-        double xAxisPosition = 0;
-        double xAxisCanvasPos = mathYCoordinateToCanvasYCoordinate(xAxisPosition);
+        double yAxisCanvasPos = mathXCoordinateToCanvasXCoordinate(0);
+        double xAxisCanvasPos = mathYCoordinateToCanvasYCoordinate(0);
         coordinateSysGC.setStroke(Color.BLACK);
         coordinateSysGC.setLineWidth(1.0);
 
@@ -200,14 +203,16 @@ public class MathCanvas extends StackPane {
         }
     }
 
-    public void drawPoint(double x, double y) {
+    public void drawPoint(double x, double y, Color color) {
+        this.pointsGC.setFill(color);
         pointsGC.fillOval(mathXCoordinateToCanvasXCoordinate(x) - 2.5,
                 mathYCoordinateToCanvasYCoordinate(y) - 2.5, 5.0, 5.0);
     }
 
-    public void drawPointLabel(double x, double y) {
+    public void drawPointLabel(double x, double y, Color color) {
         double xRounded = Math.round(x * 100.0) / 100.0;
         double yRounded = Math.round(y * 100.0) / 100.0;
+        pointsGC.setFill(color);
         pointsGC.fillOval(mathXCoordinateToCanvasXCoordinate(x) - 2.5,
                 mathYCoordinateToCanvasYCoordinate(y) - 2.5, 5.0, 5.0);
         pointsGC.fillText("(" + xRounded + ", " + yRounded + ")",
@@ -217,9 +222,9 @@ public class MathCanvas extends StackPane {
     /**
      * draw points retrieved from pointsArray attribute
      */
-    public void drawPoints() {
+    public void drawPoints(Color color) {
         for (double[] point : pointsArray) {
-            this.drawPointLabel(point[0], point[1]);
+            this.drawPointLabel(point[0], point[1], color);
         }
     }
 
@@ -265,7 +270,7 @@ public class MathCanvas extends StackPane {
 
 
                     //Draw 10 small lines between this line and the next
-                    for(double i = xCoordinate + majorScaleDistance/5; i < xCoordinate + majorScaleDistance; i+=majorScaleDistance/10) {
+                    for(double i = xCoordinate + majorScaleDistance/10; i < xCoordinate + majorScaleDistance; i+=majorScaleDistance/10) {
                         coordinateSysGC.setLineWidth(0.1);
                         coordinateSysGC.strokeLine(i , 0, i, coordinateSystemLayer.getHeight());
                     }
@@ -290,21 +295,23 @@ public class MathCanvas extends StackPane {
         coordinateSysGC.setLineWidth(1);
         coordinateSysGC.setStroke(Color.BLACK);
 
-        //If the axis is visible, draw at the location of the axis
-        if(coordinateSystemLayer.getHeight()/2  -labelHeight > yOffset && yOffset > -coordinateSystemLayer.getHeight()/2) {
-            y = coordinateSystemLayer.getHeight() / 2 + yOffset + labelHeight + tickLineLength;
-
-            //Stroke a small line from the axis
-            coordinateSysGC.setStroke(Color.BLACK);
-            coordinateSysGC.setLineWidth(1);
-            coordinateSysGC.strokeLine(x, coordinateSystemLayer.getHeight() / 2 + yOffset, x, coordinateSystemLayer.getHeight() / 2 + yOffset + tickLineLength);
-        }
-        //If the axis ist too far below, draw to the bottom of the canvas
-        else if(yOffset > -coordinateSystemLayer.getHeight()/2) {
+        double axisPos = mathYCoordinateToCanvasYCoordinate(0);
+        //If the axis is below displayed area, draw at the bottom
+        if(isBelowView(axisPos + labelHeight + tickLineLength)) {
             y = coordinateSystemLayer.getHeight();
         }
-        //If the two previous conditions are false, axis is too far up, draw to the top of the canvas
-        else y= labelHeight;
+
+        //If the axis is above the displayed area, draw at the top
+        else if(isAboveView(axisPos)) {
+            y= labelHeight;
+        }
+
+        //If the axis is visible, draw at the location of the axis
+        else {
+            y = axisPos + labelHeight + tickLineLength;
+            //Stroke a small tick line from the axis
+            coordinateSysGC.strokeLine(x, axisPos, x, axisPos + tickLineLength);
+        }
         coordinateSysGC.fillText(labelText, x, y);
     }
 
@@ -317,22 +324,20 @@ public class MathCanvas extends StackPane {
         Text label = new Text(labelText);
         double labelWidth = label.getBoundsInLocal().getWidth();
         double x;
-        //If the axis is visible, draw at the location of the axis
-        if( coordinateSystemLayer.getWidth()/2 > xOffset && xOffset > -coordinateSystemLayer.getWidth()/2 + labelWidth) {
-            x = coordinateSystemLayer.getWidth() / 2 + xOffset - labelWidth - tickLineLength; // X-coordinate of the label
-
-            //Stroke a small line from the axis
-            coordinateSysGC.setStroke(Color.BLACK);
-            coordinateSysGC.setLineWidth(1);
-            coordinateSysGC.strokeLine(coordinateSystemLayer.getWidth() / 2 + xOffset, y, coordinateSystemLayer.getWidth() / 2 + xOffset - tickLineLength, y);
-        }
-        //If the axis ist too far to the left, draw to the left side of the canvas
-        else if((coordinateSystemLayer.getWidth()/2 - labelWidth) > xOffset) {
+        coordinateSysGC.setStroke(Color.BLACK);
+        coordinateSysGC.setLineWidth(1);
+        double axisPos = mathXCoordinateToCanvasXCoordinate(0);
+        if(isLeftToView(axisPos - labelWidth - tickLineLength)) {
             x = 0;
         }
-        //If the two previous conditions are false, axis is too far to the right, draw to right side of the screen
-        else {
+        else if(isRightToView(axisPos)) {
             x = coordinateSystemLayer.getWidth() - labelWidth;
+        }
+
+        else {
+            x = axisPos - labelWidth - tickLineLength; // X-coordinate of the label
+            //Stroke a small line from the axis
+            coordinateSysGC.strokeLine(mathXCoordinateToCanvasXCoordinate(0), y, mathXCoordinateToCanvasXCoordinate(0) - tickLineLength, y);
         }
         coordinateSysGC.fillText(labelText, x, y);
     }
@@ -351,17 +356,17 @@ public class MathCanvas extends StackPane {
     }
 
     public void setRange(double start, double end) throws InvalidRangeException {
-        if (start >= end) {
-            throw new InvalidRangeException(start, end);
+        if (start == end) {
+            throw new InvalidRangeException();
         }
 
-        double range = Math.abs(end - start);
+        double delta = Math.abs(end - start);
         //Set scale to be able to display range
-        this.xScale = this.getWidth()/range;
+        this.xScale = this.getWidth()/delta;
         this.yScale = xScale;
 
-        double offset = Math.abs(start) - Math.abs(end);
-        xOffset = offset * xScale;
+        //set xOffset so the start of the range is displayed on the left most side of the canvas
+        xOffset = -(start * xScale + contentLayer.getWidth() / 2.0);
 
         this.yOffset = 0;
         updateCellSize();
@@ -382,7 +387,7 @@ public class MathCanvas extends StackPane {
 
 
     /**
-     * Updates column size dependent on current scaling to avoid to small / big columns
+     * Updates cell size dependent on current scaling to avoid to small / big columns
      */
     private void updateCellSize() {
         cellSize = xScale;
@@ -470,5 +475,26 @@ public class MathCanvas extends StackPane {
         this.contentGC.clearRect(0, 0, contentLayer.getWidth(), contentLayer.getHeight());
         this.pointsGC.clearRect(0, 0, pointsLayer.getWidth(), pointsLayer.getHeight());
         this.integralGC.clearRect(0, 0, integralLayer.getWidth(), integralLayer.getHeight());
+    }
+
+    //Check methods
+
+    private boolean isAboveView(double canvasYCoordinate) {
+        return canvasYCoordinate < 0;
+    }
+
+
+    private boolean isBelowView(double canvasYCoordinate) {
+        return canvasYCoordinate > coordinateSystemLayer.getHeight();
+    }
+
+
+    private boolean isLeftToView(double canvasXCoordinate) {
+        return canvasXCoordinate < 0;
+    }
+
+
+    private boolean isRightToView(double canvasXCoordinate) {
+        return canvasXCoordinate > coordinateSystemLayer.getWidth();
     }
 }

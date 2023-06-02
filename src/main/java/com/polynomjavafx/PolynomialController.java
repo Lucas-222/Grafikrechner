@@ -41,11 +41,19 @@ public class PolynomialController {
     public MenuItem returnToOriginMenuItem;
     public HBox infoHbox;
     public ChoiceBox<String> scaleChoiceBox;
+    public TextField scaleTextField1;
+    public TextField scaleTextField2;
     private Polynomial selectedPolynomial;
     @FXML
     private ChoiceBox<String> polynomialsCB;
     @FXML
     private MathCanvas mathCanvas;
+
+    private Color zeroPointColor;
+    private Color extremaColor;
+    private Color inflectionsPointColor;
+    private Color saddlePointColor;
+    private Color userPointColor;
 
 
 
@@ -55,8 +63,21 @@ public class PolynomialController {
         initializeMenuItems();
         initScaleChoiceBox();
         initIntegralTextFields();
+        initScaleTextFields();
+        initColors();
         scaleChoiceBoxListener();
         polynomialsCBListener();
+    }
+
+    private void initColors() {
+        this.zeroPointColor = Color.RED;
+        this.inflectionsPointColor = Color.BLUE;
+        this.saddlePointColor = Color.YELLOW;
+        this.userPointColor = Color.PURPLE;
+        this.extremaColor = Color.GREEN;
+    }
+
+    private void initScaleTextFields() {
     }
 
     /**
@@ -77,7 +98,7 @@ public class PolynomialController {
 
     private void redrawContent() {
         this.drawPolynomials();
-        mathCanvas.drawPoints();
+        mathCanvas.drawPoints(userPointColor);
     }
 
     private void updatePolynomialChoiceBox(Polynomial polynomial) {
@@ -100,7 +121,7 @@ public class PolynomialController {
                         mathCanvas.pointsGC.clearRect(0, 0, mathCanvas.pointsLayer.getWidth(),
                                 mathCanvas.pointsLayer.getHeight());
                         this.drawAttributes(p);
-                        mathCanvas.drawPoints();
+                        mathCanvas.drawPoints(userPointColor);
                     }
                 } catch (NullPointerException e) {
                     System.out.println();
@@ -127,12 +148,9 @@ public class PolynomialController {
                 double start = Double.parseDouble(matcher.group());
                 if (matcher.find()) {
                     double end = Double.parseDouble(matcher.group());
-                    try {
-                        this.mathCanvas.setRange(start, end);
-                        this.redrawContent();
-                    } catch (InvalidRangeException e) {
-                        System.out.println("Ungültige Eingabe");
-                    }
+                        this.scaleTextField1.setText(Double.toString(start));
+                        this.scaleTextField2.setText(Double.toString(end));
+                        setScale();
                 }
             }
 
@@ -463,6 +481,8 @@ public class PolynomialController {
 
             try {
                 showIntegral(selectedPolynomial);
+                redrawContent();
+                mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
             } catch (WrongInputSizeException e) {
                 e.printStackTrace();
             }
@@ -502,7 +522,7 @@ public class PolynomialController {
             labelText.append("Grad zu hoch");
         } else {
             for (Double root : roots) {
-                mathCanvas.drawPoint(root, 0.0);
+                mathCanvas.drawPoint(root, 0.0, zeroPointColor);
                 labelText.append(root).append("; ");
             }
             labelText.delete(labelText.length() - 2, labelText.length());
@@ -520,7 +540,7 @@ public class PolynomialController {
                 labelText.append("Keine Extremstellen");
             } else {
                 for (double[] extrema : extremaArray) {
-                    mathCanvas.drawPoint(extrema[0], extrema[1]);
+                    mathCanvas.drawPoint(extrema[0], extrema[1], extremaColor);
                     labelText.append("(")
                             .append(UtilityClasses.roundToSecondDecimalPoint(extrema[0]))
                             .append(", ")
@@ -553,7 +573,7 @@ public class PolynomialController {
                 labelText.append("Keine Wendepunkte");
             } else {
                 for (double[] inflection : inflectionArray) {
-                    mathCanvas.drawPoint(inflection[0], inflection[1]);
+                    mathCanvas.drawPoint(inflection[0], inflection[1], inflectionsPointColor);
                     labelText.append("(")
                             .append(UtilityClasses.roundToSecondDecimalPoint(inflection[0]))
                             .append(", ")
@@ -580,7 +600,7 @@ public class PolynomialController {
                 labelText.append("Keine Sattelpunkte");
             } else {
                 for (double[] saddlePoint : saddleArray) {
-                    mathCanvas.drawPoint(saddlePoint[0] , saddlePoint[1]);
+                    mathCanvas.drawPoint(saddlePoint[0] , saddlePoint[1], saddlePointColor);
                     labelText.append("(")
                             .append(UtilityClasses.roundToSecondDecimalPoint(saddlePoint[0]))
                             .append(", ")
@@ -605,6 +625,8 @@ public class PolynomialController {
         }
         this.redrawContent();
         scaleChoiceBox.setValue("");
+        scaleTextField1.clear();
+        scaleTextField2.clear();
     }
 
     public void onMouseClickedOnCanvas(MouseEvent mouseEvent) {
@@ -613,11 +635,11 @@ public class PolynomialController {
 
         if (mathCanvas.pointsArray.size() <= 5 && mouseEvent.getClickCount() == 1) {
             if (canvasPoints.isSelected()) {
-                mathCanvas.drawPointLabel(mathX, mathY);
+                mathCanvas.drawPointLabel(mathX, mathY, userPointColor);
                 mathCanvas.pointsArray.add(new double[]{mathX, mathY});
             } else {
                 try {
-                    mathCanvas.drawPointLabel(mathX, selectedPolynomial.functionValue(mathX));
+                    mathCanvas.drawPointLabel(mathX, selectedPolynomial.functionValue(mathX), userPointColor);
                     mathCanvas.pointsArray.add(new double[]{mathX, selectedPolynomial.functionValue(mathX)});
                 } catch (NullPointerException e) {
                     System.out.println("Can't plot a point because no polynomial has been selected. Please select" +
@@ -636,19 +658,25 @@ public class PolynomialController {
     }
 
     public void redrawPolynomialPoints() {
-        List<ArrayList<double[]>> criticalPoints = Arrays.asList(selectedPolynomial.extrema,
-                selectedPolynomial.inflections, selectedPolynomial.saddles);
+        ArrayList<double[]> extrema = selectedPolynomial.extrema;
+        ArrayList<double[]> inflections = selectedPolynomial.inflections;
+        ArrayList<double[]> saddles = selectedPolynomial.saddles;
 
-        for (ArrayList<double[]> points: criticalPoints) {
-            for (double[] point: points) {
-                mathCanvas.drawPoint(point[0], point[1]);
-            }
+        for (double[] point: extrema) {
+                mathCanvas.drawPoint(point[0], point[1],extremaColor);
+        }
+
+        for (double[] point: inflections) {
+            mathCanvas.drawPoint(point[0], point[1],inflectionsPointColor);
+        }
+
+        for (double[] saddlePoint : saddles) {
+            mathCanvas.drawPoint(saddlePoint[0], saddlePoint[1], saddlePointColor);
         }
 
         for (double root: selectedPolynomial.getRoots()) {
-            mathCanvas.drawPoint(root, 0.0);
+            mathCanvas.drawPoint(root, 0.0, zeroPointColor);
         }
-
     }
 
     public void resetScaling() {
@@ -659,5 +687,21 @@ public class PolynomialController {
     public void returnToOrigin() {
         mathCanvas.returnToOrigin();
         this.redrawContent();
+    }
+
+    public void setScale(){
+        if(scaleTextField1.getText().matches("-?[0-9]+(\\.[0-9]+)?") && scaleTextField2.getText().matches("-?[0-9]+(\\.[0-9]+)?")) {
+            double rangeInput1 = Double.parseDouble(scaleTextField1.getText());
+            double rangeInput2 = Double.parseDouble(scaleTextField2.getText());
+            try {
+                mathCanvas.setRange(Math.min(rangeInput1, rangeInput2), Math.max(rangeInput1, rangeInput2));
+                scaleTextField1.setStyle("-fx-text-fill: black;");
+                scaleTextField2.setStyle("-fx-text-fill: black;");
+            }
+            catch (InvalidRangeException e) {
+                scaleTextField1.setStyle("-fx-text-fill: red;");
+                scaleTextField2.setStyle("-fx-text-fill: red;");
+            }
+        }
     }
 }
