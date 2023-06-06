@@ -128,8 +128,8 @@ public class Polynomial {
 
     private ArrayList<Double> calculateRoots() {
         double[] startingValues = getStartingValues();
-        double tol = 1.0e-6;
-        int maxIter = 1000;
+        double tol = 1.0e-6; // 1 * 10 ^ -6
+        int maxIter = 10000;
 
         ArrayList<Double> roots = new ArrayList<>();
         for (double x : startingValues) {
