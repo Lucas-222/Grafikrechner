@@ -191,6 +191,9 @@ public class PolynomialController {
                     throw new RuntimeException(e);
                 }
             }
+            else {
+                mathCanvas.clearIntegral();
+            }
         };
 
         integralTextField1.textProperty().addListener(listener);
@@ -695,6 +698,7 @@ public class PolynomialController {
             double rangeInput2 = Double.parseDouble(scaleTextField2.getText());
             try {
                 mathCanvas.setRange(Math.min(rangeInput1, rangeInput2), Math.max(rangeInput1, rangeInput2));
+                redrawContent();
                 scaleTextField1.setStyle("-fx-text-fill: black;");
                 scaleTextField2.setStyle("-fx-text-fill: black;");
             }

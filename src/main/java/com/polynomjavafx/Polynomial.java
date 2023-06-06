@@ -114,15 +114,11 @@ public class Polynomial {
     }
 
     private double[] antiderivativeCoefficients() {
-        // Define the constant of integration
-        double c = this.coefficients[this.coefficients.length - 1];
-
         // Calculate the antiderivative coefficients using the power rule
         double[] antiderivativeCoefficients = new double[coefficients.length + 1];
-        for (int i = 0; i < coefficients.length; i++) {
-            antiderivativeCoefficients[i] = coefficients[i] / (i + 1);
+        for (int i = 1; i < coefficients.length; i++) {
+            antiderivativeCoefficients[i] = coefficients[i-1] / (i);
         }
-        antiderivativeCoefficients[coefficients.length] = c;
         return antiderivativeCoefficients;
     }
 

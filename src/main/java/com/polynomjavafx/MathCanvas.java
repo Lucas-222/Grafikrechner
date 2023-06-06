@@ -477,6 +477,10 @@ public class MathCanvas extends StackPane {
         this.integralGC.clearRect(0, 0, integralLayer.getWidth(), integralLayer.getHeight());
     }
 
+    public void clearIntegral() {
+        this.integralGC.clearRect(0,0,contentLayer.getWidth(), contentLayer.getHeight());
+    }
+
     //Check methods
 
     private boolean isAboveView(double canvasYCoordinate) {
