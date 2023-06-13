@@ -54,6 +54,7 @@ public class PolynomialController {
     private Color inflectionsPointColor;
     private Color saddlePointColor;
     private Color userPointColor;
+    private Color previewPointColor;
 
 
 
@@ -75,6 +76,7 @@ public class PolynomialController {
         this.saddlePointColor = Color.YELLOW;
         this.userPointColor = Color.PURPLE;
         this.extremaColor = Color.GREEN;
+        this.previewPointColor = Color.DARKGRAY;
     }
 
     private void initScaleTextFields() {
@@ -99,6 +101,10 @@ public class PolynomialController {
     private void redrawContent() {
         this.drawPolynomials();
         mathCanvas.drawPoints(userPointColor);
+        if (!integralTextField1.getText().isEmpty() && !integralTextField2.getText().isEmpty()) {
+            mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
+        }
+        mathCanvas.drawPreviewPoint(previewPointColor);
     }
 
     private void updatePolynomialChoiceBox(Polynomial polynomial) {
@@ -560,7 +566,7 @@ public class PolynomialController {
     }
 
     private void showIntegral(Polynomial polynomial) throws WrongInputSizeException {
-        if (!integralTextField1.getText().isEmpty() && !integralTextField2.getText().isEmpty()) {
+        if (!integralTextField1.getText().isEmpty() && !integralTextField2.getText().isEmpty() && polynomial != null) {
             double area = polynomial.getIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()));
             integralLabel.setText(String.valueOf(UtilityClasses.roundToSecondDecimalPoint(area)));
             mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
@@ -633,8 +639,8 @@ public class PolynomialController {
     }
 
     public void onMouseClickedOnCanvas(MouseEvent mouseEvent) {
-        double mathX = mathCanvas.canvasXCoordinateToMathXCoordinate(mouseEvent.getX());
-        double mathY = mathCanvas.canvasYCoordinateToMathYCoordinate(mouseEvent.getY());
+        double mathX = mathCanvas.canvasXCoordinateToMathXCoordinateUnrounded(mouseEvent.getX());
+        double mathY = mathCanvas.canvasYCoordinateToMathYCoordinateUnrounded(mouseEvent.getY());
 
         if (mathCanvas.pointsArray.size() <= 5 && mouseEvent.getClickCount() == 1) {
             if (canvasPoints.isSelected()) {
@@ -658,6 +664,13 @@ public class PolynomialController {
                     mathCanvas.integralLayer.getHeight());
             redrawPolynomialPoints();
         }
+    }
+
+    public void setPreviewPoint(double x) {
+        double mathX = mathCanvas.canvasXCoordinateToMathXCoordinateUnrounded(x);
+        double mathY = selectedPolynomial.functionValue(mathX);
+        mathCanvas.setPreviewPoint(mathX, mathY);
+        mathCanvas.drawPreviewPoint(previewPointColor);
     }
 
     public void redrawPolynomialPoints() {
@@ -706,6 +719,13 @@ public class PolynomialController {
                 scaleTextField1.setStyle("-fx-text-fill: red;");
                 scaleTextField2.setStyle("-fx-text-fill: red;");
             }
+        }
+    }
+
+    public void onMouseMovedOnCanvas(MouseEvent mouseEvent) {
+        if(selectedPolynomial != null) {
+            double x = mouseEvent.getX();
+            setPreviewPoint(x);
         }
     }
 }

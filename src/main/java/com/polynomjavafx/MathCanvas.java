@@ -14,10 +14,12 @@ public class MathCanvas extends StackPane {
     Canvas coordinateSystemLayer;
     Canvas integralLayer;
     Canvas pointsLayer;
+    Canvas previewLayer;
     GraphicsContext contentGC;
     GraphicsContext coordinateSysGC;
     GraphicsContext integralGC;
     GraphicsContext pointsGC;
+    GraphicsContext previewGC;
     double xScale;
     double yScale;
     double xOffset;
@@ -32,6 +34,8 @@ public class MathCanvas extends StackPane {
     // Initialized Attributes
     ArrayList<Polynomial> polynomialArray = new ArrayList<>(10);
     ArrayList<double[]> pointsArray = new ArrayList<>();
+    private double[] previewPoint = new double[2];
+
 
 
 
@@ -42,18 +46,21 @@ public class MathCanvas extends StackPane {
         this.coordinateSystemLayer = new Canvas();
         this.integralLayer = new Canvas();
         this.pointsLayer = new Canvas();
+        this.previewLayer = new Canvas();
 
         //GCs for drawing to layers
         this.contentGC = contentLayer.getGraphicsContext2D();
         this.coordinateSysGC = coordinateSystemLayer.getGraphicsContext2D();
         this.integralGC = integralLayer.getGraphicsContext2D();
         this.pointsGC = pointsLayer.getGraphicsContext2D();
+        this.previewGC = previewLayer.getGraphicsContext2D();
 
         //Add layers to stack pane
         this.getChildren().add(contentLayer);
         this.getChildren().add(coordinateSystemLayer);
         this.getChildren().add(integralLayer);
         this.getChildren().add(pointsLayer);
+        this.getChildren().add(previewLayer);
 
         this.DEFAULT_CELL_AMOUNT = 10;
         this.tickLineLength = 10;
@@ -72,6 +79,7 @@ public class MathCanvas extends StackPane {
             contentLayer.setWidth(newWidth);
             integralLayer.setWidth(newWidth);
             pointsLayer.setWidth(newWidth);
+            previewLayer.setWidth(newWidth);
 
             //If xScale is 0 (only during initialization) use default cell amount, otherwise get current cell amount from dividing old width by cell size
             double cellAmount = xScale != 0 ? oldWidth / cellSize : newWidth / DEFAULT_CELL_AMOUNT;
@@ -92,6 +100,7 @@ public class MathCanvas extends StackPane {
             contentLayer.setHeight(newHeight);
             integralLayer.setHeight(newHeight);
             pointsLayer.setHeight(newHeight);
+            previewLayer.setHeight(newHeight);
 
 
             updateCellSize();
@@ -207,6 +216,24 @@ public class MathCanvas extends StackPane {
         this.pointsGC.setFill(color);
         pointsGC.fillOval(mathXCoordinateToCanvasXCoordinate(x) - 2.5,
                 mathYCoordinateToCanvasYCoordinate(y) - 2.5, 5.0, 5.0);
+    }
+
+    public void setPreviewPoint(double x, double y) {
+        previewPoint[0] = x;
+        previewPoint[1] = y;
+    }
+
+    public void drawPreviewPoint(Color color) {
+        double x = this.previewPoint[0];
+        double y = this.previewPoint[1];
+        this.previewGC.clearRect(0,0, previewLayer.getWidth(), previewLayer.getHeight());
+        double xRounded = Math.round(x * 100.0) / 100.0;
+        double yRounded = Math.round(y * 100.0) / 100.0;
+        previewGC.setFill(color);
+        previewGC.fillOval(mathXCoordinateToCanvasXCoordinate(x) - 2.5,
+                mathYCoordinateToCanvasYCoordinate(y) - 2.5, 5.0, 5.0);
+        previewGC.fillText("(" + xRounded + ", " + yRounded + ")",
+                mathXCoordinateToCanvasXCoordinate(x) + 5.0, mathYCoordinateToCanvasYCoordinate(y) - 2.5);
     }
 
     public void drawPointLabel(double x, double y, Color color) {
@@ -379,8 +406,14 @@ public class MathCanvas extends StackPane {
      * @param changeY y-scale to add/subtract
      */
     public void changeScale(double changeX, double changeY) {
+        double oldX = xScale;
+        double oldY = yScale;
         xScale += changeX * xScale / 100;
         yScale += changeY * yScale / 100;
+        double changeXFactor = oldX / xScale;
+        double changeYFactor = oldY / yScale;
+        xOffset = xOffset / changeXFactor;
+        yOffset = yOffset / changeYFactor;
         updateCellSize();
         drawCoordinateSystem();
     }
@@ -412,6 +445,10 @@ public class MathCanvas extends StackPane {
         return Math.round(mathXCoordinate * 100.0) / 100.0;
     }
 
+    public double canvasXCoordinateToMathXCoordinateUnrounded(double xCoordinate) {
+        return (xCoordinate - contentLayer.getWidth() / 2.0 - xOffset) / xScale;
+    }
+
     /**
      * Translates canvas y-coordinate to mathematical equivalent
      * @param yCoordinate y-coordinate to translate
@@ -420,6 +457,11 @@ public class MathCanvas extends StackPane {
     public double canvasYCoordinateToMathYCoordinate(double yCoordinate) {
         double mathYCoordinate = -(yCoordinate - contentLayer.getHeight() / 2.0 - yOffset) / yScale;
         return Math.round(mathYCoordinate * 100.0) / 100.0;
+    }
+
+    public double canvasYCoordinateToMathYCoordinateUnrounded(double yCoordinate) {
+        double mathYCoordinate = -(yCoordinate - contentLayer.getHeight() / 2.0 - yOffset) / yScale;
+        return mathYCoordinate * 100.0;
     }
 
 

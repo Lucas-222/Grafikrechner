@@ -154,7 +154,7 @@
 
            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="10.0" prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
 
-               <MathCanvas fx:id="mathCanvas" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="10.0" onMouseClicked="#onMouseClickedOnCanvas" onScroll="#onMouseScrolledOnCanvas" prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS" />
+               <MathCanvas fx:id="mathCanvas" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="10.0" onMouseClicked="#onMouseClickedOnCanvas" onMouseMoved="#onMouseMovedOnCanvas" onScroll="#onMouseScrolledOnCanvas" prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS" />
            </VBox>
        </HBox>
    </center>
