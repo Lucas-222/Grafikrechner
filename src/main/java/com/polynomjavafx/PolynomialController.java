@@ -101,10 +101,12 @@ public class PolynomialController {
     private void redrawContent() {
         this.drawPolynomials();
         mathCanvas.drawPoints(userPointColor);
-        if (!integralTextField1.getText().isEmpty() && !integralTextField2.getText().isEmpty()) {
+        if (!integralTextField1.getText().isEmpty() && !integralTextField2.getText().isEmpty() && selectedPolynomial != null) {
             mathCanvas.drawIntegral(Double.parseDouble(integralTextField1.getText()), Double.parseDouble(integralTextField2.getText()), selectedPolynomial);
         }
-        mathCanvas.drawPreviewPoint(previewPointColor);
+        if(selectedPolynomial != null) {
+            mathCanvas.drawPreviewPoint(previewPointColor);
+        }
     }
 
     private void updatePolynomialChoiceBox(Polynomial polynomial) {
@@ -272,6 +274,12 @@ public class PolynomialController {
     }
 
     private void initializeVisuals() {
+        ChangeListener<Number> changeListener = (oldValue, newValue, observable)-> {
+            mathCanvas.clearPreviewPoint();
+            redrawContent();
+        };
+        mathCanvas.widthProperty().addListener(changeListener);
+        mathCanvas.heightProperty().addListener(changeListener);
     }
 
     public void addPolynomial(ActionEvent event) {
@@ -383,13 +391,13 @@ public class PolynomialController {
             }
             clearLabels();
             redrawContent();
+            mathCanvas.clearPreviewPoint();
         }
     }
 
     private void submitInput(double[] coefficients, Color color) throws WrongInputSizeException {
         Polynomial newPolynomial;
         newPolynomial = new Polynomial(coefficients, color);
-        System.out.println(newPolynomial.getDegree());
         this.mathCanvas.polynomialArray.add(newPolynomial);
         this.updatePolynomialChoiceBox(newPolynomial);
         this.redrawContent();
@@ -726,6 +734,9 @@ public class PolynomialController {
         if(selectedPolynomial != null) {
             double x = mouseEvent.getX();
             setPreviewPoint(x);
+        }
+        else {
+            mathCanvas.clearPreviewPoint();
         }
     }
 }

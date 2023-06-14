@@ -34,7 +34,7 @@ public class MathCanvas extends StackPane {
     // Initialized Attributes
     ArrayList<Polynomial> polynomialArray = new ArrayList<>(10);
     ArrayList<double[]> pointsArray = new ArrayList<>();
-    private double[] previewPoint = new double[2];
+    private final double[]  previewPoint = new double[2];
 
 
 
@@ -223,10 +223,14 @@ public class MathCanvas extends StackPane {
         previewPoint[1] = y;
     }
 
+    public void clearPreviewPoint() {
+        this.previewGC.clearRect(0, 0, previewLayer.getWidth(), previewLayer.getHeight());
+    }
+
     public void drawPreviewPoint(Color color) {
+        clearPreviewPoint();
         double x = this.previewPoint[0];
         double y = this.previewPoint[1];
-        this.previewGC.clearRect(0,0, previewLayer.getWidth(), previewLayer.getHeight());
         double xRounded = Math.round(x * 100.0) / 100.0;
         double yRounded = Math.round(y * 100.0) / 100.0;
         previewGC.setFill(color);
@@ -234,6 +238,7 @@ public class MathCanvas extends StackPane {
                 mathYCoordinateToCanvasYCoordinate(y) - 2.5, 5.0, 5.0);
         previewGC.fillText("(" + xRounded + ", " + yRounded + ")",
                 mathXCoordinateToCanvasXCoordinate(x) + 5.0, mathYCoordinateToCanvasYCoordinate(y) - 2.5);
+
     }
 
     public void drawPointLabel(double x, double y, Color color) {
